@@ -30,7 +30,7 @@ public class HttpResponse {
 	 * 
 	 * @return
 	 */
-	public String getContetString() {
+	public String getContentString() {
 		return new String(contentBytes);
 	}
 
