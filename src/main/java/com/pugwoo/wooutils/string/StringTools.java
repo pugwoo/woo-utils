@@ -1,4 +1,4 @@
-package com.pugwoo.wooutils;
+package com.pugwoo.wooutils.string;
 
 /**
  * 2016年2月4日 11:29:00
