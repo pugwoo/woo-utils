@@ -19,13 +19,15 @@ import java.util.Map.Entry;
  * 模拟一个浏览器发HTTP请求，不包括页面处理
  * 
  * 计划支持的特性：
- * 1. 支持指定为输出流
- * 2. 支持cookie
- * 
+ * 1. 支持指定为输出流 【done】
+ * 2. 支持cookie,不支持过期特性
  * 
  * @author pugwoo@gmail.com
  */
 public class Browser {
+	
+	/**cookie, domain(域根目录) -> key/value*/
+	private Map<String, Map<String, String>> cookies = new HashMap<String, Map<String,String>>();
 
 	/** 默认浏览器userAgent:Chrome Win7*/
 	private String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.93 Safari/537.36";
@@ -46,6 +48,16 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
+	public HttpResponse post(String httpUrl, OutputStream outputStream) throws IOException {
+		return post(httpUrl, new HashMap<String, String>(), outputStream);
+	}
+	
+	/**
+	 * post方式请求HTTP
+	 * @param httpUrl
+	 * @return
+	 * @throws IOException
+	 */
 	public HttpResponse post(String httpUrl, Map<String, String> params) throws IOException {
 		return post(httpUrl, buildPostString(params));
 	}
@@ -56,8 +68,8 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse post(String httpUrl, byte[] postData) throws IOException {
-		return post(httpUrl, new ByteArrayInputStream(postData));
+	public HttpResponse post(String httpUrl, Map<String, String> params, OutputStream outputStream) throws IOException {
+		return post(httpUrl, buildPostString(params), outputStream);
 	}
 	
 	/**
@@ -66,25 +78,54 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse post(String httpUrl, InputStream in) throws IOException {
+	public HttpResponse post(String httpUrl, byte[] postData) throws IOException {
+		return post(httpUrl, new ByteArrayInputStream(postData), null);
+	}
+	
+	/**
+	 * post方式请求HTTP
+	 * @param httpUrl
+	 * @return
+	 * @throws IOException
+	 */
+	public HttpResponse post(String httpUrl, byte[] postData, OutputStream outputStream) throws IOException {
+		return post(httpUrl, new ByteArrayInputStream(postData), outputStream);
+	}
+	
+	/**
+	 * post方式请求HTTP
+	 * @param httpUrl
+	 * @return
+	 * @throws IOException
+	 */
+	public HttpResponse post(String httpUrl, InputStream inputStream) throws IOException {
+		return post(httpUrl, inputStream, null);
+	}
+	
+	/**
+	 * post方式请求HTTP
+	 * @param httpUrl
+	 * @param outputStream 如果指定了输出流，则输出到指定的输出流，此时返回的值没有html正文bytes
+	 * @return
+	 * @throws IOException
+	 */
+	public HttpResponse post(String httpUrl, InputStream inputStream, OutputStream outputStream) throws IOException {
 		HttpURLConnection urlConnection = getUrlConnection(httpUrl, "POST");
 		
 		// POST 数据
-		if(in != null) {
+		if(inputStream != null) {
 			urlConnection.setDoOutput(true);
 	        OutputStream os = urlConnection.getOutputStream();
 	        byte[] buf = new byte[4096];
 	        int readBytes = 0;
-	        while((readBytes = in.read(buf)) != -1) {
+	        while((readBytes = inputStream.read(buf)) != -1) {
 	        	os.write(buf, 0, readBytes);
 	        }
 	        os.flush();
 	        os.close();
 		}
         
-		HttpResponse httpResponse = new HttpResponse();
-		makeHttpResponse(urlConnection, httpResponse);
-		return httpResponse;
+		return makeHttpResponse(httpUrl, urlConnection, outputStream);
 	}
 	
 	/**
@@ -96,7 +137,19 @@ public class Browser {
 	 * @throws IOException
 	 */
 	public HttpResponse get(String httpUrl) throws IOException {
-		return get(httpUrl, null);
+		return get(httpUrl, null, null);
+	}
+
+	/**
+	 * get方式请求HTTP,处理细节：<br>
+	 * 1. 如果是301或302跳转，且跳转链接不同于当前链接，则再请求跳转的URL
+	 * 
+	 * @param httpUrl
+	 * @return
+	 * @throws IOException
+	 */
+	public HttpResponse get(String httpUrl, OutputStream outputStream) throws IOException {
+		return get(httpUrl, null, outputStream);
 	}
 	
 	/**
@@ -108,6 +161,18 @@ public class Browser {
 	 * @throws IOException
 	 */
 	public HttpResponse get(String httpUrl, Map<String, String> params) throws IOException {
+		return get(httpUrl, params, null);
+	}
+	
+	/**
+	 * get方式请求HTTP,处理细节：<br>
+	 * 1. 如果是301或302跳转，且跳转链接不同于当前链接，则再请求跳转的URL
+	 * 
+	 * @param httpUrl
+	 * @return
+	 * @throws IOException
+	 */
+	public HttpResponse get(String httpUrl, Map<String, String> params, OutputStream outputStream) throws IOException {
 		httpUrl = appendParamToUrl(httpUrl, params);
 		
 		HttpURLConnection urlConnection = getUrlConnection(httpUrl, "GET");
@@ -118,18 +183,42 @@ public class Browser {
 			List<String> location = urlConnection.getHeaderFields().get("Location");
 			if(location != null && !location.isEmpty()) {
 				if(!httpUrl.equals(location.get(0))) {
-					return get(location.get(0), params);
+					return get(location.get(0), params, outputStream);
 				}
 			}
 		}
 
-		HttpResponse httpResponse = new HttpResponse();
-		makeHttpResponse(urlConnection, httpResponse);
-		return httpResponse;
+		return makeHttpResponse(httpUrl, urlConnection, outputStream);
 	}
 	
 	/////////////////// 以下是工具方法 ////////////////////////////
 	
+	/**
+	 * 获取httpUrl的域名
+	 * @param httpUrl
+	 * @return
+	 */
+	private static String getHost(String url) {
+	    if(url == null || url.isEmpty()) {
+	    	return "";
+	    }
+
+	    int doubleslash = url.indexOf("//");
+	    if(doubleslash == -1) {
+	        doubleslash = 0;
+	    } else {
+	        doubleslash += 2;
+	    }
+
+	    int end = url.indexOf('/', doubleslash);
+	    end = end >= 0 ? end : url.length();
+
+	    int port = url.indexOf(':', doubleslash);
+	    end = (port > 0 && port < end) ? port : end;
+
+	    return url.substring(doubleslash, end);
+	}
+			
 	/**
 	 * 拿到http连接对象
 	 * @param httpUrl
@@ -142,6 +231,26 @@ public class Browser {
 		HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 		urlConnection.setRequestMethod(method);
 		urlConnection.setRequestProperty("User-agent", USER_AGENT);
+		urlConnection.setRequestProperty("Referer", httpUrl);
+		
+		// 设置cookie
+		String host = getHost(httpUrl);
+		StringBuilder cookieSb = new StringBuilder();
+		boolean needAppendAnd = false;
+		for(Entry<String, Map<String, String>> entry : cookies.entrySet()) {
+			if(host.endsWith(entry.getKey())) {
+				for(Entry<String, String> cookie : entry.getValue().entrySet()) {
+					if(needAppendAnd) {
+						cookieSb.append("; ");
+					}
+					cookieSb.append(URLEncoder.encode(cookie.getKey(), "UTF-8"));
+					cookieSb.append("=");
+					cookieSb.append(URLEncoder.encode(cookie.getValue(), "UTF-8"));
+					needAppendAnd = true;
+				}
+			}
+		}
+		urlConnection.setRequestProperty("Cookie", cookieSb.toString());
 		
 		return urlConnection;
 	}
@@ -152,19 +261,56 @@ public class Browser {
 	 * @param httpResponse
 	 * @throws IOException 
 	 */
-	private void makeHttpResponse(HttpURLConnection urlConnection, HttpResponse httpResponse)
+	private HttpResponse makeHttpResponse(String httpUrl, HttpURLConnection urlConnection, OutputStream outputStream)
 			throws IOException {
+		HttpResponse httpResponse = new HttpResponse();
 		httpResponse.setResponseCode(urlConnection.getResponseCode());
 		httpResponse.setHeaders(urlConnection.getHeaderFields());
 		
+		// 处理cookie
+		List<String> setCookies = urlConnection.getHeaderFields().get("Set-Cookie");
+		if(setCookies != null && !setCookies.isEmpty()) {
+			for(int i = setCookies.size() - 1; i >=0; i--) {
+				String key = null, value = null, domain = ""; 
+				// domain default, hack 因为有些网站Set-Cookie没有指定domain，但是现在domain又不好取root domain，所以只能hack让所有网站生效
+				String strs[] = setCookies.get(i).split(";");
+				boolean isFirst = true;
+				for(String str : strs) {
+					str = str.trim();
+					String keyvalue[] = str.split("=", 2);
+					if(isFirst && keyvalue.length == 2) {
+						key = keyvalue[0];
+						value = keyvalue[1];
+					} else if(keyvalue.length == 2 && "Domain".equalsIgnoreCase(keyvalue[0])){
+						domain = keyvalue[1];
+					}
+					isFirst = false;
+				}
+				if(domain != null && key != null) {
+					if(!cookies.containsKey(domain)) {
+						cookies.put(domain, new HashMap<String, String>());
+					}
+					cookies.get(domain).put(key, value);
+				}
+			}
+		}
+		
 		InputStream in = urlConnection.getInputStream();
 		byte[] buf = new byte[4096];
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		int len;
-		while((len = in.read(buf)) != -1) {
-			baos.write(buf, 0, len);
+		if(outputStream != null) {
+			while((len = in.read(buf)) != -1) {
+				outputStream.write(buf, 0, len);
+			}
+		} else {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			while((len = in.read(buf)) != -1) {
+				baos.write(buf, 0, len);
+			}
+			httpResponse.setContentBytes(baos.toByteArray());
 		}
-		httpResponse.setContentBytes(baos.toByteArray());
+		
+		return httpResponse;
 	}
 	
 	private static byte[] buildPostString(Map<String, String> params) {
@@ -236,4 +382,6 @@ public class Browser {
 		
 		return sb.toString();
 	}
+	
+	
 }
