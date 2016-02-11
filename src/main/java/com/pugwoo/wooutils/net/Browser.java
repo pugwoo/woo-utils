@@ -243,15 +243,14 @@ public class Browser {
 					if(needAppendAnd) {
 						cookieSb.append("; ");
 					}
-					cookieSb.append(URLEncoder.encode(cookie.getKey(), "UTF-8"));
+					cookieSb.append(cookie.getKey());
 					cookieSb.append("=");
-					cookieSb.append(URLEncoder.encode(cookie.getValue(), "UTF-8"));
+					cookieSb.append(cookie.getValue());
 					needAppendAnd = true;
 				}
 			}
 		}
 		urlConnection.setRequestProperty("Cookie", cookieSb.toString());
-		
 		return urlConnection;
 	}
 	
