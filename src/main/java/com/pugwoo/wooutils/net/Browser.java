@@ -20,7 +20,7 @@ import java.util.Map.Entry;
  * 
  * 计划支持的特性：
  * 1. 支持指定为输出流 【done】
- * 2. 支持cookie,不支持过期特性
+ * 2. 支持cookie,不支持过期特性 【done】
  * 
  * @author pugwoo@gmail.com
  */
