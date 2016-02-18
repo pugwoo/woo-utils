@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -21,6 +23,8 @@ import java.util.Map.Entry;
  * 计划支持的特性：
  * 1. 支持指定为输出流 【done】
  * 2. 支持cookie,不支持过期特性 【done】
+ * 3. 支持指定proxy【done】
+ * 4. 支持程序写cookie，模拟javascript写cookie
  * 
  * @author pugwoo@gmail.com
  */
@@ -32,6 +36,22 @@ public class Browser {
 	/** 默认浏览器userAgent:Chrome Win7*/
 	private String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.93 Safari/537.36";
 
+	/**
+	 * 代理
+	 */
+	private Proxy proxy = null;
+	
+	/**
+	 * 设置http代理
+	 * @param ip
+	 * @param port
+	 * @return
+	 */
+	public Browser setHttpProxy(String ip, int port) {
+		proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ip, port));
+		return this;
+	}
+	
 	/**
 	 * post方式请求HTTP
 	 * @param httpUrl
@@ -228,7 +248,12 @@ public class Browser {
 	 */
 	private HttpURLConnection getUrlConnection(String httpUrl, String method) throws IOException {
 		URL url = new URL(httpUrl);
-		HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+		HttpURLConnection urlConnection = null;
+		if(proxy == null) {
+			urlConnection = (HttpURLConnection) url.openConnection();
+		} else {
+			urlConnection = (HttpURLConnection) url.openConnection(proxy);
+		}
 		urlConnection.setRequestMethod(method);
 		urlConnection.setRequestProperty("User-agent", USER_AGENT);
 		urlConnection.setRequestProperty("Referer", httpUrl);
