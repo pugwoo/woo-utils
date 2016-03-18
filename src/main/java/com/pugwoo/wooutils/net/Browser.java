@@ -36,6 +36,10 @@ public class Browser {
 	/** 默认浏览器userAgent:Chrome Win7*/
 	private String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.93 Safari/537.36";
 
+	public void setUserAgent(String userAgent) {
+		this.USER_AGENT = userAgent;
+	}
+	
 	/**
 	 * 代理
 	 */
