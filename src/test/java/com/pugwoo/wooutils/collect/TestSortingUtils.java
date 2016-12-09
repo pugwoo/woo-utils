@@ -12,6 +12,11 @@ public class TestSortingUtils {
 		list.add(null);
 		list.add("9");
 		
+		/**
+		 * 你只需要把要排序的对象，转换成已经是Comparable的对象，例如Java自带的int、Date、String等
+		 * 
+		 * 这个例子，就是按照字符串的长度来排序。
+		 */
 		SortingUtils.sort(list, new SortingField<String, Integer>(){
 			@Override
 			public Integer apply(String input) {

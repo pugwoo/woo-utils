@@ -5,7 +5,8 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * 2016年3月8日 17:59:16 排序工具，元素null safe
+ * 2016年3月8日 17:59:16 排序工具，元素null safe<br>
+ * 
  * 使用方式很简单，例如按照String的length长度排序：
  * List<String> list = 创建一个List包含String元素，String元素可以为null，默认null排在最后
  * SortingUtils.sort(list, new SortingField<String, Integer>(){
@@ -18,7 +19,7 @@ import java.util.List;
 public class SortingUtils {
 
 	/**
-	 * 
+	 * 排序list。只需要返回一个可排序的值，例如Integer。
 	 * @param list
 	 * @param sortingField
 	 */
