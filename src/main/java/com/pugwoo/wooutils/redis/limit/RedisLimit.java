@@ -1,15 +1,13 @@
 package com.pugwoo.wooutils.redis.limit;
 
 import java.util.Calendar;
-import java.util.List;
-import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pugwoo.wooutils.redis.RedisUtils;
+
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Response;
-import redis.clients.jedis.Transaction;
 
 /**
  * 使用redis控制全局的操作次数限制<br>
@@ -126,7 +124,7 @@ public class RedisLimit {
 					setRest = (int) restSeconds;
 				}
 				
-				if(compareAndSet(jedis, key, newValue + "", oldValue, setRest)) {
+				if(RedisUtils.compareAndSet(jedis, key, newValue + "", oldValue, setRest)) {
 					return limitParam.getLimitCount() - newValue;
 				} else {
 					continue;
@@ -150,40 +148,7 @@ public class RedisLimit {
 	private static String getKey(RedisLimitParam limitParam, String key) {
 		return limitParam.getNamespace() + "-" + key;
 	}
-	
-	/**
-	 * CAS，成功返回true，失败返回false
-	 * @param expireSeconds 超时时间，如果是null，则不设置
-	 */
-	private static boolean compareAndSet(Jedis jedis, String key, String value, String oldValue,
-			Integer expireSeconds) {
-		try {
-			jedis.watch(key);
-			String readOldValue = jedis.get(key);
-			if(Objects.equals(readOldValue, oldValue)) {
-				Transaction tx = jedis.multi();
-				Response<String> result = null;
-				if(expireSeconds != null) {
-					result = tx.setex(key, expireSeconds, value);
-				} else {
-					result = tx.set(key, value);
-				}
-
-				List<Object> results = tx.exec();
-				if(results == null || result == null || result.get() == null) {
-					return false;
-				} else {
-					return true;
-				}
-			} else {
-				return false;
-			}
-		} catch (Exception e) {
-			LOGGER.error("compareAndSet error,key:{}, value:{}, oldValue:{}", key, value, oldValue);
-			return false;
-		}
-	}
-	
+		
 	/**
 	 * 获得到周期剩余的时间
 	 * @param peroidEnum
