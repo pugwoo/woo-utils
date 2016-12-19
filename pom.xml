@@ -10,6 +10,22 @@
 	<url>http://pugwoo.com</url>
 
 	<dependencies>
+	    <!-- SLF -->
+        <dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.21</version>
+		</dependency>
+	
+	    <!-- optional依赖：Redis -->
+	    <dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>2.9.0</version>
+			<scope>provided</scope>
+		</dependency>
+	
+	    <!-- 测试需要的 -->
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
