@@ -1,4 +1,4 @@
-package com.pugwoo.wooutils;
+package com.pugwoo.wooutils.date;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

@@ -2,6 +2,8 @@ package com.pugwoo.wooutils;
 
 import java.util.Calendar;
 
+import com.pugwoo.wooutils.date.Date;
+
 public class TestDate {
 
 	public static void main(String[] args) {
