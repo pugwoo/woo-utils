@@ -62,7 +62,7 @@ public class RedisLimit {
 	
 	/**
 	 * 判断是否还有限制次数。处理完成后，传入的jedis将被close掉。
-	 * @param limitEnum
+	 * @param limitParam
 	 * @param key
 	 * @return
 	 */
@@ -86,7 +86,7 @@ public class RedisLimit {
 	 * 使用了count次限制。一般来说，业务都是在处理成功后才扣减使用是否成功的限制，
 	 * 如果使用失败了，如果业务支持事务回滚，那么可以回滚掉，此时可以不用RedisTransation做全局限制。
 	 * 
-	 * @param limitEnum
+	 * @param limitParam
 	 * @param key
 	 * @param count 一次可以使用掉多个count
 	 * @return 返回是当前周期内第几个使用配额的，如果返回-1，表示使用配额失败

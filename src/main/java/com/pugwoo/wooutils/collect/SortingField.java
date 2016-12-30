@@ -18,7 +18,7 @@ public abstract class SortingField<F, T extends Comparable<?>> {
 
 	/**
 	 * 指定排序顺序
-	 * @param sortingOrderEnum 当值为ASC，升序排列；当DESC时，逆序排列
+	 * @param sortingOrder 当值为ASC，升序排列；当DESC时，逆序排列
 	 */
 	public SortingField(SortingOrderEnum sortingOrder) {
 		this.isAsc = sortingOrder == SortingOrderEnum.ASC;
