@@ -31,6 +31,24 @@ public class HttpResponse {
 	 * @return
 	 */
 	public String getContentString() {
+		// 尝试自动从http header里面获得编码
+		List<String> contentType = headers.get("Content-Type");
+		if(contentType != null && contentType.size() > 0) {
+			String ctype = contentType.get(0);
+			if(ctype != null) {
+				int index = ctype.indexOf("charset=");
+				if(index > 0) {
+					String charset = ctype.substring(index + "charset=".length());
+					if(charset != null && !charset.isEmpty()) {
+						try {
+							return new String(contentBytes, charset);
+						} catch (UnsupportedEncodingException e) {
+						}
+					}
+				}
+			}
+		}
+		
 		return new String(contentBytes);
 	}
 

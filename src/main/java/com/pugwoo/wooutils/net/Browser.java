@@ -29,7 +29,7 @@ import java.util.Map.Entry;
  * @author pugwoo@gmail.com
  */
 public class Browser {
-	
+		
 	/**cookie, domain(域根目录) -> key/value*/
 	private Map<String, Map<String, String>> cookies = new HashMap<String, Map<String,String>>();
 
