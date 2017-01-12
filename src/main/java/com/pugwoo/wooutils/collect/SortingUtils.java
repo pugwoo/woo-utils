@@ -7,14 +7,7 @@ import java.util.List;
 /**
  * 2016年3月8日 17:59:16 排序工具，元素null safe<br>
  * 
- * 使用方式很简单，例如按照String的length长度排序：
- * List<String> list = 创建一个List包含String元素，String元素可以为null，默认null排在最后
- * SortingUtils.sort(list, new SortingField<String, Integer>(){
-			@Override
-			public Integer apply(String input) { // input不会为null
-				return input.length();
-			}
- * });
+ * 使用方式详见TestSortingUtils
  */
 public class SortingUtils {
 
