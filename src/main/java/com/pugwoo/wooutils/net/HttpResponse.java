@@ -49,7 +49,11 @@ public class HttpResponse {
 			}
 		}
 		
-		return new String(contentBytes);
+		try {
+			return new String(contentBytes, "utf-8"); // 默认 utf-8编码
+		} catch (UnsupportedEncodingException e) {
+			return new String(contentBytes);
+		}
 	}
 
 	/**
