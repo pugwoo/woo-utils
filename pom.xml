@@ -45,7 +45,7 @@
 			<version>1.7.21</version>
 		</dependency>
 	
-	    <!-- optional依赖：Redis -->
+	    <!-- optional依赖：Redis相关功能需要 -->
 	    <dependency>
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
