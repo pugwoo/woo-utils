@@ -84,8 +84,7 @@ public class CookieUtils {
 	 * @param name cookie名字
 	 * @param value cookie值，不建议为null值
 	 * @param domain 指定域名，null表示不指定
-	 * @param maxAge cookie生命周期 以秒为单位，当设置为0时，cookie默认有效期100年；如果删除，请用removeCookie方法
-	 * @throws UnsupportedEncodingException 
+	 * @param expireSeconds cookie生命周期 以秒为单位，当设置为0时，cookie默认有效期100年；如果删除，请用removeCookie方法
 	 */
 	public static void addCookie(HttpServletResponse response, String name, String value,
 			String domain, int expireSeconds) {
