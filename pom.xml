@@ -44,6 +44,14 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.21</version>
 		</dependency>
+		
+		<!-- optional依赖：servlet相关功能需要 -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
+		</dependency>
 	
 	    <!-- optional依赖：Redis相关功能需要 -->
 	    <dependency>
