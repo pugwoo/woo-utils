@@ -25,11 +25,11 @@ public class RedisLimit {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RedisLimit.class);
 	
 	/**
-	 * 查询key的redis限制剩余次数。处理完成后，传入的jedis将被close掉。
-	 * @param jedis redis客户端
+	 * 查询key的redis限制剩余次数。
+	 * @param jedis redis客户端，请自行关闭jedis。
 	 * @param limitParam 限制参数
 	 * @param key 业务主键
-	 * @return -1是系统异常
+	 * @return -1是系统异常，正常值>=0
 	 */
 	public static long getLimitCount(Jedis jedis, RedisLimitParam limitParam, String key) {
 		
@@ -53,15 +53,12 @@ public class RedisLimit {
 		} catch (Exception e) {
 			LOGGER.error("getLimitCount error,namespace:{},key:{}", limitParam.getNamespace(), key, e);
 			return -1;
-		} finally {
-			if(jedis != null) {
-				jedis.close();
-			}
 		}
 	}
 	
 	/**
-	 * 判断是否还有限制次数。处理完成后，传入的jedis将被close掉。
+	 * 判断是否还有限制次数。
+	 * @param redis客户端，请自行关闭jedis。
 	 * @param limitParam
 	 * @param key
 	 * @return
@@ -74,6 +71,7 @@ public class RedisLimit {
 	 * 使用了一次限制。一般来说，业务都是在处理成功后才扣减使用是否成功的限制，
 	 * 如果使用失败了，如果业务支持事务回滚，那么可以回滚掉，此时可以不用RedisTransation做全局限制。
 	 * 
+	 * @param jedis redis客户端，请自行关闭jedis。
 	 * @param limitEnum
 	 * @param key
 	 * @return 返回是当前周期内第几个使用配额的，如果返回-1，表示使用配额失败
@@ -86,6 +84,7 @@ public class RedisLimit {
 	 * 使用了count次限制。一般来说，业务都是在处理成功后才扣减使用是否成功的限制，
 	 * 如果使用失败了，如果业务支持事务回滚，那么可以回滚掉，此时可以不用RedisTransation做全局限制。
 	 * 
+	 * @param jedis redis客户端，请自行关闭jedis。
 	 * @param limitParam
 	 * @param key
 	 * @param count 一次可以使用掉多个count
@@ -138,10 +137,6 @@ public class RedisLimit {
 			LOGGER.error("getLimitCount error, namespace:{}, key:{}",
 					limitParam.getNamespace(), key, e);
 			return -1;
-		} finally {
-			if(jedis != null) {
-				jedis.close();
-			}
 		}
 	}
 	
