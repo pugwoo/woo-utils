@@ -29,7 +29,7 @@ public class RedisLimit {
 	 * @param jedis redis客户端，请自行关闭jedis。
 	 * @param limitParam 限制参数
 	 * @param key 业务主键
-	 * @return -1是系统异常，正常值>=0
+	 * @return -1是系统异常，正常值大于等于0
 	 */
 	public static long getLimitCount(Jedis jedis, RedisLimitParam limitParam, String key) {
 		
@@ -58,7 +58,7 @@ public class RedisLimit {
 	
 	/**
 	 * 判断是否还有限制次数。
-	 * @param redis客户端，请自行关闭jedis。
+	 * @param jedis redis客户端，请自行关闭jedis。
 	 * @param limitParam
 	 * @param key
 	 * @return
