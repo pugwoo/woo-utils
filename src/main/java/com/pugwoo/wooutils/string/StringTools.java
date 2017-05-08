@@ -5,6 +5,18 @@ package com.pugwoo.wooutils.string;
  * 字符串工具类
  */
 public class StringTools {
+	
+	/**
+	 * 将字符串str拆分成一行一个字符串
+	 * @param str
+	 * @return
+	 */
+	public static String[] splitLines(String str) {
+		if(str == null) {
+			return new String[0];
+		}
+		return str.split("\\r?\\n");
+	}
 
 	/**
 	 * 判定字符串是否只包含英文字母(不区分大小写)或数字

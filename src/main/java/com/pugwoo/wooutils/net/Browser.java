@@ -63,7 +63,7 @@ public class Browser {
 	 * @throws IOException
 	 */
 	public HttpResponse post(String httpUrl) throws IOException {
-		return post(httpUrl, new HashMap<String, String>());
+		return post(httpUrl, new HashMap<String, Object>());
 	}
 	
 	/**
@@ -73,7 +73,7 @@ public class Browser {
 	 * @throws IOException
 	 */
 	public HttpResponse post(String httpUrl, OutputStream outputStream) throws IOException {
-		return post(httpUrl, new HashMap<String, String>(), outputStream);
+		return post(httpUrl, new HashMap<String, Object>(), outputStream);
 	}
 	
 	/**
@@ -82,7 +82,7 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse post(String httpUrl, Map<String, String> params) throws IOException {
+	public HttpResponse post(String httpUrl, Map<String, Object> params) throws IOException {
 		return post(httpUrl, buildPostString(params));
 	}
 	
@@ -92,7 +92,7 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse post(String httpUrl, Map<String, String> params, OutputStream outputStream) throws IOException {
+	public HttpResponse post(String httpUrl, Map<String, Object> params, OutputStream outputStream) throws IOException {
 		return post(httpUrl, buildPostString(params), outputStream);
 	}
 	
@@ -184,7 +184,7 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse get(String httpUrl, Map<String, String> params) throws IOException {
+	public HttpResponse get(String httpUrl, Map<String, Object> params) throws IOException {
 		return get(httpUrl, params, null);
 	}
 	
@@ -196,7 +196,7 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse get(String httpUrl, Map<String, String> params, OutputStream outputStream) throws IOException {
+	public HttpResponse get(String httpUrl, Map<String, Object> params, OutputStream outputStream) throws IOException {
 		httpUrl = appendParamToUrl(httpUrl, params);
 		
 		HttpURLConnection urlConnection = getUrlConnection(httpUrl, "GET");
@@ -341,7 +341,7 @@ public class Browser {
 		return httpResponse;
 	}
 	
-	private static byte[] buildPostString(Map<String, String> params) {
+	private static byte[] buildPostString(Map<String, Object> params) {
 		if(params == null || params.isEmpty()) {
 			try {
 				return "".getBytes("UTF-8");
@@ -351,14 +351,16 @@ public class Browser {
 		}
 		StringBuilder sb = new StringBuilder();
 		boolean needAppendAnd = false;
-		for(Entry<String, String> entry : params.entrySet()) {
+		for(Entry<String, Object> entry : params.entrySet()) {
 			try {
 				if(needAppendAnd) {
 					sb.append("&");
 				}
 				sb.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
 				sb.append("=");
-				sb.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+				if(entry.getValue() != null) {
+					sb.append(URLEncoder.encode(entry.getValue().toString(), "UTF-8"));
+				}
 				needAppendAnd = true;
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
@@ -378,7 +380,7 @@ public class Browser {
 	 * @param params
 	 * @return
 	 */
-	private static String appendParamToUrl(String httpUrl, Map<String, String> params) {
+	private static String appendParamToUrl(String httpUrl, Map<String, Object> params) {
 		if(params == null || params == null || params.isEmpty()) {
 			return httpUrl;
 		}
@@ -394,14 +396,16 @@ public class Browser {
 		}
 		
 		boolean needAppendAnd = false;
-		for(Entry<String, String> entry : params.entrySet()) {
+		for(Entry<String, Object> entry : params.entrySet()) {
 			try {
 				if(needAppendAnd) {
 					sb.append("&");
 				}
 				sb.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
 				sb.append("=");
-				sb.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+				if(entry.getValue() != null) {
+					sb.append(URLEncoder.encode(entry.getValue().toString(), "UTF-8"));
+				}
 				needAppendAnd = true;
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
