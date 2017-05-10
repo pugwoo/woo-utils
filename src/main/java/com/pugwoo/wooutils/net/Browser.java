@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 2016年2月4日 15:16:42 
  * 模拟一个浏览器发HTTP请求，不包括页面处理
@@ -24,11 +27,14 @@ import java.util.Map.Entry;
  * 1. 支持指定为输出流 【done】
  * 2. 支持cookie,不支持过期特性 【done】
  * 3. 支持指定proxy【done】
- * 4. 支持程序写cookie，模拟javascript写cookie
+ * 4. 支持超时和重试，默认超时1分钟，重试次数10次
+ * 5. 支持程序写cookie，模拟javascript写cookie
  * 
  * @author pugwoo@gmail.com
  */
 public class Browser {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(Browser.class);
 		
 	/**cookie, domain(域根目录) -> key/value*/
 	private Map<String, Map<String, String>> cookies = new HashMap<String, Map<String,String>>();
@@ -39,6 +45,11 @@ public class Browser {
 	public void setUserAgent(String userAgent) {
 		this.USER_AGENT = userAgent;
 	}
+	
+	/**连接和读取的超时时间，也即最长的超时时间是timeoutSeconds*2*/
+	private int timeoutSeconds = 60;
+	/**重试次数*/
+	private int retryTimes = 10;
 	
 	/**
 	 * 代理
@@ -134,22 +145,32 @@ public class Browser {
 	 * @throws IOException
 	 */
 	public HttpResponse post(String httpUrl, InputStream inputStream, OutputStream outputStream) throws IOException {
-		HttpURLConnection urlConnection = getUrlConnection(httpUrl, "POST");
-		
-		// POST 数据
-		if(inputStream != null) {
-			urlConnection.setDoOutput(true);
-	        OutputStream os = urlConnection.getOutputStream();
-	        byte[] buf = new byte[4096];
-	        int readBytes = 0;
-	        while((readBytes = inputStream.read(buf)) != -1) {
-	        	os.write(buf, 0, readBytes);
-	        }
-	        os.flush();
-	        os.close();
+		IOException ie = null;
+		for(int i = 0; i < retryTimes; i++) {
+			try {
+				HttpURLConnection urlConnection = getUrlConnection(httpUrl, "POST");
+				
+				// POST 数据
+				if(inputStream != null) {
+					urlConnection.setDoOutput(true);
+			        OutputStream os = urlConnection.getOutputStream();
+			        byte[] buf = new byte[4096];
+			        int readBytes = 0;
+			        while((readBytes = inputStream.read(buf)) != -1) {
+			        	os.write(buf, 0, readBytes);
+			        }
+			        os.flush();
+			        os.close();
+				}
+		        
+				return makeHttpResponse(httpUrl, urlConnection, outputStream);
+			} catch (IOException e) {
+				LOGGER.error("get url:{} exception", httpUrl, e);
+				ie = e;
+			}
 		}
-        
-		return makeHttpResponse(httpUrl, urlConnection, outputStream);
+		throw ie;
+
 	}
 	
 	/**
@@ -198,21 +219,29 @@ public class Browser {
 	 */
 	public HttpResponse get(String httpUrl, Map<String, Object> params, OutputStream outputStream) throws IOException {
 		httpUrl = appendParamToUrl(httpUrl, params);
-		
-		HttpURLConnection urlConnection = getUrlConnection(httpUrl, "GET");
-		
-		// 301 302 跳转处理
-		int responseCode = urlConnection.getResponseCode();
-		if(responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
-			List<String> location = urlConnection.getHeaderFields().get("Location");
-			if(location != null && !location.isEmpty()) {
-				if(!httpUrl.equals(location.get(0))) {
-					return get(location.get(0), params, outputStream);
+		IOException ie = null;
+		for(int i = 0; i < retryTimes; i++) {
+			try {
+				HttpURLConnection urlConnection = getUrlConnection(httpUrl, "GET");
+				
+				// 301 302 跳转处理
+				int responseCode = urlConnection.getResponseCode();
+				if(responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
+					List<String> location = urlConnection.getHeaderFields().get("Location");
+					if(location != null && !location.isEmpty()) {
+						if(!httpUrl.equals(location.get(0))) {
+							return get(location.get(0), params, outputStream);
+						}
+					}
 				}
+
+				return makeHttpResponse(httpUrl, urlConnection, outputStream);
+			} catch (IOException e) {
+				LOGGER.error("get url:{} error", httpUrl, e);
+				ie = e;
 			}
 		}
-
-		return makeHttpResponse(httpUrl, urlConnection, outputStream);
+		throw ie;
 	}
 	
 	/////////////////// 以下是工具方法 ////////////////////////////
@@ -258,6 +287,8 @@ public class Browser {
 		} else {
 			urlConnection = (HttpURLConnection) url.openConnection(proxy);
 		}
+		urlConnection.setConnectTimeout(timeoutSeconds * 1000);
+		urlConnection.setReadTimeout(timeoutSeconds * 1000);
 		urlConnection.setRequestMethod(method);
 		urlConnection.setRequestProperty("User-agent", USER_AGENT);
 		urlConnection.setRequestProperty("Referer", httpUrl);
