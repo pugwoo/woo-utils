@@ -20,7 +20,7 @@ public class EasyRunTask {
 	/**要执行的任务实现*/
 	private final ITask task;
 	/**执行状态*/
-	private StatusEnum status = StatusEnum.NEW;
+	private TaskStatusEnum status = TaskStatusEnum.NEW;
 	/**每次同时多线程指定的任务数，需要一批一批来，每批作为停止的单位*/
 	private final int concurrentNum;
 	
@@ -34,23 +34,7 @@ public class EasyRunTask {
 	private AtomicInteger success = new AtomicInteger(0);
 	/**执行失败的任务总数[线程安全]*/
 	private AtomicInteger fail = new AtomicInteger(0);
-	
-	/**
-	 * 状态枚举
-	 */
-	public static enum StatusEnum {
-		/**就绪*/
-		NEW, 
-		/**运行中*/
-		RUNNING,
-		/**终止允许中*/
-		STOPPING,
-		/**终止*/
-		STOPPED,
-		/**执行完成*/
-		FINISHED
-	}
-	
+		
 	public EasyRunTask(ITask task) {
 		this.task = task;
 		this.concurrentNum = 1;
@@ -96,8 +80,8 @@ public class EasyRunTask {
 	 * @return
 	 */
 	public synchronized TaskResult stop() {
-		if(status == StatusEnum.RUNNING) {
-			status = StatusEnum.STOPPING;
+		if(status == TaskStatusEnum.RUNNING) {
+			status = TaskStatusEnum.STOPPING;
 			return new TaskResult(true);
 		}
 		return new TaskResult(false, "stop must at running status");
@@ -114,7 +98,7 @@ public class EasyRunTask {
 	}
 
 	private synchronized TaskResult run(boolean reset) {
-		if(status == StatusEnum.RUNNING || status == StatusEnum.STOPPING) {
+		if(status == TaskStatusEnum.RUNNING || status == TaskStatusEnum.STOPPING) {
 			return new TaskResult(false, "cannot start when running");
 		}
 		if(task == null) {
@@ -129,15 +113,15 @@ public class EasyRunTask {
 			fail.set(0);
 			exceptions.clear();
 		}
-		status = StatusEnum.RUNNING;
+		status = TaskStatusEnum.RUNNING;
 		
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				while(true) {
 					synchronized (that) { // 请求停止
-						if(status == StatusEnum.STOPPING) {
-							status = StatusEnum.STOPPED;
+						if(status == TaskStatusEnum.STOPPING) {
+							status = TaskStatusEnum.STOPPED;
 							return;
 						}
 					}
@@ -145,7 +129,7 @@ public class EasyRunTask {
 					int restCount = getRestCount();
 					if(getRestCount() <= 0) {
 						synchronized (that) { // 结束任务
-							status = StatusEnum.FINISHED;
+							status = TaskStatusEnum.FINISHED;
 						}
 						return;
 					}
@@ -186,7 +170,7 @@ public class EasyRunTask {
 	 * 获得当前的任务状态
 	 * @return
 	 */
-	public StatusEnum getStatus() {
+	public TaskStatusEnum getStatus() {
 		return status;
 	}
 	/**
