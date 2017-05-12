@@ -8,7 +8,7 @@ public class TestMyTaskImpl {
 
 	public static void main(String[] args) throws Exception {
 		ITask task = new MyTaskImpl();
-		EasyRunTask easyRunTask = new EasyRunTask(task);
+		EasyRunTask easyRunTask = new EasyRunTask(task, 3);
 		
 		easyRunTask.start(); // 启动任务框架，任务开始执行
 		

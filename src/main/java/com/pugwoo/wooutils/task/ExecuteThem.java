@@ -11,11 +11,15 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 2015年7月23日 14:34:51
- * 一个简易的以单线程的方式，控制多个任务多线程执行完之后再返回
+ * 一个简易的以单线程的方式，控制多个任务多线程执行完之后再返回。
+ * 
+ * 默认线程池大小为10个，可以修改。
  *
  * 使用方式：
  * 1. new一个ExecuteTime对象，然后把要执行的Runnable或Callable对象放入executeTime对象中
  * 2. 调用waitAllTerminate方法等待所有任务执行完成
+ * 
+ * 【注】每个ExecuteThem调用waitAllTerminate之后，就不能再add增加任务了。
  */
 public class ExecuteThem {
 	

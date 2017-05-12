@@ -4,9 +4,10 @@ import java.util.Random;
 
 /**
  * 这是一个示例的任务实现:
- * 假设有100个任务要执行
- * 
+ * 假设有100个任务要执行。
  * 2016年2月29日 19:44:02
+ * 
+ * 2017年5月12日 11:23:42 支持多线程并发执行
  */
 public class MyTaskImpl implements ITask {
 	
@@ -24,16 +25,20 @@ public class MyTaskImpl implements ITask {
 
 	@Override
 	public TaskResult runStep() {
+		int mycount;
+		synchronized (this) { // 支持多线程抢占任务
+			mycount = count;
+			count--;
+		}
+		
 		// 任务框架调用这个一次相当于执行一次任务
-		System.out.println("system is handle task " + count);
+		System.out.println("system is handle task " + mycount);
 		
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
-		count--;
 		
 		// 告诉任务框架，任务处理成功了还是失败，目前失败也不会重试的，只是记录下来
 		return new TaskResult(new Random().nextDouble() > 0.5);

@@ -15,7 +15,9 @@ public interface ITask {
 	int getRestCount();
 
 	/**
-	 * 执行单个记录，单线程执行
+	 * 每次调用，执行单个记录。
+	 * 【特别注意】如果要做到支持多线程，ITask的实现类，必须用变量支持多线程的并发调用。
+	 * 请看test中MyTaskImpl例子。
 	 * @return 成功返回true，失败返回false
 	 */
 	TaskResult runStep();
