@@ -6,7 +6,7 @@
 	<groupId>com.pugwoo</groupId>
 	<artifactId>woo-utils</artifactId>
 	<packaging>jar</packaging>
-	<version>0.0.9-SNAPSHOT</version>
+	<version>0.0.9</version>
 	
 	<name>woo-utils</name>
 	<description>the common utils</description>
@@ -43,6 +43,13 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.21</version>
+		</dependency>
+		
+		<!-- Guava -->
+		<dependency>
+		    <groupId>com.google.guava</groupId>
+		    <artifactId>guava</artifactId>
+		    <version>22.0</version>
 		</dependency>
 		
 		<!-- optional依赖：servlet相关功能需要 -->

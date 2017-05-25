@@ -5,6 +5,8 @@ import java.net.URL;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.google.common.net.InternetDomainName;
+
 public class NetUtils {
 
 	/**
@@ -96,4 +98,43 @@ public class NetUtils {
 		}
 	}
 	
+	/**
+	 * 获得url的host，如果url不符合格式，会返回空字符串。
+	 * 例如输入：http://www.abc.com/is/a/apple?id=3，返回www.abc.com
+	 * @param url
+	 * @return
+	 */
+	public static String getHostnameFromUrl(String url) {
+		if(url == null || url.isEmpty()) {
+			return "";
+		}
+		try {
+			URL _url = new URL(url);
+			return _url.getHost();
+		} catch (MalformedURLException e) {
+			return "";
+		}
+	}
+	
+	/**
+	 * 从hostname中获取顶级域名。例如输入www.google.com.hk返回google.com.hk
+	 * @param hostname
+	 * @return
+	 */
+	public static String getTopDomainFromHostname(String hostname) {
+		return InternetDomainName.from(hostname).topPrivateDomain().toString();
+	}
+	
+	/**
+	 * 从url中获取顶级域名。例如输入http://www.google.com.hk/abc?a=b返回google.com.hk
+	 * @param url
+	 * @return
+	 */
+	public static String getTopDomainFromUrl(String url) {
+		String hostname = getHostnameFromUrl(url);
+		if(hostname.isEmpty()) {
+			return "";
+		}
+		return getTopDomainFromHostname(hostname);
+	}
 }
