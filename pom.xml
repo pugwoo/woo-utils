@@ -45,13 +45,6 @@
 			<version>1.7.21</version>
 		</dependency>
 		
-		<!-- Guava -->
-		<dependency>
-		    <groupId>com.google.guava</groupId>
-		    <artifactId>guava</artifactId>
-		    <version>22.0</version>
-		</dependency>
-		
 		<!-- optional依赖：servlet相关功能需要 -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
