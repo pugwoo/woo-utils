@@ -3,15 +3,14 @@ package com.pugwoo.wooutils.redis;
 import java.util.Date;
 import java.util.Vector;
 
-import com.pugwoo.wooutils.redis.limit.RedisLimit;
 import com.pugwoo.wooutils.redis.limit.RedisLimitParam;
 import com.pugwoo.wooutils.redis.limit.RedisLimitPeroidEnum;
-
-import redis.clients.jedis.Jedis;
 
 public class TestLimit {
 
 	public static void main(String[] args) throws Exception {
+		
+		final RedisHelper redisHelper = TestRedisHelper.getRedisHelper();
 		
 		// 一个redisLimitParam 相当于是一个业务配置，例如每分钟只能请求1000次
 		final RedisLimitParam redisLimitParam = new RedisLimitParam();
@@ -26,8 +25,7 @@ public class TestLimit {
 				public void run() {
 					long count = 0;
 					do {
-						Jedis jedis = RedisConnectionManager.getJedisConnection();
-						count = RedisLimit.useLimitCount(jedis, redisLimitParam, "192.168.2.3");
+						count = redisHelper.useLimitCount(redisLimitParam, "192.168.2.3");
 						if(count > 0) {
 							System.out.println(Thread.currentThread().getName() +
 									"抢到了第" + count + "个，时间:" + new Date());
@@ -48,7 +46,7 @@ public class TestLimit {
 			thread.start();
 		}
 		
-		Thread.sleep(10000);
+		Thread.sleep(100000);
 		System.out.println("final:" + vector.size()); // 每分钟最多只能拿到1000个
 	}
 	

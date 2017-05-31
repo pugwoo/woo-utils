@@ -5,9 +5,7 @@ import java.util.Calendar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pugwoo.wooutils.redis.RedisUtils;
-
-import redis.clients.jedis.Jedis;
+import com.pugwoo.wooutils.redis.RedisHelper;
 
 /**
  * 使用redis控制全局的操作次数限制<br>
@@ -26,12 +24,12 @@ public class RedisLimit {
 	
 	/**
 	 * 查询key的redis限制剩余次数。
-	 * @param jedis redis客户端，请自行关闭jedis。
+	 * @param redisHelper
 	 * @param limitParam 限制参数
 	 * @param key 业务主键
 	 * @return -1是系统异常，正常值大于等于0
 	 */
-	public static long getLimitCount(Jedis jedis, RedisLimitParam limitParam, String key) {
+	public static long getLimitCount(RedisHelper redisHelper, RedisLimitParam limitParam, String key) {
 		
 		if(limitParam == null || key == null) {
 			LOGGER.error("limitEnum or key is null, limitEnum:{}, key:{}", limitParam, key);
@@ -40,7 +38,7 @@ public class RedisLimit {
 		
 		try {
 			key = getKey(limitParam, key);
-			String count = jedis.get(key);
+			String count = redisHelper.getString(key);
 			if(count == null) {
 				return limitParam.getLimitCount();
 			} else {
@@ -58,39 +56,39 @@ public class RedisLimit {
 	
 	/**
 	 * 判断是否还有限制次数。
-	 * @param jedis redis客户端，请自行关闭jedis。
+	 * @param redisHelper
 	 * @param limitParam
 	 * @param key
 	 * @return
 	 */
-	public static boolean hasLimitCount(Jedis jedis, RedisLimitParam limitParam, String key) {
-		return getLimitCount(jedis, limitParam, key) > 0;
+	public static boolean hasLimitCount(RedisHelper redisHelper, RedisLimitParam limitParam, String key) {
+		return getLimitCount(redisHelper, limitParam, key) > 0;
 	}
 	
 	/**
 	 * 使用了一次限制。一般来说，业务都是在处理成功后才扣减使用是否成功的限制，
 	 * 如果使用失败了，如果业务支持事务回滚，那么可以回滚掉，此时可以不用RedisTransation做全局限制。
 	 * 
-	 * @param jedis redis客户端，请自行关闭jedis。
+	 * @param redisHelper
 	 * @param limitEnum
 	 * @param key
 	 * @return 返回是当前周期内第几个使用配额的，如果返回-1，表示使用配额失败
 	 */
-	public static long useLimitCount(Jedis jedis, RedisLimitParam limitEnum, String key) {
-		return useLimitCount(jedis, limitEnum, key, 1);
+	public static long useLimitCount(RedisHelper redisHelper, RedisLimitParam limitEnum, String key) {
+		return useLimitCount(redisHelper, limitEnum, key, 1);
 	}
 	
 	/**
 	 * 使用了count次限制。一般来说，业务都是在处理成功后才扣减使用是否成功的限制，
 	 * 如果使用失败了，如果业务支持事务回滚，那么可以回滚掉，此时可以不用RedisTransation做全局限制。
 	 * 
-	 * @param jedis redis客户端，请自行关闭jedis。
+	 * @param redisHelper
 	 * @param limitParam
 	 * @param key
 	 * @param count 一次可以使用掉多个count
 	 * @return 返回是当前周期内第几个使用配额的，如果返回-1，表示使用配额失败
 	 */
-	public static long useLimitCount(Jedis jedis, RedisLimitParam limitParam, String key, int count) {
+	public static long useLimitCount(RedisHelper redisHelper, RedisLimitParam limitParam, String key, int count) {
 		if(limitParam == null || key == null) {
 			LOGGER.error("limitEnum or key is null, limitEnum:{}, key:{}", limitParam, key);
 			return -1;
@@ -100,7 +98,7 @@ public class RedisLimit {
 			key = getKey(limitParam, key);
 					
 			for(int i = 0; i < 1000; i++) { // 重试次数，限制重试次数上限
-				String oldValue = jedis.get(key);
+				String oldValue = redisHelper.getString(key);
 				long newValue = 0;
 				if(oldValue == null) {
 					newValue = limitParam.getLimitCount() - count;
@@ -115,7 +113,7 @@ public class RedisLimit {
 					return -1;
 				}
 				
-				long expireSeconds = jedis.ttl(key);
+				long expireSeconds = redisHelper.getExpireSecond(key);
 				long restSeconds = getRestSeconds(limitParam.getLimitPeroid());
 				Integer setRest = null;
 				// 为了避免跨周期设置问题，只能将ttl的值变小，不能变大； -1和-2（key不存在）时可以设置
@@ -123,7 +121,7 @@ public class RedisLimit {
 					setRest = (int) restSeconds;
 				}
 				
-				if(RedisUtils.compareAndSet(jedis, key, newValue + "", oldValue, setRest)) {
+				if(redisHelper.compareAndSet(key, newValue + "", oldValue, setRest)) {
 					return limitParam.getLimitCount() - newValue;
 				} else {
 					continue;

@@ -3,7 +3,7 @@ package com.pugwoo.wooutils.redis.transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import redis.clients.jedis.Jedis;
+import com.pugwoo.wooutils.redis.RedisHelper;
 
 /**
  * @author nick
@@ -27,7 +27,7 @@ public class RedisTransaction {
 	 * @param maxTransactionSeconds 单位秒，必须大于0,拿到锁之后,预计多久可以完成这个事务，如果超过这个时间还没有归还锁，那么事务将失败
 	 * @return
 	 */
-	public static boolean requireLock(Jedis jedis, String namespace,
+	public static boolean requireLock(RedisHelper redisHelper, String namespace,
 			String key, int maxTransactionSeconds) {
 		if(namespace == null || key == null || key.isEmpty() || maxTransactionSeconds <= 0) {
 			LOGGER.error("requireLock with error params: namespace:{},key:{},maxTransactionSeconds:{}",
@@ -37,18 +37,11 @@ public class RedisTransaction {
 		
 		try {
 			key = getKey(namespace, key);
-			String result = jedis.set(key, "1", "NX", "PX", maxTransactionSeconds * 1000);
-			if(result == null) {
-				return false;
-			}
-			return true;
+			boolean result = redisHelper.setStringIfNotExist(key, maxTransactionSeconds, "1");
+			return result;
 		} catch (Exception e) {
 			LOGGER.error("requireLock error, namespace:{}, key:{}", namespace, key, e);
 			return false;
-		} finally {
-			if(jedis != null) {
-				jedis.close();
-			}
 		}
 	}
 	
@@ -58,22 +51,20 @@ public class RedisTransaction {
 	 * @param namespace
 	 * @param key
 	 */
-	public static void releaseLock(Jedis jedis, String namespace, String key) {
+	public static boolean releaseLock(RedisHelper redisHelper, String namespace, String key) {
 		if(namespace == null || key == null || key.isEmpty()) {
 			LOGGER.error("requireLock with error params: namespace:{},key:{}",
 					namespace, key, new Exception());
-			return;
+			return false;
 		}
 		
 		try {
 			key = getKey(namespace, key);
-			jedis.del(key);
+			redisHelper.remove(key);
+			return true;
 		} catch (Exception e) {
 			LOGGER.error("requireLock error, namespace:{}, key:{}", namespace, key, e);
-		} finally {
-			if(jedis != null) {
-				jedis.close();
-			}
+			return false;
 		}
 	}
 	
