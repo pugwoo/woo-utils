@@ -1,7 +1,5 @@
 package com.pugwoo.wooutils.redis;
 
-import com.pugwoo.wooutils.redis.limit.RedisLimitParam;
-
 import redis.clients.jedis.Jedis;
 
 public interface RedisHelper {
@@ -19,6 +17,15 @@ public interface RedisHelper {
 	 * @return
 	 */
 	boolean setString(String key, int expireSecond, String value);
+	
+	/**
+	 * 设置对象
+	 * @param key
+	 * @param expireSecond
+	 * @param value
+	 * @return
+	 */
+	<T> boolean setObject(String key, int expireSecond, T value);
 
 	/**
 	 * 当key不存在时才写入，写入成功返回true，写入失败返回false
@@ -50,6 +57,13 @@ public interface RedisHelper {
 	 * @return
 	 */
 	String getString(String key);
+	
+	/**
+	 * 获取对象，需要提供IRedisObjectConverter的实现对象
+	 * @param key
+	 * @return
+	 */
+	<T> T getObject(String key, Class<T> clazz);
 	
 	/**
 	 * 删除指定的key

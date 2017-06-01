@@ -1,4 +1,4 @@
-package com.pugwoo.wooutils.redis.limit;
+package com.pugwoo.wooutils.redis.impl;
 
 import java.util.Calendar;
 
@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pugwoo.wooutils.redis.RedisHelper;
+import com.pugwoo.wooutils.redis.RedisLimitParam;
+import com.pugwoo.wooutils.redis.RedisLimitPeroidEnum;
 
 /**
  * 使用redis控制全局的操作次数限制<br>

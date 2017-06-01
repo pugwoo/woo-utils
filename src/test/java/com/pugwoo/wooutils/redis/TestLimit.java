@@ -3,9 +3,6 @@ package com.pugwoo.wooutils.redis;
 import java.util.Date;
 import java.util.Vector;
 
-import com.pugwoo.wooutils.redis.limit.RedisLimitParam;
-import com.pugwoo.wooutils.redis.limit.RedisLimitPeroidEnum;
-
 public class TestLimit {
 
 	public static void main(String[] args) throws Exception {

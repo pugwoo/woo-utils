@@ -1,4 +1,4 @@
-package com.pugwoo.wooutils.redis;
+package com.pugwoo.wooutils.redis.impl;
 
 import java.util.List;
 import java.util.Objects;
@@ -6,9 +6,9 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pugwoo.wooutils.redis.limit.RedisLimit;
-import com.pugwoo.wooutils.redis.limit.RedisLimitParam;
-import com.pugwoo.wooutils.redis.transaction.RedisTransaction;
+import com.pugwoo.wooutils.redis.IRedisObjectConverter;
+import com.pugwoo.wooutils.redis.RedisHelper;
+import com.pugwoo.wooutils.redis.RedisLimitParam;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -26,6 +26,8 @@ public class RedisHelperImpl implements RedisHelper {
 	private String password = null;
 	/**指定0~15哪个redis库*/
 	private Integer database = 0;
+	/**String和Object之间的转换对象*/
+	private IRedisObjectConverter redisObjectConverter;
 	
 	/**
 	 * 单例的JedisPool，实际项目中可以配置在string，也可以是懒加载
@@ -83,6 +85,15 @@ public class RedisHelperImpl implements RedisHelper {
 				}
 			}
 		}
+	}
+	
+	@Override
+	public <T> boolean setObject(String key, int expireSecond, T value) {
+		if(redisObjectConverter == null) {
+			throw new RuntimeException("IRedisObjectConverter is null");
+		}
+		String v = redisObjectConverter.convertToString(value);
+		return setString(key, expireSecond, v);
 	}
 	
 	@Override
@@ -166,6 +177,19 @@ public class RedisHelperImpl implements RedisHelper {
 				}
 			}
 		}
+	}
+	
+	@Override
+	public <T> T getObject(String key, Class<T> clazz) {
+		if(redisObjectConverter == null) {
+			throw new RuntimeException("IRedisObjectConverter is null");
+		}
+		String value = getString(key);
+		if(value == null) {
+			return null;
+		}
+		
+		return redisObjectConverter.convertToObject(value, clazz);
 	}
 	
 	@Override
@@ -289,4 +313,13 @@ public class RedisHelperImpl implements RedisHelper {
 	public void setDatabase(Integer database) {
 		this.database = database;
 	}
+
+	public IRedisObjectConverter getRedisObjectConverter() {
+		return redisObjectConverter;
+	}
+
+	public void setRedisObjectConverter(IRedisObjectConverter redisObjectConverter) {
+		this.redisObjectConverter = redisObjectConverter;
+	}
+	
 }
