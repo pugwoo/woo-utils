@@ -17,6 +17,10 @@ import redis.clients.jedis.Protocol;
 import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
 
+/**
+ * 大部分实现时间: 2016年11月2日 15:10:21
+ * @author nick
+ */
 public class RedisHelperImpl implements RedisHelper {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(RedisHelperImpl.class);
