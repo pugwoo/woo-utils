@@ -113,5 +113,14 @@ public class NetUtils {
 			return "";
 		}
 	}
+	
+	/**
+	 * 获得servlet应用的contextPath，即tomcat部署的应用名称的根目录，如admin.war部署之后返回 /admin
+	 * @param request
+	 * @return
+	 */
+	public static String getContextPath(HttpServletRequest request) {
+		return request.getContextPath();
+	}
 
 }
