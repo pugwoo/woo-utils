@@ -9,12 +9,18 @@ public class TestBrowser {
 
 	@Test
 	public void testGet() throws Exception {
-		HttpResponse resp = new Browser().get("http://www.baidu.com");
-		System.out.println(resp.getHeaders());
-		System.out.println(resp.getContentLength());
-		System.out.println(resp.getContentString());
-		
-		
+//		HttpResponse resp = new Browser().get("http://www.baidu.com");
+//		System.out.println(resp.getHeaders());
+//		System.out.println(resp.getContentLength());
+//		System.out.println(resp.getContentString());
+
+		OutputStream out = new FileOutputStream("d:/a.txt");
+		HttpResponse resp = new Browser().postAsync("http://www.baidu.com",
+				out);
+		while(!resp.isDownloadFinished()) {
+			System.out.println(resp.getDownloadedBytes());
+			Thread.sleep(100);
+		}
 	}
 	
 	public static void main(String[] args) throws Exception {

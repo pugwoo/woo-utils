@@ -1,3 +1,6 @@
+2017年7月3日
+v0.0.11 - [add] Browser增加异步get/post功能
+
 2017年5月31日
 v0.0.10 - [add] 重构redis,增加若干接口,规范接口为RedisHelper
         - [del] 去除guava依赖,去除拿top domain方法
