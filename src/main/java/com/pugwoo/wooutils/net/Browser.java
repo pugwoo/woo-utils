@@ -35,6 +35,13 @@ import org.slf4j.LoggerFactory;
 public class Browser {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(Browser.class);
+	
+	public class HttpResponseFuture {
+		/**已经下载的字节数*/
+		public long downloadedBytes;
+		/**是否已经下载完成*/
+		public boolean isFinished;
+	}
 		
 	/**cookie, domain(域根目录) -> key/value*/
 	private Map<String, Map<String, String>> cookies = new HashMap<String, Map<String,String>>();
@@ -93,6 +100,16 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
+	public HttpResponse postAsync(String httpUrl, OutputStream outputStream) throws IOException {
+		return postAsync(httpUrl, new HashMap<String, Object>(), outputStream);
+	}
+	
+	/**
+	 * post方式请求HTTP
+	 * @param httpUrl
+	 * @return
+	 * @throws IOException
+	 */
 	public HttpResponse post(String httpUrl, Map<String, Object> params) throws IOException {
 		return post(httpUrl, buildPostString(params));
 	}
@@ -105,6 +122,16 @@ public class Browser {
 	 */
 	public HttpResponse post(String httpUrl, Map<String, Object> params, OutputStream outputStream) throws IOException {
 		return post(httpUrl, buildPostString(params), outputStream);
+	}
+	
+	/**
+	 * post方式请求HTTP
+	 * @param httpUrl
+	 * @return
+	 * @throws IOException
+	 */
+	public HttpResponse postAsync(String httpUrl, Map<String, Object> params, OutputStream outputStream) throws IOException {
+		return postAsync(httpUrl, buildPostString(params), outputStream);
 	}
 	
 	/**
@@ -133,6 +160,16 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
+	public HttpResponse postAsync(String httpUrl, byte[] postData, OutputStream outputStream) throws IOException {
+		return postAsync(httpUrl, new ByteArrayInputStream(postData), outputStream);
+	}
+	
+	/**
+	 * post方式请求HTTP
+	 * @param httpUrl
+	 * @return
+	 * @throws IOException
+	 */
 	public HttpResponse post(String httpUrl, InputStream inputStream) throws IOException {
 		return post(httpUrl, inputStream, null);
 	}
@@ -144,7 +181,26 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse post(String httpUrl, InputStream inputStream, OutputStream outputStream) throws IOException {
+	public HttpResponse post(String httpUrl, InputStream inputStream, OutputStream outputStream)
+			throws IOException {
+		return post(httpUrl, inputStream, outputStream, false);
+	}
+	
+	/**
+	 * post方式请求HTTP，异步方式
+	 * @param httpUrl
+	 * @param inputStream
+	 * @param outputStream 如果指定了输出流，则输出到指定的输出流，此时返回的值没有html正文bytes
+	 * @return
+	 * @throws IOException
+	 */
+	public HttpResponse postAsync(String httpUrl, InputStream inputStream, OutputStream outputStream)
+	        throws IOException {
+		return post(httpUrl, inputStream, outputStream, true);
+	}
+	
+	private HttpResponse post(String httpUrl, InputStream inputStream, OutputStream outputStream,
+			boolean isAsync) throws IOException {
 		IOException ie = null;
 		for(int i = 0; i < retryTimes; i++) {
 			try {
@@ -163,7 +219,7 @@ public class Browser {
 			        os.close();
 				}
 		        
-				return makeHttpResponse(httpUrl, urlConnection, outputStream);
+				return makeHttpResponse(httpUrl, urlConnection, outputStream, isAsync);
 			} catch (IOException e) {
 				LOGGER.error("get url:{} exception", httpUrl, e);
 				ie = e;
@@ -172,6 +228,8 @@ public class Browser {
 		throw ie;
 
 	}
+	
+	/////////////////////// =========================================================
 	
 	/**
 	 * get方式请求HTTP,处理细节：<br>
@@ -205,8 +263,8 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse get(String httpUrl, Map<String, Object> params) throws IOException {
-		return get(httpUrl, params, null);
+	public HttpResponse getAsync(String httpUrl, OutputStream outputStream) throws IOException {
+		return getAsync(httpUrl, null, outputStream);
 	}
 	
 	/**
@@ -217,7 +275,48 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse get(String httpUrl, Map<String, Object> params, OutputStream outputStream) throws IOException {
+	public HttpResponse get(String httpUrl, Map<String, Object> params) throws IOException {
+		return get(httpUrl, params, null, false);
+	}
+	
+	/**
+	 * get方式请求HTTP,处理细节：<br>
+	 * 1. 如果是301或302跳转，且跳转链接不同于当前链接，则再请求跳转的URL
+	 * 
+	 * @param httpUrl
+	 * @param params
+	 * @param outputStream
+	 * @return
+	 */
+	public HttpResponse get(String httpUrl, Map<String, Object> params, OutputStream outputStream) 
+	        throws IOException {
+		return get(httpUrl, params, outputStream, false);
+	}
+	
+	/**
+	 * get方式请求HTTP,处理细节：<br>
+	 * 1. 如果是301或302跳转，且跳转链接不同于当前链接，则再请求跳转的URL
+	 * 
+	 * @param httpUrl
+	 * @param params
+	 * @param outputStream
+	 * @return
+	 */
+	public HttpResponse getAsync(String httpUrl, Map<String, Object> params, OutputStream outputStream) 
+	        throws IOException {
+		return get(httpUrl, params, outputStream, true);
+	}
+	
+	/**
+	 * get方式请求HTTP,处理细节：<br>
+	 * 1. 如果是301或302跳转，且跳转链接不同于当前链接，则再请求跳转的URL
+	 * 
+	 * @param httpUrl
+	 * @return
+	 * @throws IOException
+	 */
+	private HttpResponse get(String httpUrl, Map<String, Object> params, OutputStream outputStream,
+			boolean isAsync) throws IOException {
 		httpUrl = appendParamToUrl(httpUrl, params);
 		IOException ie = null;
 		for(int i = 0; i < retryTimes; i++) {
@@ -235,7 +334,7 @@ public class Browser {
 					}
 				}
 
-				return makeHttpResponse(httpUrl, urlConnection, outputStream);
+				return makeHttpResponse(httpUrl, urlConnection, outputStream, isAsync);
 			} catch (IOException e) {
 				LOGGER.error("get url:{} error", httpUrl, e);
 				ie = e;
@@ -318,10 +417,13 @@ public class Browser {
 	 * 构造httpResponse
 	 * @param urlConnection
 	 * @param httpResponse
+	 * @param outputStream
+	 * @param isAsync 是否异步，只有当outputStream!=null时，该值才有效。
+	 *        当isAsync为true时，HttpResponse可以获得已下载的字节数。
 	 * @throws IOException 
 	 */
-	private HttpResponse makeHttpResponse(String httpUrl, HttpURLConnection urlConnection, OutputStream outputStream)
-			throws IOException {
+	private HttpResponse makeHttpResponse(String httpUrl, HttpURLConnection urlConnection,
+			final OutputStream outputStream, boolean isAsync) throws IOException {
 		HttpResponse httpResponse = new HttpResponse();
 		httpResponse.setResponseCode(urlConnection.getResponseCode());
 		httpResponse.setHeaders(urlConnection.getHeaderFields());
@@ -354,12 +456,33 @@ public class Browser {
 			}
 		}
 		
-		InputStream in = urlConnection.getInputStream();
+		final InputStream in = urlConnection.getInputStream();
 		byte[] buf = new byte[4096];
 		int len;
 		if(outputStream != null) {
-			while((len = in.read(buf)) != -1) {
-				outputStream.write(buf, 0, len);
+			if(isAsync) {
+				final HttpResponseFuture future = new HttpResponseFuture();
+				httpResponse.setFuture(future);
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						byte[] buf = new byte[4096];
+						int len;
+						try {
+							while((len = in.read(buf)) != -1) {
+								future.downloadedBytes += len;
+								outputStream.write(buf, 0, len);
+							}
+							future.isFinished = true;
+						} catch (IOException e) {
+							LOGGER.error("outputStream write error", e);
+						}
+					}
+				}).start();;
+			} else {
+				while((len = in.read(buf)) != -1) {
+					outputStream.write(buf, 0, len);
+				}
 			}
 		} else {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();

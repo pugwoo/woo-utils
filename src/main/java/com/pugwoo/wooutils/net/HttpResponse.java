@@ -24,9 +24,53 @@ public class HttpResponse {
 	 * HTTP正文
 	 */
 	private byte[] contentBytes;
+	
+	/**
+	 * 异步下载的future
+	 */
+	private Browser.HttpResponseFuture future;
+	
+	/**
+	 * 获得文件长度，-1表示未知
+	 * @return
+	 */
+	public long getContentLength() {
+		List<String> cl = headers.get("Content-Length");
+		if(cl == null || cl.isEmpty()) {
+			return -1;
+		}
+		try {
+			return new Long(cl.get(0));
+		} catch (Exception e) {
+			return -1;
+		}
+	}
+	
+	/**
+	 * 获得已下载的字节数，非异步下载返回-1
+	 * @return
+	 */
+	public long getDownloadedBytes() {
+		if(future == null) {
+			return -1;
+		}
+		return future.downloadedBytes;
+	}
+	
+	/**
+	 * 获取下载是否已经完成，针对异步下载而言
+	 * @return
+	 */
+	public boolean isDownloadFinished() {
+		if(future == null) {
+			return true;
+		}
+		return future.isFinished;
+	}
 
 	/**
-	 * 获得正文
+	 * 获得正文，会从头部自动识别编码（如果头部有Content-Type）。
+	 * 但是没有，但是html中才有meta charset，那么不处理，请手工指定。
 	 * 
 	 * @return
 	 */
@@ -57,7 +101,7 @@ public class HttpResponse {
 	}
 
 	/**
-	 * 获得正文
+	 * 获得正文,指定编码方式
 	 * 
 	 * @param charset
 	 * @return
@@ -95,4 +139,8 @@ public class HttpResponse {
 		this.headers = headers;
 	}
 
+	public void setFuture(Browser.HttpResponseFuture future) {
+		this.future = future;
+	}
+	
 }
