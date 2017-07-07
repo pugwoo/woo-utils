@@ -1,7 +1,12 @@
 package com.pugwoo.wooutils.net;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -31,6 +36,28 @@ public class TestBrowser {
 			System.out.println(resp.getDownloadedBytes());
 			Thread.sleep(100);
 		}
-	}
+		
+		/////////////////////////// 把远程的下载转输的outputStream出到下载的InputStream，使用pipe的方式
+		
+		final String downUrl = "http://下载链接";
+		
+    	PipedInputStream in = new PipedInputStream();
+    	final PipedOutputStream out2 = new PipedOutputStream(in); // 将输入流和输出流对起来
+    	new Thread(new Runnable() {
+    	    public void run () {
+    	    	try {
+					new Browser().get(downUrl, out2);
+					out2.close();
+				} catch (IOException e) {
+//					LOGGER.error("down report fail, url:{}", downUrl, e);
+				}
+    	    }
+    	}).start();
+    	
+    	Map<String, String> headers = new HashMap<String, String>();
+    	headers.put("Content-type", "application/pdf");
+//    	return new StreamDownloadBean("sample-" + sampleNumber + ".pdf", in, headers);
 
+	}
+	
 }
