@@ -227,7 +227,7 @@ public class RedisHelperImpl implements RedisHelper {
 			if(Objects.equals(readOldValue, oldValue)) {
 				Transaction tx = jedis.multi();
 				Response<String> result = null;
-				if(expireSeconds != null) {
+				if(expireSeconds != null && expireSeconds >= 0) {
 					result = tx.setex(key, expireSeconds, value);
 				} else {
 					result = tx.set(key, value);
