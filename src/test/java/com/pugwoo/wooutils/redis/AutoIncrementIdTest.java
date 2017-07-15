@@ -2,7 +2,7 @@ package com.pugwoo.wooutils.redis;
 
 import com.pugwoo.wooutils.redis.impl.RedisHelperImpl;
 
-public class TestAutoIncrementId {
+public class AutoIncrementIdTest {
 
 	public static void main(String[] args) {
 		RedisHelperImpl redisHelper = new RedisHelperImpl();
