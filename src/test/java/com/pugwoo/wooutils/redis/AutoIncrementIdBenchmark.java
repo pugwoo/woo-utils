@@ -8,13 +8,13 @@ import com.pugwoo.wooutils.redis.impl.RedisHelperImpl;
 /**
  * 普通笔记本本地redis(windows上)压测结果：
  * 
- * 并发数:1,QPS:7603
- * 并发数:10,QPS:14021
- * 并发数:100,QPS:13744
- * 并发数:200,QPS:10311
- * 并发数:300,QPS:8907
- * 并发数:500,QPS:6603
- * 并发数:1000,QPS:3661
+ * 并发数:1,QPS:8778
+ * 并发数:10,QPS:19205
+ * 并发数:100,QPS:13552
+ * 并发数:200,QPS:11100
+ * 并发数:300,QPS:10037
+ * 并发数:500,QPS:7960
+ * 并发数:1000,QPS:5277
  * @author NICK
  *
  */
@@ -23,7 +23,7 @@ public class AutoIncrementIdBenchmark {
 	public static void main(String[] args) throws Exception {
         final List<Long> ids = new Vector<Long>();
         long start = System.currentTimeMillis();
-        int concurrents = 1000; // 并发数
+        int concurrents = 1; // 并发数
         for(int i = 0; i < concurrents; i++) {
         	Thread thread = new Thread(new Runnable() {
 				@Override
