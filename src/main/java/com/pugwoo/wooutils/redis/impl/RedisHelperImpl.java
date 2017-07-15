@@ -287,6 +287,32 @@ public class RedisHelperImpl implements RedisHelper {
 		return RedisTransaction.releaseLock(this, namespace, key);
 	}
 	
+	@Override
+	public Long getAutoIncrementId(String namespace) {
+		if(namespace == null || namespace.isEmpty()) {
+			LOGGER.error("getAutoIncrementId with error params: namespace:{}",
+					namespace, new Exception());
+			return null;
+		}
+		
+		Jedis jedis = null;
+		try {
+			jedis = getJedisConnection();
+			return jedis.incr(namespace + "_ID");
+		} catch (Exception e) {
+			LOGGER.error("getAutoIncrementId jedis incr error, namespace:{}", namespace, e);
+			return null;
+		} finally {
+			if (jedis != null) {
+				try {
+					jedis.close();
+				} catch (Exception e) {
+					LOGGER.error("close jedis error", e);
+				}
+			}
+		}
+	}
+	
 	public String getHost() {
 		return host;
 	}

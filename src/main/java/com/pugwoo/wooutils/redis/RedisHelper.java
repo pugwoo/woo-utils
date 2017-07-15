@@ -136,4 +136,12 @@ public interface RedisHelper {
 	 */
 	boolean releaseLock(String namespace, String key);
 	
+	/////////////////// Redis Auto Increment ID 分布式自增id //////////////////////
+	
+	/**
+	 * 获得自增id，从1开始
+	 * @param namespace 必须，由使用方自定决定，用于区分不同的业务。实际redis key会加上_ID后缀
+	 * @return
+	 */
+	Long getAutoIncrementId(String namespace);
 }
