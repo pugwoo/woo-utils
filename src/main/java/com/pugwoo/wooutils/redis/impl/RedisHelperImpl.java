@@ -27,6 +27,7 @@ public class RedisHelperImpl implements RedisHelper {
 	
 	private String host = "127.0.0.1";
 	private Integer port = 6379;
+	private Integer maxConnection = 128;
 	private String password = null;
 	/**指定0~15哪个redis库*/
 	private Integer database = 0;
@@ -44,7 +45,7 @@ public class RedisHelperImpl implements RedisHelper {
 			synchronized (this) {
 				if(pool == null) {
 					JedisPoolConfig poolConfig = new JedisPoolConfig();
-					poolConfig.setMaxTotal(128); // 最大链接数
+					poolConfig.setMaxTotal(maxConnection); // 最大链接数
 					poolConfig.setMaxIdle(64);
 					poolConfig.setMaxWaitMillis(1000L);
 					poolConfig.setTestOnBorrow(false);
@@ -308,6 +309,14 @@ public class RedisHelperImpl implements RedisHelper {
 
 	public void setPort(Integer port) {
 		this.port = port;
+	}
+	
+	public Integer getMaxConnection() {
+		return maxConnection;
+	}
+
+	public void setMaxConnection(Integer maxConnection) {
+		this.maxConnection = maxConnection;
 	}
 
 	public Integer getDatabase() {
