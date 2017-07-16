@@ -23,7 +23,7 @@ public class AutoIncrementIdBenchmark {
 	public static void main(String[] args) throws Exception {
         final List<Long> ids = new Vector<Long>();
         long start = System.currentTimeMillis();
-        int concurrents = 1; // 并发数
+        int concurrents = 1000; // 并发数
         for(int i = 0; i < concurrents; i++) {
         	Thread thread = new Thread(new Runnable() {
 				@Override

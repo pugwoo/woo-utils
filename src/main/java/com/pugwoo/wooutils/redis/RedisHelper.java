@@ -141,7 +141,7 @@ public interface RedisHelper {
 	/**
 	 * 获得自增id，从1开始
 	 * @param namespace 必须，由使用方自定决定，用于区分不同的业务。实际redis key会加上_ID后缀
-	 * @return
+	 * @return 没有重试，获取失败返回null，注意判断和重试
 	 */
 	Long getAutoIncrementId(String namespace);
 }
