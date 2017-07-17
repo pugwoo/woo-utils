@@ -9,7 +9,7 @@ public class HelloService {
 
 	@Synchronized(namespace = "hello")
 	public void hello() {
-		System.out.println("hello world");
+		System.out.println("hello()");
 	}
 	
 }

@@ -13,16 +13,27 @@ public class SyncMethodInterceptor implements MethodInterceptor {
 	
 	private RedisHelper redisHelper;
 	
+	public SyncMethodInterceptor() {
+	}
+	
 	public SyncMethodInterceptor(RedisHelper redisHelper) {
+		this.redisHelper = redisHelper;
+	}
+	
+	public RedisHelper getRedisHelper() {
+		return redisHelper;
+	}
+
+	public void setRedisHelper(RedisHelper redisHelper) {
 		this.redisHelper = redisHelper;
 	}
 
 	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		
-		System.out.println("hello world");
+		System.out.println("sync invoker");
 		
-		return null;
+		return invocation.proceed();
 	}
 
 }
