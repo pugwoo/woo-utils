@@ -38,6 +38,7 @@
     </scm>
 	
 	<dependencies>
+	
 	    <!-- SLF -->
         <dependency>
 			<groupId>org.slf4j</groupId>
@@ -60,6 +61,14 @@
 			<version>2.9.0</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- optional依赖： Redis的分布式锁注解方式使用时，需要该依赖，实际上依赖Spring容器-->
+		<dependency>
+		    <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>4.2.8.RELEASE</version>
+            <scope>provided</scope>
+		</dependency>
 	
 	    <!-- 测试需要的 -->
 		<dependency>
@@ -74,6 +83,13 @@
 			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>4.2.8.RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+		
 	</dependencies>
 
 	<build>
