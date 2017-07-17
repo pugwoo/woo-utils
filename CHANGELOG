@@ -1,6 +1,6 @@
 2017年7月15日
 v0.0.13 - [add] redis支持指定链接数setMaxConnections，默认128
-
+        - [add] redisHelper增加getAutoIncrementId方法，支持分布式自增id获取
 
 2017年7月13日
 v0.0.12 - [fix] 修复redisLimit当周期为永久时使用不了的bug

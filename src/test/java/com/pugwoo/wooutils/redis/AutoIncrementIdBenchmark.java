@@ -6,15 +6,15 @@ import java.util.Vector;
 import com.pugwoo.wooutils.redis.impl.RedisHelperImpl;
 
 /**
- * 普通笔记本本地redis(windows上)压测结果：
+ * 普通台式机本地redis(windows上)压测结果：
  * 
- * 并发数:1,QPS:8778
- * 并发数:10,QPS:19205
- * 并发数:100,QPS:13552
- * 并发数:200,QPS:11100
- * 并发数:300,QPS:10037
- * 并发数:500,QPS:7960
- * 并发数:1000,QPS:5277
+ * 并发数:1,QPS:40719
+ * 并发数:10,QPS:86976
+ * 并发数:100,QPS:65050
+ * 并发数:200,QPS:47124
+ * 并发数:300,QPS:38487
+ * 并发数:500,QPS:25554
+ * 并发数:1000,QPS:12687
  * @author NICK
  *
  */
