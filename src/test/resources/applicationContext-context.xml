@@ -26,12 +26,12 @@
 
     <!-- 支持redis @Synchronized -->
     <bean class="com.pugwoo.wooutils.redis.RedisSyncProxyCreator">
-        <property name="redisHelper" ref="redisHelper" />
-        <property name="beanTypes"> <!-- 【不支持】通配符 -->
+        <property name="beanTypes">
 		    <list>
 		        <value>com.pugwoo.wooutils.redis.sync.HelloService</value>
 		    </list>
 		</property>
+        <property name="redisHelper" ref="redisHelper" />
 	</bean>
 	
 </beans>
