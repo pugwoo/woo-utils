@@ -20,10 +20,6 @@
 	    <property name="password" value=""/>
 	</bean>
 	
-	<bean id="syncMethodInterceptor" class="com.pugwoo.wooutils.redis.impl.SyncMethodInterceptor">
-	    <property name="redisHelper" ref="redisHelper"></property>
-	</bean>
-	
     <!-- 支持redis @Synchronized -->
     <bean class="com.pugwoo.wooutils.redis.RedisSyncProxyCreator">
         <property name="beanTypes">

@@ -100,11 +100,9 @@ public class RedisSyncProxyCreator extends AbstractAutoProxyCreator implements I
             }
         }
         
-//        if(context.getBean(SyncMethodInterceptor.class.getCanonicalName()) == null) {
-//            SyncMethodInterceptor interceptor = new SyncMethodInterceptor(redisHelper);
-//            ConfigurableListableBeanFactory beanFactory = ((ConfigurableApplicationContext) context).getBeanFactory();
-//            beanFactory.registerSingleton(SyncMethodInterceptor.class.getCanonicalName(), interceptor);
-//        }
+        SyncMethodInterceptor interceptor = new SyncMethodInterceptor(redisHelper);
+        ConfigurableListableBeanFactory beanFactory = ((ConfigurableApplicationContext) context).getBeanFactory();
+        beanFactory.registerSingleton("syncMethodInterceptor", interceptor);
         
         super.setInterceptorNames("syncMethodInterceptor");
     }
