@@ -2,13 +2,10 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xmlns:context="http://www.springframework.org/schema/context"
-	   xmlns:aop="http://www.springframework.org/schema/aop"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans
 	                    http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
 	                    http://www.springframework.org/schema/context
-	                    http://www.springframework.org/schema/context/spring-context-4.2.xsd
-						http://www.springframework.org/schema/aop
-						http://www.springframework.org/schema/aop/spring-aop-4.2.xsd">
+	                    http://www.springframework.org/schema/context/spring-context-4.2.xsd">
 
 	<!-- 支持注解注入 -->
 	<context:component-scan base-package="com.pugwoo.*" />
@@ -19,15 +16,7 @@
 	    <property name="port" value="6379"/>
 	    <property name="password" value=""/>
 	</bean>
-	
-    <!-- 支持redis @Synchronized -->
-    <bean class="com.pugwoo.wooutils.redis.RedisSyncProxyCreator">
-        <property name="beanTypes">
-		    <list>
-		        <value>com.pugwoo.wooutils.redis.sync.HelloService</value>
-		    </list>
-		</property>
-        <property name="redisHelper" ref="redisHelper" />
-	</bean>
+
+	<bean class="com.pugwoo.wooutils.redis.RedisSyncAspect" />
 	
 </beans>

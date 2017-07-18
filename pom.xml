@@ -69,6 +69,18 @@
             <version>4.2.8.RELEASE</version>
             <scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjrt</artifactId>
+			<version>1.8.10</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>1.8.10</version>
+			<scope>provided</scope>
+		</dependency>
 	
 	    <!-- 测试需要的 -->
 		<dependency>
