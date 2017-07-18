@@ -70,6 +70,7 @@ public class RedisSyncAspect implements ApplicationContextAware, InitializingBea
 				int c = a + b;
 				a = b;
 				b = c; // 构造兔子数列
+				if(b > 1000) {b = 1000;}
 			}
 		}
     }
