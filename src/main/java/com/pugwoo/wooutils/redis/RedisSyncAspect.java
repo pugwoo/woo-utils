@@ -3,6 +3,8 @@ package com.pugwoo.wooutils.redis;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -13,12 +15,17 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @Aspect
 public class RedisSyncAspect implements ApplicationContextAware, InitializingBean {
 	
+	private static final Logger LOGGER = LoggerFactory.getLogger(RedisSyncAspect.class);
+	
 	private ApplicationContext applicationContext;
 	
 	private RedisHelper redisHelper;
 
 	@Around("@annotation(com.pugwoo.wooutils.redis.Synchronized) execution(* *.*(..))")
-    public Object around(ProceedingJoinPoint pjp) throws Throwable{
+    public Object around(ProceedingJoinPoint pjp) throws Throwable {
+		
+		
+		
 		System.out.println("--------around before--------");
         Object result = pjp.proceed();
         System.out.println("--------around after--------");
