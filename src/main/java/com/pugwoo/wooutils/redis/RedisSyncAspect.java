@@ -1,7 +1,5 @@
 package com.pugwoo.wooutils.redis;
 
-import java.applet.AppletContext;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
