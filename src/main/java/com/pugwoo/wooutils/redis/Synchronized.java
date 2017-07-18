@@ -8,7 +8,8 @@ import java.lang.annotation.Target;
 /**
  * 分布式锁，注解在方法上。 暂时不支持还按照方法的参数来独立限制。
  * 
- * 关于返回值：如果方法是常规返回值，当没有获取到锁时，且超过了阻塞等待时间，则返回null
+ * 关于返回值：如果方法是常规返回值，当没有获取到锁时，且超过了阻塞等待时间，则返回null。
+ * 如果想拿到更多的信息，可以通过
  * @author nick markfly
  */
 @Target({ElementType.METHOD})

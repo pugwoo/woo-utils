@@ -26,6 +26,8 @@ public class TestSync {
 					try {
 						while (true) {
 							String result = helloService.hello("nick" + a);
+						//	System.out.println("线程" + a +
+						//			"执行结果详情: 是否执行了方法:" + RedisSyncContext.getHaveRun());
 							if(result != null) {
 								break;
 							}

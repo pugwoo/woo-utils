@@ -28,6 +28,7 @@ public class RedisSyncAspect implements ApplicationContextAware, InitializingBea
     public Object around(ProceedingJoinPoint pjp) throws Throwable {
 		if(this.redisHelper == null) {
 			LOGGER.error("redisHelper is null, RedisSyncAspect will passthrough all method call");
+			RedisSyncContext.set(false, true);
 			return pjp.proceed();
 		}
 		
@@ -41,11 +42,13 @@ public class RedisSyncAspect implements ApplicationContextAware, InitializingBea
 		boolean requireLock = redisHelper.requireLock(namespace, "-", expireSecond);
 		if(requireLock) {
 			try {
+				RedisSyncContext.set(true, true);
 				return pjp.proceed();
 			} finally {
 				redisHelper.releaseLock(namespace, "-");
 			}
 		} else {
+			RedisSyncContext.set(true, false);
 			return null;
 		}
     }
