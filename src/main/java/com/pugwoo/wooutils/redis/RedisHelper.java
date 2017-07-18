@@ -73,7 +73,8 @@ public interface RedisHelper {
 	boolean remove(String key);
 	
 	/**
-	 * CAS，成功返回true，失败返回false
+	 * CAS，成功返回true，失败返回false。
+	 * 注意：在高并发场景下，过多线程使用该方法将导致过多无用的重试，从而大幅降低性能。
 	 * @param expireSeconds 超时时间，如果是null，则不设置
 	 */
 	boolean compareAndSet(String key, String value, String oldValue, Integer expireSeconds);
