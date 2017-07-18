@@ -6,7 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 分布式锁，注解在方法上。
+ * 分布式锁，注解在方法上。 暂时不支持还按照方法的参数来独立限制。
+ * 
  * 关于返回值：如果方法是常规返回值，当没有获取到锁时，且超过了阻塞等待时间，则返回null
  * @author nick markfly
  */
