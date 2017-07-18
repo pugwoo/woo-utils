@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.pugwoo.wooutils.redis.RedisSyncContext;
+
 @ContextConfiguration(locations = {"classpath:applicationContext-context.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
 public class TestSync {
@@ -25,10 +27,10 @@ public class TestSync {
 				public void run() {
 					try {
 						while (true) {
-							String result = helloService.hello("nick" + a);
-						//	System.out.println("线程" + a +
-						//			"执行结果详情: 是否执行了方法:" + RedisSyncContext.getHaveRun());
-							if(result != null) {
+							helloService.hello("nick" + a);
+							System.out.println("线程" + a +
+									"执行结果详情: 是否执行了方法:" + RedisSyncContext.getHaveRun());
+							if(RedisSyncContext.getHaveRun()) {
 								break;
 							}
 						}

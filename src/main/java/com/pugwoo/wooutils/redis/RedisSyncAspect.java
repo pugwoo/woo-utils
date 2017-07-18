@@ -38,18 +38,39 @@ public class RedisSyncAspect implements ApplicationContextAware, InitializingBea
 		
 		String namespace = sync.namespace();
 		int expireSecond = sync.expireSecond();
+		int waitLockMillisecond = sync.waitLockMillisecond();
 		
-		boolean requireLock = redisHelper.requireLock(namespace, "-", expireSecond);
-		if(requireLock) {
-			try {
-				RedisSyncContext.set(true, true);
-				return pjp.proceed();
-			} finally {
-				redisHelper.releaseLock(namespace, "-");
+		int a = 0, b = 1; // 构造兔子数列
+		
+		long start = System.currentTimeMillis();
+		while(true) {
+			boolean requireLock = redisHelper.requireLock(namespace, "-", expireSecond);
+			if(requireLock) {
+				try {
+					RedisSyncContext.set(true, true);
+					return pjp.proceed();
+				} finally {
+					redisHelper.releaseLock(namespace, "-");
+				}
 			}
-		} else {
-			RedisSyncContext.set(true, false);
-			return null;
+			
+			if(waitLockMillisecond == 0) {
+				RedisSyncContext.set(true, false);
+				return null;
+			}
+			long totalWait = System.currentTimeMillis() - start;
+			if(totalWait >= waitLockMillisecond) {
+				RedisSyncContext.set(true, false);
+				return null;
+			}
+			if(waitLockMillisecond - totalWait < b) {
+				Thread.sleep(waitLockMillisecond - totalWait);
+			} else {
+				Thread.sleep(b);
+				int c = a + b;
+				a = b;
+				b = c; // 构造兔子数列
+			}
 		}
     }
 

@@ -8,7 +8,7 @@ public class RedisSyncContext {
 	
 	private static ThreadLocal<RedisSyncContext> contextTL = new ThreadLocal<RedisSyncContext>();
 	
-	// 是否是串行执行，当redisHelper没有提供时为false
+	// 是否是串行执行，当redisHelper没有提供时为false。一般不需要来检查这个值。
 	private boolean isSync;
 	
 	// 是否有执行方法
@@ -38,7 +38,7 @@ public class RedisSyncContext {
 	}
 
 	/**
-	 * 是否是串行执行，当redisHelper没有提供时为false
+	 * 是否是串行执行，当redisHelper没有提供时为false。一般不需要来检查这个值。
 	 * @return
 	 */
 	public static boolean getIsSync() {

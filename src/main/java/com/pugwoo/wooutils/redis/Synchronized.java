@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * 分布式锁，注解在方法上。 暂时不支持还按照方法的参数来独立限制。
  * 
  * 关于返回值：如果方法是常规返回值，当没有获取到锁时，且超过了阻塞等待时间，则返回null。
- * 如果想拿到更多的信息，可以通过
+ * 如果想拿到更多的信息，可以通过RedisSyncContext拿，线程独立。
  * @author nick markfly
  */
 @Target({ElementType.METHOD})
@@ -29,5 +29,12 @@ public @interface Synchronized {
 	 */
 	int expireSecond() default 60;
 	
+	/**
+	 * 当进程/线程没有拿到锁时，阻塞等待的时间，单位毫秒，默认10000毫秒
+	 * （取10秒这个值考虑的是人类等待计算机反馈的不耐烦的大概时间）。
+	 * 如果需要阻塞，请设置为0.
+	 * @return
+	 */
+	int waitLockMillisecond() default 10000;
 	
 }
