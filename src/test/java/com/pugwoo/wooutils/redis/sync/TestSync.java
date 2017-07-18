@@ -15,7 +15,29 @@ public class TestSync {
 	
 	@Test
 	public void test() throws Exception {
-		helloService.hello();
+		helloService.hello("nick");
+		helloService.hello2();
+		
+		for(int i = 0; i < 10; i++) {
+			final int a = i;
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						while (true) {
+							String result = helloService.hello("nick" + a);
+							if(result != null) {
+								break;
+							}
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
+		}
+		
+		Thread.sleep(60000); // 因为在test中，主线程要sleep足够长时间，让其它线程跑完
 	}
 	
 }

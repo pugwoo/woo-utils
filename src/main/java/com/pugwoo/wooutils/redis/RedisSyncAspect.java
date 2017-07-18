@@ -1,8 +1,11 @@
 package com.pugwoo.wooutils.redis;
 
+import java.lang.reflect.Method;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -23,13 +26,28 @@ public class RedisSyncAspect implements ApplicationContextAware, InitializingBea
 
 	@Around("@annotation(com.pugwoo.wooutils.redis.Synchronized) execution(* *.*(..))")
     public Object around(ProceedingJoinPoint pjp) throws Throwable {
+		if(this.redisHelper == null) {
+			LOGGER.error("redisHelper is null, RedisSyncAspect will passthrough all method call");
+			return pjp.proceed();
+		}
 		
+		MethodSignature signature = (MethodSignature) pjp.getSignature();
+		Method targetMethod = signature.getMethod();
+		Synchronized sync = targetMethod.getAnnotation(Synchronized.class);
 		
+		String namespace = sync.namespace();
+		int expireSecond = sync.expireSecond();
 		
-		System.out.println("--------around before--------");
-        Object result = pjp.proceed();
-        System.out.println("--------around after--------");
-        return result;
+		boolean requireLock = redisHelper.requireLock(namespace, "-", expireSecond);
+		if(requireLock) {
+			try {
+				return pjp.proceed();
+			} finally {
+				redisHelper.releaseLock(namespace, "-");
+			}
+		} else {
+			return null;
+		}
     }
 
 	public void setRedisHelper(RedisHelper redisHelper) {
