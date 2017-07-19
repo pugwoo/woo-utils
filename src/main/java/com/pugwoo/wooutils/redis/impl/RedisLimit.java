@@ -16,8 +16,7 @@ import redis.clients.jedis.Jedis;
 /**
  * 使用redis控制全局的操作次数限制。可用于限制自然单位时间（天、小时、分钟、周等），全局的总操作次数。<br>
  * <br>
- * <del>注：redis的incr或decr在redis删除某个expire key时，会出现多个线程拿到相同值的情况，
- * 所以incr或decr来做这个功能并不可靠。</del>
+ * 注：redis的incr或decr在redis删除某个expire key时，会出现多个线程拿到相同值的情况，所以incr或decr来做这个功能并不可靠。
  * 
  * 2017年7月19日 14:14:19
  * 由于使用redis cas，在高并发情况下会导致大量无效的重试，从而把性能降低到一个不太可能用于线上环境的情况。
@@ -62,7 +61,7 @@ public class RedisLimit {
 	 * @param limitParam
 	 * @param key
 	 * @param count 一次可以使用掉多个count
-	 * @return 返回是当前周期内第几个(该值会>0)使用配额的，如果返回-1，表示使用配额失败
+	 * @return 返回是当前周期内第几个(该值会大于0)使用配额的，如果返回-1，表示使用配额失败
 	 */
 	public static long useLimitCount(RedisHelper redisHelper, RedisLimitParam limitParam, String key, int count) {
 		if(!checkParam(limitParam, key)) {
