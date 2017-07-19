@@ -118,7 +118,7 @@ public interface RedisHelper {
 	 */
 	long useLimitCount(RedisLimitParam limitParam, String key, int count);
 	
-	/////////////////// Redis Transaction 事务 ////////////////////////
+	/////////////////// Redis Lock 分布式锁 ////////////////////////
 	
 	/**
 	 * 获得一个名称为key的锁，redis保证同一时刻只有一个client可以获得锁。

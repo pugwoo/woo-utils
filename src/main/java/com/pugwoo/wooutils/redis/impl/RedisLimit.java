@@ -1,6 +1,8 @@
 package com.pugwoo.wooutils.redis.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import com.pugwoo.wooutils.redis.RedisHelper;
 import com.pugwoo.wooutils.redis.RedisLimitParam;
 import com.pugwoo.wooutils.redis.RedisLimitPeroidEnum;
+
+import redis.clients.jedis.Jedis;
 
 /**
  * 使用redis控制全局的操作次数限制。可用于限制自然单位时间（天、小时、分钟、周等），全局的总操作次数。<br>
@@ -39,78 +43,67 @@ public class RedisLimit {
 		
 		try {
 			key = getKey(limitParam, key);
-			String count = redisHelper.getString(key);
-			if(count == null) {
-				return limitParam.getLimitCount();
-			} else {
-				long limitCount = new Integer(count);
-				if(limitCount > limitParam.getLimitCount()) {
-					limitCount = limitParam.getLimitCount();
-				}
-				return limitCount;
-			}
+			String value = redisHelper.getString(key);
+			int usedCount = value == null ? 0 : new Integer(value);
+			int left = limitParam.getLimitCount() - usedCount;
+			return left < 0 ? 0 : left;
 		} catch (Exception e) {
-			LOGGER.error("getLimitCount error,namespace:{},key:{}", limitParam.getNamespace(), key, e);
+			LOGGER.error("getLimitCount error,namespace:{},key:{}",
+					limitParam.getNamespace(), key, e);
 			return -1;
 		}
 	}
 		
 	/**
 	 * 使用了count次限制。一般来说，业务都是在处理成功后才扣减使用是否成功的限制，
-	 * 如果使用失败了，如果业务支持事务回滚，那么可以回滚掉，此时可以不用RedisTransation做全局限制。
+	 * 如果使用失败了，如果业务支持事务回滚，那么可以回滚掉，此时可以不用分布式锁做全局限制。
 	 * 
 	 * @param redisHelper
 	 * @param limitParam
 	 * @param key
 	 * @param count 一次可以使用掉多个count
-	 * @return 返回是当前周期内第几个使用配额的，如果返回-1，表示使用配额失败
+	 * @return 返回是当前周期内第几个(该值会>0)使用配额的，如果返回-1，表示使用配额失败
 	 */
 	public static long useLimitCount(RedisHelper redisHelper, RedisLimitParam limitParam, String key, int count) {
 		if(!checkParam(limitParam, key)) {
 			return -1;
 		}
 		
+		Jedis jedis = null;
 		try {
 			key = getKey(limitParam, key);
-					
-			for(int i = 0; i < 1000; i++) { // 重试次数，限制重试次数上限
-				String oldValue = redisHelper.getString(key);
-				long newValue = 0;
-				if(oldValue == null) {
-					newValue = limitParam.getLimitCount() - count;
-				} else {
-					long old = new Integer(oldValue);
-					if(old > limitParam.getLimitCount()) {
-						old = limitParam.getLimitCount();
-					}
-					newValue = old - count;
-				}
-				if(newValue < 0) { // 已经没有使用限额
-					return -1;
-				}
-				
-				long expireSeconds = redisHelper.getExpireSecond(key);
-				long restSeconds = getRestSeconds(limitParam.getLimitPeroid());
-				Integer setRest = null;
-				// 为了避免跨周期设置问题，只能将ttl的值变小，不能变大； -1和-2（key不存在）时可以设置
-				if(expireSeconds < 0 || expireSeconds >= 0 && restSeconds <= expireSeconds) {
-					setRest = (int) restSeconds;
-				}
-				
-				if(redisHelper.compareAndSet(key, newValue + "", oldValue, setRest)) {
-					return limitParam.getLimitCount() - newValue;
-				} else {
-					continue;
-				}
-			}
+			jedis = redisHelper.getJedisConnection();
 
-			LOGGER.error("useLimitCount after 1000 times try fail, namespace:{}, key:{}",
-					limitParam.getNamespace(), key);
-			return -1; // 最终失败
+			Long retVal = null;
+			if(count == 1) {
+				retVal = jedis.incr(key);
+			} else {
+				retVal = jedis.incrBy(key, count);
+			}
+			
+			if(retVal == null) {
+				LOGGER.error("useLimitCount fail,namespace:{},key:{},count:{},ret is null",
+						limitParam.getNamespace(), key, count);
+				return -1;
+			}
+			if(retVal <= limitParam.getLimitCount()) {
+				return retVal;
+			} else {
+				if(count == 1) { // 还原现场
+					jedis.decr(key);
+				} else {
+					jedis.decrBy(key, count);
+				}
+				return -1; // 已经超额
+			}
 		} catch (Exception e) {
 			LOGGER.error("getLimitCount error, namespace:{}, key:{}",
 					limitParam.getNamespace(), key, e);
 			return -1;
+		} finally {
+			if(jedis != null) {
+				jedis.close();
+			}
 		}
 	}
 	
@@ -128,7 +121,51 @@ public class RedisLimit {
 	}
 	
 	private static String getKey(RedisLimitParam limitParam, String key) {
-		return limitParam.getNamespace() + "-" + key;
+		String time = null;
+		Date now = new Date();
+		if(limitParam.getLimitPeroid() == RedisLimitPeroidEnum.SECOND) {
+			SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+			time = df.format(now);
+		} else if (limitParam.getLimitPeroid() == RedisLimitPeroidEnum.TEN_SECOND) {
+			SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+			time = df.format(now);
+			time = time.substring(0, time.length() - 1);
+		} else if (limitParam.getLimitPeroid() == RedisLimitPeroidEnum.MINUTE) {
+			SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmm");
+			time = df.format(now);
+		} else if (limitParam.getLimitPeroid() == RedisLimitPeroidEnum.HOUR) {
+			SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHH");
+			time = df.format(now);
+		} else if (limitParam.getLimitPeroid() == RedisLimitPeroidEnum.DAY) {
+			SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+			time = df.format(now);
+		} else if (limitParam.getLimitPeroid() == RedisLimitPeroidEnum.WEEK_START_SUNDAY) {
+			Calendar c = Calendar.getInstance();
+			c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+			if(c.getTime().after(new Date())) {
+				c.add(Calendar.DATE, -7);
+			}
+			SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+			time = df.format(c.getTime());
+		} else if (limitParam.getLimitPeroid() == RedisLimitPeroidEnum.WEEK_START_MONDAY) {
+			Calendar c = Calendar.getInstance();
+			c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+			if(c.getTime().after(new Date())) {
+				c.add(Calendar.DATE, -7);
+			}
+			SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+			time = df.format(c.getTime());
+		} else if (limitParam.getLimitPeroid() == RedisLimitPeroidEnum.MONTH) {
+			SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
+			time = df.format(now);
+		} else if (limitParam.getLimitPeroid() == RedisLimitPeroidEnum.YEAR) {
+			SimpleDateFormat df = new SimpleDateFormat("yyyy");
+			time = df.format(now);
+		} else if (limitParam.getLimitPeroid() == RedisLimitPeroidEnum.PERMANENT) {
+			time = "";
+		}
+		
+		return limitParam.getNamespace() + "-" + key + "-" + time;
 	}
 	
 	private static boolean checkParam(RedisLimitParam limitParam, String key) {
@@ -152,89 +189,4 @@ public class RedisLimit {
 		
 		return true;
 	}
-		
-	/**
-	 * 获得到周期剩余的时间
-	 * @param peroidEnum
-	 * @return 默认就是永久 -1
-	 */
-	private static long getRestSeconds(RedisLimitPeroidEnum peroidEnum) {
-		if(peroidEnum == null) {
-			return -1;
-		}
-		if(peroidEnum == RedisLimitPeroidEnum.MINUTE) {
-			Calendar cal = Calendar.getInstance();
-			cal.add(Calendar.MINUTE, 1);
-			cal.set(Calendar.SECOND, 0);
-			cal.set(Calendar.MILLISECOND, 0);
-			return (cal.getTimeInMillis() - System.currentTimeMillis()) / 1000;
-		}
-		if(peroidEnum == RedisLimitPeroidEnum.HOUR) {
-			Calendar cal = Calendar.getInstance();
-			cal.add(Calendar.HOUR_OF_DAY, 1);
-			cal.set(Calendar.MINUTE, 0);
-			cal.set(Calendar.SECOND, 0);
-			cal.set(Calendar.MILLISECOND, 0);
-			return (cal.getTimeInMillis() - System.currentTimeMillis()) / 1000;
-		}
-		if(peroidEnum == RedisLimitPeroidEnum.DAY) {
-			Calendar cal = Calendar.getInstance();
-			cal.add(Calendar.DATE, 1);
-			cal.set(Calendar.HOUR_OF_DAY, 0);
-			cal.set(Calendar.MINUTE, 0);
-			cal.set(Calendar.SECOND, 0);
-			cal.set(Calendar.MILLISECOND, 0);
-			return (cal.getTimeInMillis() - System.currentTimeMillis()) / 1000;
-		}
-		if(peroidEnum == RedisLimitPeroidEnum.WEEK_START_SUNDAY) {
-			return secondsToNextWeek(Calendar.SUNDAY);
-		}
-		if(peroidEnum == RedisLimitPeroidEnum.WEEK_START_MONDAY) {
-			return secondsToNextWeek(Calendar.MONDAY);
-		}
-		if(peroidEnum == RedisLimitPeroidEnum.MONTH) {
-			Calendar cal = Calendar.getInstance();
-			cal.add(Calendar.MONTH, 1);
-			cal.set(Calendar.DATE, 1);
-			cal.set(Calendar.HOUR_OF_DAY, 0);
-			cal.set(Calendar.MINUTE, 0);
-			cal.set(Calendar.SECOND, 0);
-			cal.set(Calendar.MILLISECOND, 0);
-			return (cal.getTimeInMillis() - System.currentTimeMillis()) / 1000;
-		}
-		if(peroidEnum == RedisLimitPeroidEnum.YEAR) {
-			Calendar cal = Calendar.getInstance();
-			cal.add(Calendar.YEAR, 1);
-			cal.set(Calendar.MONTH, 0);
-			cal.set(Calendar.DATE, 1);
-			cal.set(Calendar.HOUR_OF_DAY, 0);
-			cal.set(Calendar.MINUTE, 0);
-			cal.set(Calendar.SECOND, 0);
-			cal.set(Calendar.MILLISECOND, 0);
-			return (cal.getTimeInMillis() - System.currentTimeMillis()) / 1000;
-		}
-		if(peroidEnum == RedisLimitPeroidEnum.PERMANENT) {
-			return -1;
-		}
-		
-		return -1;
-	}
-	
-	/**
-	 * 传入的是Calendar.SUNDAY  Calendar.MONDAY
-	 * @param i
-	 * @return
-	 */
-	private static long secondsToNextWeek(int i) {
-		Calendar cal = Calendar.getInstance();
-		do {
-			cal.add(Calendar.DATE, 1);
-		} while(cal.get(Calendar.DAY_OF_WEEK) != i);
-		cal.set(Calendar.HOUR_OF_DAY, 0);
-		cal.set(Calendar.MINUTE, 0);
-		cal.set(Calendar.SECOND, 0);
-		cal.set(Calendar.MILLISECOND, 0);
-		return (cal.getTimeInMillis() - System.currentTimeMillis()) / 1000;
-	}
-	
 }

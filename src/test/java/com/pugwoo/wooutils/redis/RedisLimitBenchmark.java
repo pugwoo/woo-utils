@@ -3,10 +3,17 @@ package com.pugwoo.wooutils.redis;
 import java.util.Vector;
 
 /**
+ * 优化前:
  * 并发数:1,QPS:8022
  * 并发数:10,QPS:1840
  * 并发数:100,QPS:228
  * 并发数:1000,QPS:17
+ * 
+ * 优化后:
+ * 并发数:1,QPS:38899
+ * 并发数:10,QPS:83531
+ * 并发数:100,QPS:64746
+ * 并发数:1000,QPS:51715
  * @author nick
  */
 public class RedisLimitBenchmark {
@@ -17,9 +24,9 @@ public class RedisLimitBenchmark {
 		final RedisLimitParam redisLimitParam = new RedisLimitParam();
 		redisLimitParam.setNamespace("VISIT-LIMIT"); // 每个业务单独设置，每个业务不同
 		redisLimitParam.setLimitPeroid(RedisLimitPeroidEnum.DAY); // 设置长一点，方便benchmark
-		redisLimitParam.setLimitCount(10000000); // 设置足够大，抢不完
+		redisLimitParam.setLimitCount(100000000); // 设置足够大，抢不完
 		
-		int concurrents = 1000; // 并发数
+		int concurrents = 1; // 并发数
 		
 		long start = System.currentTimeMillis();
 		final Vector<Long> vector = new Vector<Long>();
