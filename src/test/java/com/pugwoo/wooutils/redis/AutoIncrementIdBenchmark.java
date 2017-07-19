@@ -37,8 +37,7 @@ public class AutoIncrementIdBenchmark {
         	thread.start();
         }
         
-        int ms = 60000;
-        Thread.sleep(ms); // 测试将持续60秒
+        Thread.sleep(60000); // 测试将持续60秒
         long end = System.currentTimeMillis();
         
         System.out.println("并发数:" + concurrents +
