@@ -86,6 +86,11 @@ public class RedisLimit {
 						limitParam.getNamespace(), key, count);
 				return -1;
 			}
+			
+			if(retVal == count && limitParam.getLimitPeroid().getExpireSecond() >= 0) {
+				jedis.expire(key, limitParam.getLimitPeroid().getExpireSecond());
+			}
+			
 			if(retVal <= limitParam.getLimitCount()) {
 				return retVal;
 			} else {
