@@ -33,9 +33,7 @@ public class RedisLimit {
 	 * @return -1是系统异常，正常值大于等于0
 	 */
 	public static long getLimitCount(RedisHelper redisHelper, RedisLimitParam limitParam, String key) {
-		
-		if(limitParam == null || key == null) {
-			LOGGER.error("limitEnum or key is null, limitEnum:{}, key:{}", limitParam, key);
+		if(!checkParam(limitParam, key)) {
 			return 0;
 		}
 		
@@ -58,19 +56,6 @@ public class RedisLimit {
 	}
 		
 	/**
-	 * 使用了一次限制。一般来说，业务都是在处理成功后才扣减使用是否成功的限制，
-	 * 如果使用失败了，如果业务支持事务回滚，那么可以回滚掉，此时可以不用RedisTransation做全局限制。
-	 * 
-	 * @param redisHelper
-	 * @param limitEnum
-	 * @param key
-	 * @return 返回是当前周期内第几个使用配额的，如果返回-1，表示使用配额失败
-	 */
-	public static long useLimitCount(RedisHelper redisHelper, RedisLimitParam limitEnum, String key) {
-		return useLimitCount(redisHelper, limitEnum, key, 1);
-	}
-	
-	/**
 	 * 使用了count次限制。一般来说，业务都是在处理成功后才扣减使用是否成功的限制，
 	 * 如果使用失败了，如果业务支持事务回滚，那么可以回滚掉，此时可以不用RedisTransation做全局限制。
 	 * 
@@ -81,8 +66,7 @@ public class RedisLimit {
 	 * @return 返回是当前周期内第几个使用配额的，如果返回-1，表示使用配额失败
 	 */
 	public static long useLimitCount(RedisHelper redisHelper, RedisLimitParam limitParam, String key, int count) {
-		if(limitParam == null || key == null) {
-			LOGGER.error("limitEnum or key is null, limitEnum:{}, key:{}", limitParam, key);
+		if(!checkParam(limitParam, key)) {
 			return -1;
 		}
 		
@@ -130,8 +114,43 @@ public class RedisLimit {
 		}
 	}
 	
+	/**
+	 * 使用了一次限制。一般来说，业务都是在处理成功后才扣减使用是否成功的限制，
+	 * 如果使用失败了，如果业务支持事务回滚，那么可以回滚掉，此时可以不用RedisTransation做全局限制。
+	 * 
+	 * @param redisHelper
+	 * @param limitEnum
+	 * @param key
+	 * @return 返回是当前周期内第几个使用配额的，如果返回-1，表示使用配额失败
+	 */
+	public static long useLimitCount(RedisHelper redisHelper, RedisLimitParam limitEnum, String key) {
+		return useLimitCount(redisHelper, limitEnum, key, 1);
+	}
+	
 	private static String getKey(RedisLimitParam limitParam, String key) {
 		return limitParam.getNamespace() + "-" + key;
+	}
+	
+	private static boolean checkParam(RedisLimitParam limitParam, String key) {
+		if(limitParam == null || key == null) {
+			LOGGER.error("limitEnum or key is null, limitEnum:{}, key:{}", limitParam, key);
+			return false;
+		}
+		
+		if(limitParam.getNamespace() == null || limitParam.getNamespace().trim().isEmpty()) {
+			LOGGER.error("limitEnum.namespace is blank");
+			return false;
+		}
+		if(limitParam.getLimitPeroid() == null) {
+			LOGGER.error("limitEnum.limitPeroid is null");
+			return false;
+		}
+		if(limitParam.getLimitCount() <= 0) {
+			LOGGER.error("limitEnum.limitCount must bigger than zero");
+			return false;
+		}
+		
+		return true;
 	}
 		
 	/**
