@@ -10,6 +10,9 @@ import com.pugwoo.wooutils.redis.RedisHelper;
  * redis锁，用于保证分布式系统同一时刻只有一个程序获得资源。
  *          对于指定的nameSpace，每次只有一个对象可以获得锁。
  * redis有个很好的特性，就是超时删除。非常合适在实际的项目场景中。
+ * 
+ * 【注意】分布式锁并不等同于分布式事务。
+ *        我建议应尽量避免使用到分布式事务，应由分布式各系统自行进行数据修正工作。
  */
 public class RedisLock {
 	

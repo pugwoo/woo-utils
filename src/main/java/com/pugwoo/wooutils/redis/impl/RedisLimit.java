@@ -10,13 +10,14 @@ import com.pugwoo.wooutils.redis.RedisLimitParam;
 import com.pugwoo.wooutils.redis.RedisLimitPeroidEnum;
 
 /**
- * 使用redis控制全局的操作次数限制<br>
+ * 使用redis控制全局的操作次数限制。可用于限制自然单位时间（天、小时、分钟、周等），全局的总操作次数。<br>
  * <br>
- * 【重要】注：RedisLimit并不保证全局的串行事务，因为redis和mysql的事务没有办法很好地合在一起，所以不搞太复杂。
- * 高并发的串行保证请使用RedisTransation <br>
- * <br>
- * 注：redis的incr或decr在redis删除某个expire key时，会出现多个线程拿到相同值的情况，
- * 所以incr或decr来做这个功能并不可靠。
+ * <del>注：redis的incr或decr在redis删除某个expire key时，会出现多个线程拿到相同值的情况，
+ * 所以incr或decr来做这个功能并不可靠。</del>
+ * 
+ * 2017年7月19日 14:14:19
+ * 由于使用redis cas，在高并发情况下会导致大量无效的重试，从而把性能降低到一个不太可能用于线上环境的情况。
+ * 这里换了一种实现方式进行优化：使用key+时间的方式作为key，巧妙避免掉跨时段的redis清理key和incr的冲突。
  * 
  * @author pugwoo
  */
