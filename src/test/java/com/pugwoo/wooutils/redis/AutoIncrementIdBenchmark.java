@@ -3,8 +3,6 @@ package com.pugwoo.wooutils.redis;
 import java.util.List;
 import java.util.Vector;
 
-import com.pugwoo.wooutils.redis.impl.RedisHelperImpl;
-
 /**
  * 普通台式机本地redis(windows上)压测结果：
  * 
@@ -27,11 +25,8 @@ public class AutoIncrementIdBenchmark {
         for(int i = 0; i < concurrents; i++) {
         	Thread thread = new Thread(new Runnable() {
 				@Override
-				public void run() {
-					RedisHelperImpl redisHelper = new RedisHelperImpl();
-			        redisHelper.setHost("127.0.0.1");
-			        redisHelper.setPort(6379);
-			        redisHelper.setPassword("");
+				public void run() {			        
+			        RedisHelper redisHelper = TestRedisHelper.getRedisHelper();
 			        while(true) {
 						Long id = redisHelper.getAutoIncrementId("ORDER");
 						ids.add(id);

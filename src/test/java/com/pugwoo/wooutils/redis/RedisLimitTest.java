@@ -1,9 +1,10 @@
 package com.pugwoo.wooutils.redis;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Vector;
 
-public class TestLimit {
+public class RedisLimitTest {
 
 	public static void main(String[] args) throws Exception {
 		
@@ -16,6 +17,7 @@ public class TestLimit {
 		redisLimitParam.setLimitCount(1000);
 		
 		final Vector<Long> vector = new Vector<Long>();
+		List<Thread> threads = new Vector<Thread>();
 		for(int i = 0; i < 100; i++) { // 模拟100个线程
 			Thread thread = new Thread(new Runnable() {
 				@Override
@@ -41,10 +43,14 @@ public class TestLimit {
 			}, "线程"+i);
 			thread.setDaemon(true);
 			thread.start();
+			threads.add(thread);
 		}
 		
-		Thread.sleep(100000);
-		System.out.println("final:" + vector.size()); // 每分钟最多只能拿到1000个
+		for(Thread thread : threads) {
+			thread.join();
+		}
+		System.out.println("final:" + vector.size());
+		// 每分钟最多只能拿到1000个，如果执行过程没有跨到2个1分钟内执行，那么总数应该是1000
 	}
 	
 }

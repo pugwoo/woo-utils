@@ -6,26 +6,22 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import com.pugwoo.wooutils.redis.impl.RedisHelperImpl;
-
 public class AutoIncrementIdTest {
 
 	public static void main(String[] args) throws InterruptedException {
-		final RedisHelperImpl redisHelper = new RedisHelperImpl();
-        redisHelper.setHost("127.0.0.1");
-        redisHelper.setPort(6379);
-        redisHelper.setPassword("");
-        redisHelper.setMaxConnection(1000);
+		final RedisHelper redisHelper = TestRedisHelper.getRedisHelper();
         
         final List<Long> ids = new Vector<Long>();
         
         long start = System.currentTimeMillis();
         List<Thread> threads = new ArrayList<Thread>();
-        for(int t = 0; t < 900; t++) { // redis最大连接数一般到900，受服务器打开文件数限制，需要修改
+        
+        // redis最大连接数一般到900，受服务器打开文件数限制，需要修改系统配置: 最大连接数
+        for(int t = 0; t < 100; t++) { 
         	Thread thread = new Thread(new Runnable() {
 				@Override
 				public void run() {
-			        for(int i = 0; i < 100; i++) {
+			        for(int i = 0; i < 1000; i++) {
 			            Long id = redisHelper.getAutoIncrementId("ORDER");
 			     //       System.out.println(id);
 			            ids.add(id);
