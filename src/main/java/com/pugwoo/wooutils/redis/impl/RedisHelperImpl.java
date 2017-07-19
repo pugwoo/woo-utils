@@ -264,7 +264,7 @@ public class RedisHelperImpl implements RedisHelper {
 
 	@Override
 	public boolean hasLimitCount(RedisLimitParam limitParam, String key) {
-		return RedisLimit.hasLimitCount(this, limitParam, key);
+		return RedisLimit.getLimitCount(this, limitParam, key) > 0;
 	}
 
 	@Override

@@ -56,18 +56,7 @@ public class RedisLimit {
 			return -1;
 		}
 	}
-	
-	/**
-	 * 判断是否还有限制次数。
-	 * @param redisHelper
-	 * @param limitParam
-	 * @param key
-	 * @return
-	 */
-	public static boolean hasLimitCount(RedisHelper redisHelper, RedisLimitParam limitParam, String key) {
-		return getLimitCount(redisHelper, limitParam, key) > 0;
-	}
-	
+		
 	/**
 	 * 使用了一次限制。一般来说，业务都是在处理成功后才扣减使用是否成功的限制，
 	 * 如果使用失败了，如果业务支持事务回滚，那么可以回滚掉，此时可以不用RedisTransation做全局限制。
