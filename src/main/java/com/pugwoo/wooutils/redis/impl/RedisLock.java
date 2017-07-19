@@ -7,12 +7,13 @@ import com.pugwoo.wooutils.redis.RedisHelper;
 
 /**
  * @author nick
- * redis事务的一致性保证。对于指定的nameSpace，每次只有一个对象可以获得锁。
+ * redis锁，用于保证分布式系统同一时刻只有一个程序获得资源。
+ *          对于指定的nameSpace，每次只有一个对象可以获得锁。
  * redis有个很好的特性，就是超时删除。非常合适在实际的项目场景中。
  */
-public class RedisTransaction {
+public class RedisLock {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(RedisTransaction.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RedisLock.class);
 	
 	private static String getKey(String namespace, String key) {
 		return namespace + "-" + key;
