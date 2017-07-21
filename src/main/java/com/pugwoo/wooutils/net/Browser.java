@@ -27,8 +27,8 @@ import org.slf4j.LoggerFactory;
  * 1. 支持指定为输出流 【done】
  * 2. 支持cookie,不支持过期特性 【done】
  * 3. 支持指定proxy【done】
- * 4. 支持超时和重试，默认超时1分钟，重试次数10次
- * 5. 支持程序写cookie，模拟javascript写cookie
+ * 4. 支持超时和重试，默认超时1分钟，重试次数10次【done】
+ * 5. 支持程序写cookie，模拟javascript写cookie【done】
  * 
  * @author pugwoo@gmail.com
  */
@@ -45,6 +45,9 @@ public class Browser {
 		
 	/**cookie, domain(域根目录) -> key/value*/
 	private Map<String, Map<String, String>> cookies = new HashMap<String, Map<String,String>>();
+	
+	/**请求时的头部*/
+	private Map<String, String> requestProperty = new HashMap<String, String>();
 
 	/** 默认浏览器userAgent:Chrome Win7*/
 	private String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.93 Safari/537.36";
@@ -58,10 +61,13 @@ public class Browser {
 	/**重试次数*/
 	private int retryTimes = 10;
 	
-	/**
-	 * 代理
-	 */
+	/**代理*/
 	private Proxy proxy = null;
+	
+	/**设置请求时的头部，RequestProperty，该设置是Browser实例全局的*/
+	public void addRequestProperty(String key, String value) {
+		requestProperty.put(key, value);
+	}
 	
 	/**
 	 * 设置http代理
@@ -410,6 +416,12 @@ public class Browser {
 			}
 		}
 		urlConnection.setRequestProperty("Cookie", cookieSb.toString());
+		
+		// 设置用户自定义RequestProperty
+		for(Entry<String, String> entry : requestProperty.entrySet()) {
+			urlConnection.setRequestProperty(entry.getKey(), entry.getValue());
+		}
+		
 		return urlConnection;
 	}
 	

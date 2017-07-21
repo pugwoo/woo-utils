@@ -1,8 +1,11 @@
+2017年7月21日
+v0.1.1 - [add] Browser支持设置请求包头部RequestProperty
+
 2017年7月15-19日
 v0.1.0 - [add] redis支持指定链接数setMaxConnections，默认128
-        - [add] redisHelper增加getAutoIncrementId方法，支持分布式自增id获取
-        - [add] 增加redis以@Synchronized注解的方式控制方法串行执行
-        - [improve] 优化redisLimit性能，性能提升200倍
+       - [add] redisHelper增加getAutoIncrementId方法，支持分布式自增id获取
+       - [add] 增加redis以@Synchronized注解的方式控制方法串行执行
+       - [improve] 优化redisLimit性能，性能提升200倍
 
 2017年7月13日
 v0.0.12 - [fix] 修复redisLimit当周期为永久时使用不了的bug
