@@ -16,7 +16,7 @@ public class Hash {
 	
 	/**
 	 * 摘要md5
-	 * @param str
+	 * @param bytes
 	 * @return
 	 */
 	public static String md5(byte[] bytes) {
@@ -34,7 +34,7 @@ public class Hash {
 	
 	/**
 	 * 摘要sha256
-	 * @param str
+	 * @param bytes
 	 * @return
 	 */
 	public static String sha256(byte[] bytes) {
