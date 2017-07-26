@@ -15,12 +15,30 @@ public class Hash {
 	}
 	
 	/**
+	 * 摘要md5
+	 * @param str
+	 * @return
+	 */
+	public static String md5(byte[] bytes) {
+		return digest("MD5", bytes);
+	}
+	
+	/**
 	 * 摘要sha256
 	 * @param str
 	 * @return
 	 */
 	public static String sha256(String str) {
 		return digest("SHA-256", str.getBytes());
+	}
+	
+	/**
+	 * 摘要sha256
+	 * @param str
+	 * @return
+	 */
+	public static String sha256(byte[] bytes) {
+		return digest("SHA-256", bytes);
 	}
 	
 	/**
