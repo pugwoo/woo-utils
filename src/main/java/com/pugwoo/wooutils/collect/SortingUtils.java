@@ -52,6 +52,7 @@ public class SortingUtils {
 		});
 	}
 	
+	@SafeVarargs
 	public static <T> void sort(List<T> list, final SortingField<T, ? extends Comparable<?>>... sortingFields) {
 		if(list == null || sortingFields == null || sortingFields.length == 0) {
 			return;

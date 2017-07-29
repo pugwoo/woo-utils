@@ -53,6 +53,18 @@
             <version>3.1.0</version>
             <scope>provided</scope>
 		</dependency>
+		
+		<!-- optional依赖：office相关(excel)-->
+	    <dependency>
+			<groupId>net.sf.jxls</groupId>
+			<artifactId>jxls-core</artifactId>
+			<version>1.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jxls</groupId>
+			<artifactId>jxls-reader</artifactId>
+			<version>1.0.5</version>
+		</dependency>
 	
 	    <!-- optional依赖：Redis相关功能需要 -->
 	    <dependency>
