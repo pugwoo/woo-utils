@@ -1,6 +1,6 @@
 package com.pugwoo.wooutils.redis;
 
-import com.alibaba.fastjson.JSON;
+import com.pugwoo.wooutils.json.JSON;
 
 public class MyRedisObjectConverter implements IRedisObjectConverter {
 
@@ -9,7 +9,7 @@ public class MyRedisObjectConverter implements IRedisObjectConverter {
 		if(t == null) {
 			return null;
 		}
-		return JSON.toJSONString(t);
+		return JSON.toJson(t);
 	}
 
 	@Override
@@ -17,7 +17,7 @@ public class MyRedisObjectConverter implements IRedisObjectConverter {
 		if(str == null) {
 			return null;
 		}
-		return JSON.parseObject(str, clazz);
+		return JSON.parse(str, clazz);
 	}
 
 }
