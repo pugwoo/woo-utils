@@ -11,7 +11,7 @@ public interface ITask {
 
 	/**
 	 * 获得剩下的任务记录数，当获取的任务数小于等于0时，认为任务结束。
-	 * 每次执行runStep()前，该方法都会被调用一次，返回>0才继续执行runStep()
+	 * 每次执行runStep()前，该方法都会被调用一次，返回大于0才继续执行runStep()
 	 */
 	int getRestCount();
 
