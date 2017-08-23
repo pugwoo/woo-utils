@@ -52,7 +52,6 @@ public class ZipUtils {
 	 * 压缩文件
 	 * @param zipItems
 	 * @param out 不会自动close
-	 * @return
 	 */
 	public static void zip(List<ZipItem> zipItems, OutputStream out) throws IOException {
 		ZipOutputStream zipOut = new ZipOutputStream(out);
