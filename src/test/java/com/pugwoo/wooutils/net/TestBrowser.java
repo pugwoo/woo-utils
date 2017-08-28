@@ -16,10 +16,14 @@ public class TestBrowser {
 	@Test
 	public void testPost() throws Exception {
 		Browser browser = new Browser();
-		browser.setHttpProxy("127.0.0.1", 8888);
+//		browser.setHttpProxy("127.0.0.1", 8888);
 		Map<String, Object> params = new HashMap<>();
 		BrowserPostFile file = new BrowserPostFile("hello.txt", "text/plain", "hello111".getBytes());
 		params.put("file", file);
+//		BrowserPostFile file2 = new BrowserPostFile("hello.png", "image/png",
+//				new FileInputStream("C:\\Users\\nickt\\Desktop\\1.png"));
+//		params.put("file2", file2);
+		params.put("info", "myinfo");
 		browser.post("http://127.0.0.1:8080/admin/admin_upload/upload",
 				params);
 	}

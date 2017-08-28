@@ -10,7 +10,13 @@ public class BrowserPostFile {
 	// 文件名称
 	private String filename;
 
-	// 文件contentType
+	/**
+	 * 文件contentType，常用的contentType:
+	 * 1. text/plain 文本
+	 * 2. image/png 图片
+	 * 3. image/jpeg 图片
+	 * 4. application/octet-stream    二进制流，例如zip文件
+	 */
 	private String contentType;
 	
 	// 输入流in（in和bytes二选一）

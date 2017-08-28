@@ -573,6 +573,12 @@ public class Browser {
 					while((len = file.getIn().read(buff)) != -1) {
 						baos.write(buff, 0, len);
 					}
+					try {
+						if(file.getIn() != null) {
+							file.getIn().close();
+						}
+					} catch (Exception e) {
+					}
 				}
 			} else {
 				Object value = entry.getValue();
@@ -659,6 +665,5 @@ public class Browser {
 		
 		return sb.toString();
 	}
-	
 	
 }
