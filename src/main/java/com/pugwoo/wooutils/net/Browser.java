@@ -117,7 +117,19 @@ public class Browser {
 	 * @throws IOException
 	 */
 	public HttpResponse post(String httpUrl, Map<String, Object> params) throws IOException {
-		return post(httpUrl, buildPostString(params));
+		return post(httpUrl, params, null);
+	}
+	
+	private boolean isWithBrowserPostFile(Map<String, Object> params) {
+		if(params == null) {
+			return false;
+		}
+		for(Entry<String, Object> entry : params.entrySet()) {
+			if(entry.getValue() instanceof BrowserPostFile) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
@@ -127,7 +139,15 @@ public class Browser {
 	 * @throws IOException
 	 */
 	public HttpResponse post(String httpUrl, Map<String, Object> params, OutputStream outputStream) throws IOException {
-		return post(httpUrl, buildPostString(params), outputStream);
+		if(isWithBrowserPostFile(params)) {
+			String boundary = "----WebKitFormBoundaryYp0ZBDEHwALiqVW5";
+			Map<String, String> header = new HashMap<>();
+			header.put("Content-Type", "multipart/form-data; boundary=" + boundary);
+			return post(httpUrl, new ByteArrayInputStream(buildPostString(params, boundary)),
+					outputStream, false, header);
+		} else {
+			return post(httpUrl, buildPostString(params), outputStream);
+		}
 	}
 	
 	/**
@@ -137,7 +157,15 @@ public class Browser {
 	 * @throws IOException
 	 */
 	public HttpResponse postAsync(String httpUrl, Map<String, Object> params, OutputStream outputStream) throws IOException {
-		return postAsync(httpUrl, buildPostString(params), outputStream);
+		if(isWithBrowserPostFile(params)) {
+			String boundary = "----WebKitFormBoundaryYp0ZBDEHwALiqVW5";
+			Map<String, String> header = new HashMap<>();
+			header.put("Content-Type", "multipart/form-data; boundary=" + boundary);
+			return post(httpUrl, new ByteArrayInputStream(buildPostString(params, boundary)),
+					outputStream, true, header);
+		} else {
+			return postAsync(httpUrl, buildPostString(params), outputStream);
+		}
 	}
 	
 	/**
@@ -166,16 +194,6 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse postAsync(String httpUrl, byte[] postData, OutputStream outputStream) throws IOException {
-		return postAsync(httpUrl, new ByteArrayInputStream(postData), outputStream);
-	}
-	
-	/**
-	 * post方式请求HTTP
-	 * @param httpUrl
-	 * @return
-	 * @throws IOException
-	 */
 	public HttpResponse post(String httpUrl, InputStream inputStream) throws IOException {
 		return post(httpUrl, inputStream, null);
 	}
@@ -189,7 +207,17 @@ public class Browser {
 	 */
 	public HttpResponse post(String httpUrl, InputStream inputStream, OutputStream outputStream)
 			throws IOException {
-		return post(httpUrl, inputStream, outputStream, false);
+		return post(httpUrl, inputStream, outputStream, false, null);
+	}
+	
+	/**
+	 * post方式请求HTTP
+	 * @param httpUrl
+	 * @return
+	 * @throws IOException
+	 */
+	public HttpResponse postAsync(String httpUrl, byte[] postData, OutputStream outputStream) throws IOException {
+		return postAsync(httpUrl, new ByteArrayInputStream(postData), outputStream);
 	}
 	
 	/**
@@ -202,15 +230,20 @@ public class Browser {
 	 */
 	public HttpResponse postAsync(String httpUrl, InputStream inputStream, OutputStream outputStream)
 	        throws IOException {
-		return post(httpUrl, inputStream, outputStream, true);
+		return post(httpUrl, inputStream, outputStream, true, null);
 	}
 	
 	private HttpResponse post(String httpUrl, InputStream inputStream, OutputStream outputStream,
-			boolean isAsync) throws IOException {
+			boolean isAsync, Map<String, String> requestHeader) throws IOException {
 		IOException ie = null;
 		for(int i = 0; i < retryTimes; i++) {
 			try {
 				HttpURLConnection urlConnection = getUrlConnection(httpUrl, "POST");
+				if(requestHeader != null) {
+					for(Entry<String, String> entry : requestHeader.entrySet()) {
+						urlConnection.setRequestProperty(entry.getKey(), entry.getValue());
+					}
+				}
 				
 				// POST 数据
 				if(inputStream != null) {
@@ -507,13 +540,59 @@ public class Browser {
 		return httpResponse;
 	}
 	
+	/**multipart/form-data编码方式
+	 * @throws IOException */
+	private static byte[] buildPostString(Map<String, Object> params, String boundary)
+			throws IOException {
+		if(params == null || params.isEmpty()) {
+			return new byte[0];
+		}
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		
+		for(Entry<String, Object> entry : params.entrySet()) {
+			baos.write(("--" + boundary + "\r\n").getBytes());
+			String str = "Content-Disposition: form-data; name=\"" + 
+					URLEncoder.encode(entry.getKey(), "UTF-8") + "\"";
+			baos.write(str.getBytes());
+			if(entry.getValue() instanceof BrowserPostFile) {
+				BrowserPostFile file = (BrowserPostFile) entry.getValue();
+				String str1 = "; filename=\"" + 
+						URLEncoder.encode(file.getFilename(), "UTF-8") + "\"\r\n";
+				baos.write(str1.getBytes());
+				String contentType = "Content-Type: " + file.getContentType();
+				baos.write(contentType.getBytes());
+			}
+			baos.write("\r\n\r\n".getBytes());
+			if(entry.getValue() instanceof BrowserPostFile) {
+				BrowserPostFile file = (BrowserPostFile) entry.getValue();
+				if(file.getBytes() != null) {
+					baos.write(file.getBytes());
+				} else {
+					byte[] buff = new byte[4096];
+					int len = 0;
+					while((len = file.getIn().read(buff)) != -1) {
+						baos.write(buff, 0, len);
+					}
+				}
+			} else {
+				Object value = entry.getValue();
+				if(value == null) {value = "";}
+				baos.write(value.toString().getBytes());
+			}
+			baos.write("\r\n".getBytes());
+		}
+		
+		if(!params.isEmpty()) {
+			baos.write(("--" + boundary + "--").getBytes());
+		}
+		
+		return baos.toByteArray();
+	}
+	
+	/**application/x-www-form-urlencoded编码方式*/
 	private static byte[] buildPostString(Map<String, Object> params) {
 		if(params == null || params.isEmpty()) {
-			try {
-				return "".getBytes("UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				return new byte[0];
-			}
+			return new byte[0];
 		}
 		StringBuilder sb = new StringBuilder();
 		boolean needAppendAnd = false;
@@ -529,7 +608,7 @@ public class Browser {
 				}
 				needAppendAnd = true;
 			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
+				LOGGER.error("UnsupportedEncodingException", e);
 			}
 		}
 		

@@ -11,6 +11,18 @@ import java.util.Map;
 import org.junit.Test;
 
 public class TestBrowser {
+	
+	// 测试上传文件
+	@Test
+	public void testPost() throws Exception {
+		Browser browser = new Browser();
+		browser.setHttpProxy("127.0.0.1", 8888);
+		Map<String, Object> params = new HashMap<>();
+		BrowserPostFile file = new BrowserPostFile("hello.txt", "text/plain", "hello111".getBytes());
+		params.put("file", file);
+		browser.post("http://127.0.0.1:8080/admin/admin_upload/upload",
+				params);
+	}
 
 	@Test
 	public void testGet() throws Exception {
