@@ -1,11 +1,40 @@
 package com.pugwoo.wooutils.net;
 
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
 public class NetUtils {
+	
+	/**
+	 * 获得本机的ipv4的所有ip列表，排除本机ip 127.开头的
+	 * @throws SocketException 
+	 */
+	public static List<String> getIpv4IPs() throws SocketException {
+		List<String> ips = new ArrayList<String>();
+		String regex = "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+		Pattern pattern = Pattern.compile(regex);
+
+		for (Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces(); ifaces.hasMoreElements();) {
+			NetworkInterface iface = ifaces.nextElement();
+			for (Enumeration<InetAddress> addresses = iface.getInetAddresses(); addresses.hasMoreElements();) {
+				InetAddress address = addresses.nextElement();
+				if (pattern.matcher(address.getHostAddress()).find() && !address.getHostAddress().startsWith("127.")) {
+					ips.add(address.getHostAddress());
+				}
+			}
+		}
+
+		return ips;
+	}
 
 	/**
 	 * 获得客户端的ip地址
