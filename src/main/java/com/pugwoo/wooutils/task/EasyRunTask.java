@@ -1,14 +1,16 @@
 package com.pugwoo.wooutils.task;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 2015年7月21日 11:17:16
- * 按最简单的方式：每次只能有一个task
+ * 简单的可以控制开始、停止、恢复或重新开始的任务控制框架。
  * 
- * TODO 增加pause方法
+ * 关于暂停：等价于 start - stop - resume
+ * 重新开始：等价于 start - stop - start
  * 
  * @author pugwoo
  */
@@ -34,6 +36,11 @@ public class EasyRunTask {
 	private AtomicInteger success = new AtomicInteger(0);
 	/**执行失败的任务总数[线程安全]*/
 	private AtomicInteger fail = new AtomicInteger(0);
+	
+	/**任务开始时间*/
+	private Date startTime;
+	/**任务结束时间*/
+	private Date endTime;
 		
 	public EasyRunTask(ITask task) {
 		this.task = task;
@@ -43,20 +50,6 @@ public class EasyRunTask {
 	public EasyRunTask(ITask task, int concurrentNum) {
 		this.task = task;
 		this.concurrentNum = concurrentNum;
-	}
-	
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("task:").append(task == null ? "null" : task.getClass().getName()).append(",");
-		sb.append("status:").append(status).append(",");
-		sb.append("total:").append(total).append(",");
-		sb.append("processed:").append(processed).append(",");
-		sb.append("success:").append(success).append(",");
-		sb.append("fail:").append(fail).append(",");
-		sb.append("exceptions:").append(exceptions.size());
-		// TODO 打印出第一个异常堆栈
-		return sb.toString();
 	}
 	
 	/**
@@ -106,6 +99,7 @@ public class EasyRunTask {
 		}
 		
 		if(reset) {
+			startTime = new Date();
 			task.reset();
 			total.set(0);
 			processed.set(0);
@@ -122,6 +116,7 @@ public class EasyRunTask {
 					synchronized (that) { // 请求停止
 						if(status == TaskStatusEnum.STOPPING) {
 							status = TaskStatusEnum.STOPPED;
+							endTime = new Date();
 							return;
 						}
 					}
@@ -130,11 +125,12 @@ public class EasyRunTask {
 					if(getRestCount() <= 0) {
 						synchronized (that) { // 结束任务
 							status = TaskStatusEnum.FINISHED;
+							endTime = new Date();
 						}
 						return;
 					}
 					
-					// 多线程执行任务
+					// 多线程执行任务，实际上，是一批一批地去执行，这样才能中途控制其停下
 					int nThreads = Math.min(restCount, concurrentNum);
 					ExecuteThem executeThem = new ExecuteThem(nThreads);
 					for(int i = 0; i < nThreads; i++) {
@@ -207,6 +203,22 @@ public class EasyRunTask {
 	 */
 	public int getFail() {
 		return fail.get();
+	}
+
+	/**
+	 * 获得任务执行开始时间
+	 * @return
+	 */
+	public Date getStartTime() {
+		return startTime;
+	}
+
+	/**
+	 * 获得任务执行结束时间
+	 * @return
+	 */
+	public Date getEndTime() {
+		return endTime;
 	}
 	
 }

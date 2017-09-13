@@ -67,7 +67,7 @@ public class ExecuteThem {
 		try {
 			executorService.awaitTermination(waitSeconds, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
-			// ignore
+			exceptions.add(e);
 		} finally {
 			executorService.shutdownNow();
 		}
@@ -77,11 +77,9 @@ public class ExecuteThem {
 			try {
 				results.add(future.get());
 			} catch (InterruptedException e) {
-				e.printStackTrace();
 				results.add(null);
 				exceptions.add(e);
 			} catch (ExecutionException e) {
-				e.printStackTrace();
 				results.add(null);
 				exceptions.add(e);
 			}
