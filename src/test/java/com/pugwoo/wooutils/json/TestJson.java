@@ -11,6 +11,9 @@ public class TestJson {
 		date = JSON.parse("\"2017年3月30日\"", Date.class);
 		System.out.println(date);
 		
+		date = JSON.parse("\"  \"", Date.class);
+		System.out.println(date);
+		
 		System.out.println(JSON.toJson(new Date()));
 	}
 	
