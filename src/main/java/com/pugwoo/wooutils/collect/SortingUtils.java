@@ -59,8 +59,7 @@ public class SortingUtils {
 		}
 		
 		Collections.sort(list, new Comparator<T>() {
-			@SuppressWarnings("unchecked")
-			@Override
+			@SuppressWarnings("unchecked") @Override
 			public int compare(T left, T right) {
 				for(SortingField<T, ? extends Comparable<?>> sortingField : sortingFields) {
 					boolean isLeftNull = left == null;
