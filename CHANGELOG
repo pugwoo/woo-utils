@@ -1,3 +1,6 @@
+2017年9月19日
+v0.1.13 - [del] 删除Browser中post(String httpUrl)和post(String httpUrl, OutputStream outputStream)方法，减少误用
+
 2017年9月18日
 v0.1.12 - [add] 增加MapUtils和ListUtils的方法
 

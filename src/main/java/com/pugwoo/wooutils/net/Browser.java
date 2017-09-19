@@ -86,36 +86,6 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse post(String httpUrl) throws IOException {
-		return post(httpUrl, new HashMap<String, Object>());
-	}
-	
-	/**
-	 * post方式请求HTTP
-	 * @param httpUrl
-	 * @return
-	 * @throws IOException
-	 */
-	public HttpResponse post(String httpUrl, OutputStream outputStream) throws IOException {
-		return post(httpUrl, new HashMap<String, Object>(), outputStream);
-	}
-	
-	/**
-	 * post方式请求HTTP
-	 * @param httpUrl
-	 * @return
-	 * @throws IOException
-	 */
-	public HttpResponse postAsync(String httpUrl, OutputStream outputStream) throws IOException {
-		return postAsync(httpUrl, new HashMap<String, Object>(), outputStream);
-	}
-	
-	/**
-	 * post方式请求HTTP
-	 * @param httpUrl
-	 * @return
-	 * @throws IOException
-	 */
 	public HttpResponse post(String httpUrl, Map<String, Object> params) throws IOException {
 		return post(httpUrl, params, null);
 	}

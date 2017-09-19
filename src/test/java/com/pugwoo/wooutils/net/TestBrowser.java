@@ -36,7 +36,7 @@ public class TestBrowser {
 //		System.out.println(resp.getContentString());
 
 		OutputStream out = new FileOutputStream("d:/a.txt");
-		HttpResponse resp = new Browser().postAsync("http://www.baidu.com",
+		HttpResponse resp = new Browser().getAsync("http://www.baidu.com",
 				out);
 		while(!resp.isDownloadFinished()) {
 			System.out.println(resp.getDownloadedBytes());
