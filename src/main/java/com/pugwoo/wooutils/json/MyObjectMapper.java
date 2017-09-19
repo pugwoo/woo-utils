@@ -15,10 +15,12 @@ public class MyObjectMapper extends ObjectMapper {
 
 	public MyObjectMapper() {
 		super();
-		
-		// 个性化配置
+
 		setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")); // 设置日期格式
 		configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); //属性不存在的兼容处理
+		
+		// 当map含有null key时，转成空字符串
+		getSerializerProvider().setNullKeySerializer(new NullKeySerializer());
 		
 		configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true); //属性key可以不用括号
 		configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true); //属性key使用单引号
@@ -30,7 +32,6 @@ public class MyObjectMapper extends ObjectMapper {
 		SimpleModule module = new SimpleModule("DateDeserializerModule",
 		      new Version(1, 0, 0, "", "", ""));
 		module.addDeserializer(Date.class, deserializer);
-		
 		registerModule(module);
 	}
 	
