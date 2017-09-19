@@ -115,13 +115,23 @@ public class DateUtils {
 	}
 	
 	/**
-	 * 转换成标准的格式
+	 * 转换成标准的格式 yyyy-MM-dd HH:mm:ss
 	 */
 	public static String format(Date date) {
 		if(date == null) {
 			return "";
 		}
 		return new SimpleDateFormat(FORMAT_STANDARD).format(date);
+	}
+	
+	/**
+	 * 转换成标准的格式 yyyy-MM-dd
+	 */
+	public static String formatDate(Date date) {
+		if(date == null) {
+			return "";
+		}
+		return new SimpleDateFormat(FORMAT_DATE).format(date);
 	}
 	
 	public static String format(Date date, String pattern) {
