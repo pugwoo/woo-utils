@@ -10,7 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.pugwoo.wooutils.date.DateUtils;
+import com.pugwoo.wooutils.lang.DateUtils;
 
 public class MultiDateDeserializer extends StdDeserializer<Date> {
 	
