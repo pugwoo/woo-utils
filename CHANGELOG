@@ -1,5 +1,6 @@
 2017年9月21日
 v0.1.15 - [add] DoubleUtils
+        - [add] 增加MapUtils按值排序
 
 2017年9月19日
 v0.1.14 - [add] JSON支持当null key值时，转换成空字符串。重构DateUtils。

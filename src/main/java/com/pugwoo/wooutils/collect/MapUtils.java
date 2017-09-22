@@ -3,40 +3,82 @@ package com.pugwoo.wooutils.collect;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class MapUtils {
 	
 	/**
-	 * 按map的key正序排列
-	 * @param map
-	 * @return
-	 */
-	public static <K extends Comparable<? super K>, V> Map<K, V> sortByKey(Map<K, V> map) {
-		return sortByKey(map, false);
-	}
-	
-	/**
-	 * 按Map的key排序
+	 * 按Map的key排序。对于null值，无论正序或逆序，都排最后。
 	 * @param map
 	 * @param isDesc 是否逆序,true则为逆序;false为正序
 	 * @return 返回的是一个LinkedHashMap
 	 */
-	public static <K extends Comparable<? super K>, V>
-	    Map<K, V> sortByKey(Map<K, V> map, boolean isDesc) {
+	public static <K extends Comparable<? super K>, V> Map<K, V> sortByKey(
+			Map<K, V> map, boolean isDesc) {
+		if(map == null || map.isEmpty()) {
+			return new LinkedHashMap<>();
+		}
 		Map<K, V> result = new LinkedHashMap<>();
-		List<K> keys = new ArrayList<>(map.keySet());
-		Collections.sort(keys);
-		if(isDesc) {
-			Collections.reverse(keys);
+		List<Entry<K, V>> list = new ArrayList<>(map.entrySet());
+		Collections.sort(list, new Comparator<Entry<K, V>>() {
+			@Override public int compare(Entry<K, V> o1, Entry<K, V> o2) {
+				if(o1.getKey() == o2.getKey()) {
+					return 0;
+				}
+				if(o1.getKey() == null) {
+					return 1;
+				}
+				if(o2.getKey() == null) {
+					return -1;
+				}
+				int o = o1.getKey().compareTo(o2.getKey());
+				return o * (isDesc ? -1 : 1);
+			}
+		});
+		
+		for(Entry<K, V> entry : list) {
+			result.put(entry.getKey(), entry.getValue());
 		}
-		for(K key : keys) {
-			result.put(key, map.get(key));
+		return result;
+	}
+	
+	/**
+	 * 按Map的value排序。对于null值，无论正序或逆序，都排最后。
+	 * @param map
+	 * @param isDesc 是否逆序,true则为逆序;false为正序
+	 * @return 返回的是一个LinkedHashMap
+	 */
+	public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(
+			Map<K, V> map, boolean isDesc) {
+		if(map == null || map.isEmpty()) {
+			return new LinkedHashMap<>();
 		}
-			
+		Map<K, V> result = new LinkedHashMap<>();
+		List<Entry<K, V>> list = new ArrayList<>(map.entrySet());
+		Collections.sort(list, new Comparator<Entry<K, V>>() {
+			@Override public int compare(Entry<K, V> o1, Entry<K, V> o2) {
+				if(o1.getValue() == o2.getValue()) {
+					return 0;
+				}
+				if(o1.getValue() == null) {
+					return 1;
+				}
+				if(o2.getValue() == null) {
+					return -1;
+				}
+				int o = o1.getValue().compareTo(o2.getValue());
+				return o * (isDesc ? -1 : 1);
+			}
+		});
+		
+		for(Entry<K, V> entry : list) {
+			result.put(entry.getKey(), entry.getValue());
+		}
 		return result;
 	}
 

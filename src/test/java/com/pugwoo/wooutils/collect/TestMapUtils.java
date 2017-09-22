@@ -11,7 +11,7 @@ public class TestMapUtils {
 		map.put("you", 6);
 		map.put("hello", 5);
 		
-		map = MapUtils.sortByKey(map);
+		map = MapUtils.sortByKey(map, false);
 		for(Entry<String, Integer> entry : map.entrySet()) {
 			System.out.println(entry.getKey() + ":" + entry.getValue());
 		}
