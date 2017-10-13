@@ -81,9 +81,9 @@ public class NetUtils {
 	 */
 	public static String getHttpRootURL(HttpServletRequest request) {
 		return request.getScheme() + "://" + request.getServerName()
-				+ ("http".equals(request.getScheme()) && request.getServerPort() == 80
-						|| "https".equals(request.getScheme()) && request.getServerPort() == 443 ? ""
-								: ":" + request.getServerPort());
+				+ ("http".equalsIgnoreCase(request.getScheme()) && request.getServerPort() == 80
+				|| "https".equalsIgnoreCase(request.getScheme()) && request.getServerPort() == 443 ? ""
+					: ":" + request.getServerPort());
 	}
 	
 	/**
@@ -92,8 +92,17 @@ public class NetUtils {
 	 * @return
 	 */
 	public static String getHostname(HttpServletRequest request) {
-		String serverName = request.getServerName();
-		return serverName;
+		return request.getServerName();
+	}
+	
+	/**
+	 * 获得当前域名和端口，如果是http协议，返回www.abc.com:80，如果是https协议，返回www.abc.com:443
+	 * 其它端口正常带上，例如www.abc.com:8080
+	 * @param request
+	 * @return
+	 */
+	public static String getHostnameWithPort(HttpServletRequest request) {
+		return request.getServerName() + ":" + request.getServerPort();
 	}
 	
 	/**
@@ -113,7 +122,7 @@ public class NetUtils {
 	 * @param url
 	 * @return
 	 */
-	public static String getPathFromUrl(String url) {
+	public static String getUrlPath(String url) {
 		if(url == null || url.isEmpty()) {
 			return "";
 		}
@@ -127,17 +136,35 @@ public class NetUtils {
 	
 	/**
 	 * 获得url的host，如果url不符合格式，会返回空字符串。
-	 * 例如输入：http://www.abc.com/is/a/apple?id=3，返回www.abc.com
+	 * 例如输入：http://www.abc.com/is/a/apple?id=3，返回www.abc.com，不带端口
 	 * @param url
 	 * @return
 	 */
-	public static String getHostnameFromUrl(String url) {
+	public static String getUrlHostname(String url) {
 		if(url == null || url.isEmpty()) {
 			return "";
 		}
 		try {
 			URL _url = new URL(url);
 			return _url.getHost();
+		} catch (MalformedURLException e) {
+			return "";
+		}
+	}
+	
+	/**
+	 * 获得url的host，如果url不符合格式，会返回空字符串。
+	 * 例如输入：http://www.abc.com/is/a/apple?id=3，返回www.abc.com:80，一定会带上端口
+	 * @param url
+	 * @return
+	 */
+	public static String getUrlHostnameWithPort(String url) {
+		if(url == null || url.isEmpty()) {
+			return "";
+		}
+		try {
+			URL _url = new URL(url);
+			return _url.getHost() + ":" + _url.getPort();
 		} catch (MalformedURLException e) {
 			return "";
 		}
