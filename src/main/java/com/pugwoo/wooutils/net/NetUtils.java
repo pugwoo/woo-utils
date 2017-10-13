@@ -37,15 +37,15 @@ public class NetUtils {
 	}
 
 	/**
-	 * 获得客户端的ip地址
+	 * 获得客户端的ip地址，请配合nginx配置使用
 	 * @return
 	 */
 	public static String getRemoteIp(HttpServletRequest request) {
-		String remoteIp = request.getHeader("X-Forwarded-For");
-		if(remoteIp != null && !remoteIp.trim().isEmpty()) {
-			return remoteIp;
+		String ip = request.getHeader("X-Forwarded-For");
+		if(ip == null || ip.trim().isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getRemoteAddr();
 		}
-		return request.getRemoteAddr();
+		return ip;
 	}
 	
 	/**
