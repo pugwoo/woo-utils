@@ -1,3 +1,6 @@
+2017年10月13日
+v0.1.16 - [fix] redis value过滤掉null值
+
 2017年9月21日
 v0.1.15 - [add] DoubleUtils
         - [add] 增加MapUtils按值排序

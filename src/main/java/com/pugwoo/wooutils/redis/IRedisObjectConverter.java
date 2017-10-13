@@ -7,14 +7,14 @@ package com.pugwoo.wooutils.redis;
 public interface IRedisObjectConverter {
 
 	/**
-	 * 将对象转换成字符串
+	 * 将对象转换成字符串，【注意】需要自行处理null值的情况
 	 * @param t
 	 * @return
 	 */
 	<T> String convertToString(T t);
 	
 	/**
-	 * 将字符串转换成对象
+	 * 将字符串转换成对象，【注意】需要自行处理str为null值的情况
 	 * @param str
 	 * @return
 	 */

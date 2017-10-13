@@ -73,6 +73,9 @@ public class RedisHelperImpl implements RedisHelper {
 	
 	@Override
 	public boolean setString(String key, int expireSecond, String value) {
+		if(value == null) { // null值不需要设置
+			return true;
+		}
 		Jedis jedis = null;
 		try {
 			jedis = getJedisConnection();
@@ -103,6 +106,9 @@ public class RedisHelperImpl implements RedisHelper {
 	
 	@Override
 	public boolean setStringIfNotExist(String key, int expireSecond, String value) {
+		if(value == null) { // null值不需要设置
+			return true;
+		}
 		Jedis jedis = null;
 		try {
 			jedis = getJedisConnection();
@@ -220,6 +226,9 @@ public class RedisHelperImpl implements RedisHelper {
 	
 	@Override
 	public boolean compareAndSet(String key, String value, String oldValue, Integer expireSeconds) {
+		if(value == null) { // 不支持value设置为null
+			return false;
+		}
 		Jedis jedis = null;
 		try {
 			jedis = getJedisConnection();
