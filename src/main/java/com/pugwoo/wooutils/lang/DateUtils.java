@@ -150,4 +150,19 @@ public class DateUtils {
 	    return null; // Unknown format.
 	}
 	
+	// ======================================
+	
+	/**
+	 * 计算两个日期的天数差，不足一天的不算。
+	 * @param date1
+	 * @param date2
+	 * @return
+	 */
+	public static int diffDays(Date date1, Date date2) {
+		if(date1 == null || date2 == null) {
+			return 0;
+		}
+		return (int) (Math.abs(date1.getTime() - date2.getTime()) / (24 * 3600 * 1000));
+	}
+	
 }
