@@ -178,4 +178,41 @@ public class DateUtils {
 		return diffDays(date1, date2) / 365;
 	}
 	
+	/**
+	 * 显示日期date到现在的时间差的字符串友好形式:
+	 * 1. 10秒内，显示刚刚
+	 * 2. 60秒内，显示xx秒前
+	 * 3. 3600秒内，显示xx分钟前
+	 * 4. 3600*24秒内，显示xx小时前
+	 * 5. 3600*24*10秒内，显示xx天前
+	 * 6. 其它显示真实日期，格式yyyy-MM-dd HH:mm
+	 * @param date
+	 * @return
+	 */
+    public static String getIntervalToNow(Date date) {
+        if(date == null){
+            return "";
+        }
+        String interval = "";
+        long seconds = (new Date().getTime() - date.getTime()) / 1000;
+        if(seconds >= 0) {
+            if (seconds < 10) {
+                interval = "刚刚";
+            } else if (seconds < 60) {
+            	interval = seconds + "秒前";
+            } else if (seconds < 3600) {
+            	interval = (seconds / 60) + "分钟前";
+            } else if (seconds < 3600 * 24) {
+            	interval = (seconds / 3600) + "小时前";
+            } else if (seconds < 3600 * 24 * 10) {
+            	interval = (seconds / 3600 / 24) + "天前";
+            } else {
+            	interval = format(date, "yyyy-MM-dd HH:mm");
+            }
+        } else {
+        	interval = format(date, "yyyy-MM-dd HH:mm");
+        }
+        return interval;
+    }
+
 }
