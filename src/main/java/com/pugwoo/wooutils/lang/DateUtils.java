@@ -168,4 +168,14 @@ public class DateUtils {
 		return (int) (Math.abs(date1.getTime() - date2.getTime()) / (24 * 3600 * 1000));
 	}
 	
+	/**
+	 * 计算两个日期的年份差，主要用于计算年龄。不足一年的不计，一年按365天计，不考虑闰年。
+	 * @param date1
+	 * @param date2
+	 * @return
+	 */
+	public static int diffYears(Date date1, Date date2) {
+		return diffDays(date1, date2) / 365;
+	}
+	
 }
