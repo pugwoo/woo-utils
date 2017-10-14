@@ -64,9 +64,24 @@ public class Browser {
 	/**代理*/
 	private Proxy proxy = null;
 	
-	/**设置请求时的头部，RequestProperty，该设置是Browser实例全局的*/
+	/**设置请求时的头部，RequestProperty，该设置是Browser实例全局的。
+	 * 注意：请不要用这个方法设置cookie，请使用addCookie方法
+	 */
 	public void addRequestProperty(String key, String value) {
 		requestProperty.put(key, value);
+	}
+	
+	/**
+	 * 自行添加cookie
+	 * @param domain 域名，例如abc.com
+	 * @param key cookie名
+	 * @param value cookie值
+	 */
+	public void addCookie(String domain, String key, String value) {
+		if(cookies.get(domain) == null) {
+			cookies.put(domain, new HashMap<>());
+		}
+		cookies.get(domain).put(key, value);
 	}
 	
 	/**
@@ -353,33 +368,7 @@ public class Browser {
 	}
 	
 	/////////////////// 以下是工具方法 ////////////////////////////
-	
-	/**
-	 * 获取httpUrl的域名
-	 * @param httpUrl
-	 * @return
-	 */
-	private static String getHost(String url) {
-	    if(url == null || url.isEmpty()) {
-	    	return "";
-	    }
 
-	    int doubleslash = url.indexOf("//");
-	    if(doubleslash == -1) {
-	        doubleslash = 0;
-	    } else {
-	        doubleslash += 2;
-	    }
-
-	    int end = url.indexOf('/', doubleslash);
-	    end = end >= 0 ? end : url.length();
-
-	    int port = url.indexOf(':', doubleslash);
-	    end = (port > 0 && port < end) ? port : end;
-
-	    return url.substring(doubleslash, end);
-	}
-			
 	/**
 	 * 拿到http连接对象
 	 * @param httpUrl
@@ -402,7 +391,7 @@ public class Browser {
 		urlConnection.setRequestProperty("Referer", httpUrl);
 		
 		// 设置cookie
-		String host = getHost(httpUrl);
+		String host = NetUtils.getUrlHostname(httpUrl);
 		StringBuilder cookieSb = new StringBuilder();
 		boolean needAppendAnd = false;
 		for(Entry<String, Map<String, String>> entry : cookies.entrySet()) {

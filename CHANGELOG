@@ -1,3 +1,6 @@
+2017年10月14日
+v0.1.17 - [add] 增加Browser的addCookie方法
+
 2017年10月13日
 v0.1.16 - [fix] redis value过滤掉null值
         - [add] 增加StringTools随机生成字符串
