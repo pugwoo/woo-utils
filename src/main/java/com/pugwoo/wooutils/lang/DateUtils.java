@@ -29,9 +29,12 @@ public class DateUtils {
 	
 	@SuppressWarnings("serial")
 	public static final Map<String, String> DATE_FORMAT_REGEXPS = new HashMap<String, String>() {{
-	    put("^\\d{8}$", "yyyyMMdd"); // 20170306
+		put("^\\d{6}$", "yyyyMM"); // 201703
+		put("^\\d{8}$", "yyyyMMdd"); // 20170306
 	    put("^\\d{14}$", "yyyyMMddHHmmss"); // 20170306152356
 	    put("^\\d{8}\\s\\d{6}$", "yyyyMMdd HHmmss"); // 20170306 152356
+	    put("^\\d{4}-\\d{1,2}$", "yyyy-MM"); // 2017-03
+	    put("^\\d{4}/\\d{1,2}$", "yyyy/MM"); // 2017/03
 	    put("^\\d{4}-\\d{1,2}-\\d{1,2}$", "yyyy-MM-dd"); // 2017-03-06
 	    put("^\\d{4}/\\d{1,2}/\\d{1,2}$", "yyyy/MM/dd"); // 2017/03/06
 	    put("^\\d{1,2}:\\d{1,2}:\\d{1,2}$", "HH:mm:ss"); // 16:34:32
