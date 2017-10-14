@@ -45,6 +45,11 @@ public class JSON {
 		}
 	}
 	
+	/**
+	 * 将对象转换成json字符串
+	 * @param obj
+	 * @return
+	 */
 	public static String toJson(Object obj) {
 		try {
 			return objectMapper.writeValueAsString(obj);
@@ -52,5 +57,27 @@ public class JSON {
 			throw new RuntimeException(e);
 		}
 	}
-
+	
+	/**
+	 * 转换对象为map
+	 * @param obj java bean对象，主要不要传入单个值如string Date等
+	 * @return
+	 */
+	public static Map<String, Object> toMap(Object obj) {
+		return parseObject(toJson(obj));
+	}
+	
+	/**
+	 * 使用json的方式克隆对象
+	 * @param t
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T clone(T t) {
+		if(t == null) {
+			return null;
+		}
+		return (T) parse(toJson(t), t.getClass());
+	}
+	
 }

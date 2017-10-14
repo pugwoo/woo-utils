@@ -1,10 +1,27 @@
 package com.pugwoo.wooutils.string;
 
+import java.util.Random;
+
 /**
  * 2016年2月4日 11:29:00
  * 字符串工具类
  */
 public class StringTools {
+	
+	/**
+	 * 生成随机字符串，例如输出source=0123456789,num=6，输出就是6位随机数字
+	 * @param source 字符串的输入源，例如纯数字的话，这里输入0123456789
+	 * @param num 生成出几位的string
+	 * @return
+	 */
+	public static String randomString(String source, int num) {
+		StringBuilder sb = new StringBuilder();
+		Random random = new Random();
+		for(int i = 0; i < num; i++) {
+			sb.append(source.charAt(random.nextInt(source.length())));
+		}
+		return sb.toString();
+	}
 	
 	/**
 	 * 将字符串str拆分成一行一个字符串

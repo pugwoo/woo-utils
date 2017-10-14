@@ -1,5 +1,7 @@
 2017年10月13日
 v0.1.16 - [fix] redis value过滤掉null值
+        - [add] 增加StringTools随机生成字符串
+        - [add] 增加JSON的toMap和clone方法
 
 2017年9月21日
 v0.1.15 - [add] DoubleUtils
