@@ -34,7 +34,19 @@ public class StringTools {
 		}
 		return str.split("\\r?\\n");
 	}
-
+	
+	/**
+	 * 将字符串str按空行拆分成不同的字符串
+	 * @param str
+	 * @return
+	 */
+	public static String[] splitByEmptyLines(String str) {
+		if(str == null) {
+			return new String[0];
+		}
+		return str.split("\\r?\\n[\\r?\\n]+");
+	}
+	
 	/**
 	 * 判定字符串是否只包含英文字母(不区分大小写)或数字
 	 * @param str 不能为null
