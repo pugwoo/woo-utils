@@ -9,6 +9,25 @@ import java.util.Random;
 public class StringTools {
 	
 	/**
+	 * 把obj转换成string，如果obj为null，返回null
+	 * @param obj
+	 * @return
+	 */
+	public static String toString(Object obj) {
+		return obj == null ? null : obj.toString();
+	}
+	
+	/**
+	 * 把obj转换成string，如果obj为null，返回参数ifnull的值
+	 * @param obj
+	 * @param ifnull
+	 * @return
+	 */
+	public static String toString(Object obj, String ifnull) {
+		return obj == null ? ifnull : obj.toString();
+	}
+	
+	/**
 	 * 生成随机字符串，例如输出source=0123456789,num=6，输出就是6位随机数字
 	 * @param source 字符串的输入源，例如纯数字的话，这里输入0123456789
 	 * @param num 生成出几位的string
