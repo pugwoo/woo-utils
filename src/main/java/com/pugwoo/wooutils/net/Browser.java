@@ -16,6 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +69,35 @@ public class Browser {
 	
 	/**代理*/
 	private Proxy proxy = null;
+	
+	/**信任所有ssl证书*/
+	private TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+		public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+			return null;
+		}
+		public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+		}
+		public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+		}
+	} };
+	private SSLSocketFactory oldSSLSocketFactory = null;
+	
+	public void setIsTrustAllCerts(boolean isTrustAllCerts) {
+		if(isTrustAllCerts) {
+			try {
+				SSLContext sc = SSLContext.getInstance("SSL");
+				sc.init(null, trustAllCerts, new java.security.SecureRandom());
+				if(oldSSLSocketFactory == null) {
+					oldSSLSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
+				}
+				HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+			} catch (Exception e) {
+				LOGGER.error("set ignore ssl certs fail", e);
+			}
+		} else {
+			HttpsURLConnection.setDefaultSSLSocketFactory(oldSSLSocketFactory);
+		}
+	}
 	
 	/**设置请求时的头部，RequestProperty，该设置是Browser实例全局的。
 	 * 注意：请不要用这个方法设置cookie，请使用addCookie方法
