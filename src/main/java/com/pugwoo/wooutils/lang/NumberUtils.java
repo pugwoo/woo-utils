@@ -41,6 +41,24 @@ public class NumberUtils {
 	}
 	
 	/**
+	 * 转换成Double，不会抛出异常，转换失败返回null
+	 * @return
+	 */
+	public static Double parseDouble(Object obj) {
+		if(obj == null) {
+			return null;
+		}
+		if(obj instanceof Double) {
+			return (Double) obj;
+		}
+		try {
+			return new Double(obj.toString());
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	/**
 	 * 保留decimalPlaces位小数，例如：
 	 * 输入 (1.236, 2) 输出1.24
 	 * 输入 (1.2, 2) 输出1.2
