@@ -2,6 +2,7 @@
 v0.1.18 - [add] 增加StringTools的splitByEmptyLines、toString方法
         - [improve] DoubleUtils重命名为NumberUtils，并提供转Integer/Long不抛出异常的方法
         - [add] Browser支持设置支持任何https证书
+        - [add] IOUtils增加读取整个文件为String
         
 2017年10月14日
 v0.1.17 - [add] 增加Browser的addCookie方法
