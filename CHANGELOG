@@ -1,3 +1,6 @@
+2017年11月16日
+v0.2.0 - [add] MapUtils.of增加更多的key/value，方便java使用类json写法构造map
+
 2017年11月1日
 v0.1.18 - [add] 增加StringTools的splitByEmptyLines、toString方法
         - [improve] DoubleUtils重命名为NumberUtils，并提供转Integer/Long不抛出异常的方法

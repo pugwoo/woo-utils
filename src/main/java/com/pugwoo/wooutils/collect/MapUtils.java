@@ -139,4 +139,321 @@ public class MapUtils {
 		return map;
 	}
 	
+	/**
+	 * 创建一个map，其值为key、value
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public static Map<String, Object> of(String key, Object value,
+			String key2, Object value2, String key3, Object value3,
+			String key4, Object value4, String key5, Object value5) {
+		Map<String, Object> map = new HashMap<>();
+		map.put(key, value);
+		map.put(key2, value2);
+		map.put(key3, value3);
+		map.put(key4, value4);
+		map.put(key5, value5);
+		return map;
+	}
+	
+	/**
+	 * 创建一个map，其值为key、value
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public static Map<String, Object> of(String key, Object value,
+			String key2, Object value2, String key3, Object value3,
+			String key4, Object value4, String key5, Object value5,
+			String key6, Object value6) {
+		Map<String, Object> map = new HashMap<>();
+		map.put(key, value);
+		map.put(key2, value2);
+		map.put(key3, value3);
+		map.put(key4, value4);
+		map.put(key5, value5);
+		map.put(key6, value6);
+		return map;
+	}
+	
+	/**
+	 * 创建一个map，其值为key、value
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public static Map<String, Object> of(String key, Object value,
+			String key2, Object value2, String key3, Object value3,
+			String key4, Object value4, String key5, Object value5,
+			String key6, Object value6, String key7, Object value7) {
+		Map<String, Object> map = new HashMap<>();
+		map.put(key, value);
+		map.put(key2, value2);
+		map.put(key3, value3);
+		map.put(key4, value4);
+		map.put(key5, value5);
+		map.put(key6, value6);
+		map.put(key7, value7);
+		return map;
+	}
+	
+	/**
+	 * 创建一个map，其值为key、value
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public static Map<String, Object> of(String key, Object value,
+			String key2, Object value2, String key3, Object value3,
+			String key4, Object value4, String key5, Object value5,
+			String key6, Object value6, String key7, Object value7,
+			String key8, Object value8) {
+		Map<String, Object> map = new HashMap<>();
+		map.put(key, value);
+		map.put(key2, value2);
+		map.put(key3, value3);
+		map.put(key4, value4);
+		map.put(key5, value5);
+		map.put(key6, value6);
+		map.put(key7, value7);
+		map.put(key8, value8);
+		return map;
+	}
+	
+	/**
+	 * 创建一个map，其值为key、value
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public static Map<String, Object> of(String key, Object value,
+			String key2, Object value2, String key3, Object value3,
+			String key4, Object value4, String key5, Object value5,
+			String key6, Object value6, String key7, Object value7,
+			String key8, Object value8, String key9, Object value9) {
+		Map<String, Object> map = new HashMap<>();
+		map.put(key, value);
+		map.put(key2, value2);
+		map.put(key3, value3);
+		map.put(key4, value4);
+		map.put(key5, value5);
+		map.put(key6, value6);
+		map.put(key7, value7);
+		map.put(key8, value8);
+		map.put(key9, value9);
+		return map;
+	}
+	
+	/**
+	 * 创建一个map，其值为key、value
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public static Map<String, Object> of(String key, Object value,
+			String key2, Object value2, String key3, Object value3,
+			String key4, Object value4, String key5, Object value5,
+			String key6, Object value6, String key7, Object value7,
+			String key8, Object value8, String key9, Object value9,
+			String key10, Object value10) {
+		Map<String, Object> map = new HashMap<>();
+		map.put(key, value);
+		map.put(key2, value2);
+		map.put(key3, value3);
+		map.put(key4, value4);
+		map.put(key5, value5);
+		map.put(key6, value6);
+		map.put(key7, value7);
+		map.put(key8, value8);
+		map.put(key9, value9);
+		map.put(key10, value10);
+		return map;
+	}
+	
+	/**
+	 * 创建一个map，其值为key、value
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public static Map<String, Object> of(String key, Object value,
+			String key2, Object value2, String key3, Object value3,
+			String key4, Object value4, String key5, Object value5,
+			String key6, Object value6, String key7, Object value7,
+			String key8, Object value8, String key9, Object value9,
+			String key10, Object value10, String key11, Object value11) {
+		Map<String, Object> map = new HashMap<>();
+		map.put(key, value);
+		map.put(key2, value2);
+		map.put(key3, value3);
+		map.put(key4, value4);
+		map.put(key5, value5);
+		map.put(key6, value6);
+		map.put(key7, value7);
+		map.put(key8, value8);
+		map.put(key9, value9);
+		map.put(key10, value10);
+		map.put(key11, value11);
+		return map;
+	}
+	
+	/**
+	 * 创建一个map，其值为key、value
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public static Map<String, Object> of(String key, Object value,
+			String key2, Object value2, String key3, Object value3,
+			String key4, Object value4, String key5, Object value5,
+			String key6, Object value6, String key7, Object value7,
+			String key8, Object value8, String key9, Object value9,
+			String key10, Object value10, String key11, Object value11,
+			String key12, Object value12) {
+		Map<String, Object> map = new HashMap<>();
+		map.put(key, value);
+		map.put(key2, value2);
+		map.put(key3, value3);
+		map.put(key4, value4);
+		map.put(key5, value5);
+		map.put(key6, value6);
+		map.put(key7, value7);
+		map.put(key8, value8);
+		map.put(key9, value9);
+		map.put(key10, value10);
+		map.put(key11, value11);
+		map.put(key12, value12);
+		return map;
+	}
+	
+	/**
+	 * 创建一个map，其值为key、value
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public static Map<String, Object> of(String key, Object value,
+			String key2, Object value2, String key3, Object value3,
+			String key4, Object value4, String key5, Object value5,
+			String key6, Object value6, String key7, Object value7,
+			String key8, Object value8, String key9, Object value9,
+			String key10, Object value10, String key11, Object value11,
+			String key12, Object value12, String key13, Object value13) {
+		Map<String, Object> map = new HashMap<>();
+		map.put(key, value);
+		map.put(key2, value2);
+		map.put(key3, value3);
+		map.put(key4, value4);
+		map.put(key5, value5);
+		map.put(key6, value6);
+		map.put(key7, value7);
+		map.put(key8, value8);
+		map.put(key9, value9);
+		map.put(key10, value10);
+		map.put(key11, value11);
+		map.put(key12, value12);
+		map.put(key13, value13);
+		return map;
+	}
+	
+	/**
+	 * 创建一个map，其值为key、value
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public static Map<String, Object> of(String key, Object value,
+			String key2, Object value2, String key3, Object value3,
+			String key4, Object value4, String key5, Object value5,
+			String key6, Object value6, String key7, Object value7,
+			String key8, Object value8, String key9, Object value9,
+			String key10, Object value10, String key11, Object value11,
+			String key12, Object value12, String key13, Object value13,
+			String key14, Object value14) {
+		Map<String, Object> map = new HashMap<>();
+		map.put(key, value);
+		map.put(key2, value2);
+		map.put(key3, value3);
+		map.put(key4, value4);
+		map.put(key5, value5);
+		map.put(key6, value6);
+		map.put(key7, value7);
+		map.put(key8, value8);
+		map.put(key9, value9);
+		map.put(key10, value10);
+		map.put(key11, value11);
+		map.put(key12, value12);
+		map.put(key13, value13);
+		map.put(key14, value14);
+		return map;
+	}
+	
+	/**
+	 * 创建一个map，其值为key、value
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public static Map<String, Object> of(String key, Object value,
+			String key2, Object value2, String key3, Object value3,
+			String key4, Object value4, String key5, Object value5,
+			String key6, Object value6, String key7, Object value7,
+			String key8, Object value8, String key9, Object value9,
+			String key10, Object value10, String key11, Object value11,
+			String key12, Object value12, String key13, Object value13,
+			String key14, Object value14, String key15, Object value15) {
+		Map<String, Object> map = new HashMap<>();
+		map.put(key, value);
+		map.put(key2, value2);
+		map.put(key3, value3);
+		map.put(key4, value4);
+		map.put(key5, value5);
+		map.put(key6, value6);
+		map.put(key7, value7);
+		map.put(key8, value8);
+		map.put(key9, value9);
+		map.put(key10, value10);
+		map.put(key11, value11);
+		map.put(key12, value12);
+		map.put(key13, value13);
+		map.put(key14, value14);
+		map.put(key15, value15);
+		return map;
+	}
+	
+	/**
+	 * 创建一个map，其值为key、value
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public static Map<String, Object> of(String key, Object value,
+			String key2, Object value2, String key3, Object value3,
+			String key4, Object value4, String key5, Object value5,
+			String key6, Object value6, String key7, Object value7,
+			String key8, Object value8, String key9, Object value9,
+			String key10, Object value10, String key11, Object value11,
+			String key12, Object value12, String key13, Object value13,
+			String key14, Object value14, String key15, Object value15,
+			String key16, Object value16) {
+		Map<String, Object> map = new HashMap<>();
+		map.put(key, value);
+		map.put(key2, value2);
+		map.put(key3, value3);
+		map.put(key4, value4);
+		map.put(key5, value5);
+		map.put(key6, value6);
+		map.put(key7, value7);
+		map.put(key8, value8);
+		map.put(key9, value9);
+		map.put(key10, value10);
+		map.put(key11, value11);
+		map.put(key12, value12);
+		map.put(key13, value13);
+		map.put(key14, value14);
+		map.put(key15, value15);
+		map.put(key16, value16);
+		return map;
+	}
 }
