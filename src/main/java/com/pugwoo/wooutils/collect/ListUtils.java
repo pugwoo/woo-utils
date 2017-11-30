@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ListUtils {
@@ -20,6 +21,19 @@ public class ListUtils {
 			return new ArrayList<>();
 		}
 		return list.stream().map(mapper).collect(Collectors.toList());
+	}
+	
+	/**
+	 * filter一个list
+	 * @param list
+	 * @param predicate
+	 * @return
+	 */
+	public static <T> List<T> filter(List<T> list, Predicate<? super T> predicate) {
+		if(list == null) {
+			return new ArrayList<>();
+		}
+		return list.stream().filter(predicate).collect(Collectors.toList());
 	}
 	
 	@SafeVarargs
