@@ -388,7 +388,7 @@ public class Browser {
 					List<String> location = urlConnection.getHeaderFields().get("Location");
 					if(location != null && !location.isEmpty()) {
 						if(!httpUrl.equals(location.get(0))) {
-							return get(location.get(0), params, outputStream);
+							return get(location.get(0), params, outputStream, isAsync);
 						}
 					}
 				}
