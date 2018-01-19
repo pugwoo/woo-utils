@@ -118,6 +118,15 @@ public class NetUtils {
 	}
 	
 	/**
+	 * 获得url的路径，例如访问url是http://www.abc.com/is/a/apple?id=3，则返回/is/a/apple
+	 * @param url
+	 * @return
+	 */
+	public static String getUrlPath(HttpServletRequest request) {
+		return request.getRequestURI();
+	}
+	
+	/**
 	 * 获得url的路径，例如输入：http://www.abc.com/is/a/apple?id=3，返回/is/a/apple
 	 * @param url
 	 * @return
