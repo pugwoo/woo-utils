@@ -1,5 +1,6 @@
 2018年1月19日
 v0.2.3 - [add] 增加NetUtils.getUrlPath方法
+       - [add] 增加ListUtils的排序方法:sortAscNullLast sortAscNullFirst sortDescNullLast sortDescNullFirst
 
 2017年12月26日
 v0.2.2 - [fix] 修复Browser在异步获取数据时，碰到301/302跳转的处理问题
