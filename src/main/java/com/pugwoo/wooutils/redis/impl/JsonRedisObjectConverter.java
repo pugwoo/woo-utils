@@ -19,7 +19,7 @@ public class JsonRedisObjectConverter implements IRedisObjectConverter {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(JsonRedisObjectConverter.class);
 	
-	private ObjectMapper mapper;
+	protected ObjectMapper mapper;
 	{
 		mapper  = new ObjectMapper();
 		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
