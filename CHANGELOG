@@ -1,3 +1,6 @@
+2018年2月3日
+v0.2.4 - [add] 增加用于redis序列化的jackson object mapper及对应的IRedisObjectConverter实现
+
 2018年1月19日
 v0.2.3 - [add] 增加NetUtils.getUrlPath方法
        - [add] 增加ListUtils的排序方法:sortAscNullLast sortAscNullFirst sortDescNullLast sortDescNullFirst
