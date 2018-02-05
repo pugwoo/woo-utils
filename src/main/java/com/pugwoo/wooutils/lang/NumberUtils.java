@@ -1,5 +1,6 @@
 package com.pugwoo.wooutils.lang;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 
 public class NumberUtils {
@@ -61,7 +62,7 @@ public class NumberUtils {
 	/**
 	 * 保留decimalPlaces位小数，例如：
 	 * 输入 (1.236, 2) 输出1.24
-	 * 输入 (1.2, 2) 输出1.2
+	 * 输入 (1.2, 2) 输出1.20
 	 * @param number
 	 * @param decimalPlaces
 	 * @return
@@ -72,7 +73,7 @@ public class NumberUtils {
 			format.append(".");
 		}
 		for(int i = 0; i < decimalPlaces; i++) {
-			format.append("#");
+			format.append("0");
 		}
 		DecimalFormat df = new DecimalFormat(format.toString());
 		return df.format(number);
@@ -81,12 +82,25 @@ public class NumberUtils {
 	/**
 	 * 保留decimalPlaces位小数，例如：
 	 * 输入 (1.236, 2) 输出1.24
-	 * 输入 (1.2, 2) 输出1.2
+	 * 输入 (1.2, 2) 输出1.20
 	 * @param number
 	 * @param decimalPlaces
 	 * @return
 	 */
 	public static double roundUpToDouble(double number, int decimalPlaces) {
 		return new Double(roundUp(number, decimalPlaces));
+	}
+	
+	/**
+	 * 保留decimalPlaces位小数，例如：
+	 * 输入 (1.236, 2) 输出1.24
+	 * 输入 (1.2, 2) 输出1.20
+	 * @param number
+	 * @param decimalPlaces
+	 * @return
+	 */
+	public static BigDecimal roundUp(BigDecimal number, int decimalPlaces) {
+	    if(number == null) return null;
+	    return number.setScale(decimalPlaces, BigDecimal.ROUND_HALF_UP);
 	}
 }
