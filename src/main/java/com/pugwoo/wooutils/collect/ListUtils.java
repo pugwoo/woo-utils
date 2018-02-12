@@ -1,5 +1,6 @@
 package com.pugwoo.wooutils.collect;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -197,5 +198,29 @@ public class ListUtils {
 		}
 		return result;
 	}
-
+	
+	public static <T, R> BigDecimal sum(List<T> list, Function<? super T, ? extends R> mapper) {
+		BigDecimal sum = BigDecimal.ZERO;
+		if(list == null) {
+			return sum;
+		}
+		for(T t : list) {
+			if(t == null) continue;
+			Object val = mapper.apply(t);
+			if(val == null) continue;
+			BigDecimal a = null;
+			if(!(val instanceof BigDecimal)) {
+				try {
+					a = new BigDecimal(val.toString());
+				} catch (Exception e) {// ignore
+				}
+			} else {
+				a = (BigDecimal) val;
+			}
+			if(a == null) continue;
+			sum = sum.add(a);
+		}
+		return sum;
+	}
+	
 }

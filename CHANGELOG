@@ -1,3 +1,6 @@
+2018年2月12日
+v0.2.6 - [add] 增加ListUtils的sum方法
+
 2018年2月5日
 v0.2.5 - [improve] 修改NumberUtils的roundUp方法为保留固定位数小数点，同时增加BigDecimal处理
 
