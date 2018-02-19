@@ -3,7 +3,9 @@ package com.pugwoo.wooutils.collect;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -82,6 +84,27 @@ public class ListUtils {
 			return new ArrayList<>();
 		}
 		return list.stream().map(mapper).collect(Collectors.toList());
+	}
+	
+	/**
+	 * 转换list为map,返回的是LinkedHashMap，顺序和list一样
+	 * @param list
+	 * @param keyMapper
+	 * @param valueMapper
+	 * @return
+	 */
+	public static <T, K, V> Map<K, V> toMap(List<T> list,
+			Function<? super T, ? extends K> keyMapper,
+			Function<? super T, ? extends V> valueMapper) {
+		if(list == null) {
+			return new LinkedHashMap<>();
+		}
+		Map<K, V> map = new LinkedHashMap<>();
+		for(T t : list) {
+			if(t == null) continue;
+			map.put(keyMapper.apply(t), valueMapper.apply(t));
+		}
+		return map;
 	}
 	
 	/**
