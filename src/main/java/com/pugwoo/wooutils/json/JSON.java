@@ -1,10 +1,13 @@
 package com.pugwoo.wooutils.json;
 
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * 封装起来的常用的json方法
@@ -30,11 +33,6 @@ public class JSON {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static Map<String, Object> parseObject(String str) {
-		return parse(str, Map.class);
-	}
-	
 	public static <T> T parse(String str, Class<T> clazz, Class<?> genericClass) {
 		try {
 			JavaType type = objectMapper.getTypeFactory().constructParametricType(
@@ -45,6 +43,35 @@ public class JSON {
 		}
 	}
 	
+	/**
+	 * 解析字符串为Map
+	 * @param str
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static Map<String, Object> parseToMap(String str) {
+		return parse(str, Map.class);
+	}
+	
+	/**
+	 * 解析对象，可以通过jackson的ObjectNode读取各种类型值
+	 * @param str
+	 * @return
+	 */
+	public static ObjectNode parseObject(String str) {
+		return parse(str, ObjectNode.class);
+	}
+	
+	/**
+	 * 解析数组
+	 * @param str
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<JsonNode> parseArray(String str) {
+		return parse(str, List.class, JsonNode.class);
+	}
+
 	/**
 	 * 将对象转换成json字符串
 	 * @param obj
@@ -64,7 +91,7 @@ public class JSON {
 	 * @return
 	 */
 	public static Map<String, Object> toMap(Object obj) {
-		return parseObject(toJson(obj));
+		return parseToMap(toJson(obj));
 	}
 	
 	/**

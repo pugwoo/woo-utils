@@ -1,3 +1,7 @@
+2018年3月2日
+v0.2.8 - [add] 增加JSON的parseArray方法
+       - [add] 增加ListUtils的forEach方法
+
 2018年2月19日
 v0.2.7 - [add] 增加ListUtils的toMap方法
 

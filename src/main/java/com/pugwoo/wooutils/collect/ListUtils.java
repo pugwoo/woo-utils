@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -118,6 +119,14 @@ public class ListUtils {
 			return new ArrayList<>();
 		}
 		return list.stream().filter(predicate).collect(Collectors.toList());
+	}
+	
+	public static <T> void forEach(List<T> list, Consumer<? super T> consumer) {
+		if(list != null) {
+			for(T t : list) {
+				consumer.accept(t);
+			}
+		}
 	}
 	
 	@SafeVarargs
