@@ -17,7 +17,7 @@ public class NumberUtils {
 			return (Integer) obj;
 		}
 		try {
-			return new Integer(obj.toString());
+			return new Integer(obj.toString().trim());
 		} catch (Exception e) {
 			return null;
 		}
@@ -35,7 +35,7 @@ public class NumberUtils {
 			return (Long) obj;
 		}
 		try {
-			return new Long(obj.toString());
+			return new Long(obj.toString().trim());
 		} catch (Exception e) {
 			return null;
 		}
@@ -53,7 +53,26 @@ public class NumberUtils {
 			return (Double) obj;
 		}
 		try {
-			return new Double(obj.toString());
+			return new Double(obj.toString().trim());
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * 转换成BigDecimal，不会抛出异常，转换失败返回null
+	 * @param obj
+	 * @return
+	 */
+	public static BigDecimal parseBigDecimal(Object obj) {
+		if(obj == null) {
+			return null;
+		}
+		if(obj instanceof BigDecimal) {
+			return (BigDecimal) obj;
+		}
+		try {
+			return new BigDecimal(obj.toString().trim());
 		} catch (Exception e) {
 			return null;
 		}

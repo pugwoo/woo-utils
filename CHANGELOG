@@ -1,3 +1,7 @@
+2018年3月14日
+v0.2.9 - [add] JSON增加泛型写法
+       - [add] NumberUtils增加parseDecimal方法
+
 2018年3月2日
 v0.2.8 - [add] 增加JSON的parseArray方法
        - [add] 增加ListUtils的forEach方法
