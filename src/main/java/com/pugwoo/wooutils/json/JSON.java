@@ -36,7 +36,7 @@ public class JSON {
 	public static <T> T parse(String str, Class<T> clazz, Class<?> genericClass) {
 		try {
 			JavaType type =  objectMapper.getTypeFactory()
-					.constructCollectionLikeType(clazz, genericClass);
+					.constructParametricType(clazz, genericClass);
 			return objectMapper.readValue(str, type);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -46,7 +46,7 @@ public class JSON {
 	public static <T> T parse(String str, Class<T> clazz, JavaType genericClass) {
 		try {
 			JavaType type =  objectMapper.getTypeFactory()
-					.constructCollectionLikeType(clazz, genericClass);
+					.constructParametricType(clazz, genericClass);
 			return objectMapper.readValue(str, type);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -56,7 +56,7 @@ public class JSON {
 	public static <T> T parse(String str, Class<T> clazz, Class<?> genericClass1, Class<?> genericClass2) {
 		try {
 			JavaType type =  objectMapper.getTypeFactory()
-					.constructMapLikeType(clazz, genericClass1, genericClass2);
+					.constructParametricType(clazz, genericClass1, genericClass2);
 			return objectMapper.readValue(str, type);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -66,7 +66,7 @@ public class JSON {
 	public static <T> T parse(String str, Class<T> clazz, JavaType genericClass1, JavaType genericClass2) {
 		try {
 			JavaType type =  objectMapper.getTypeFactory()
-					.constructMapLikeType(clazz, genericClass1, genericClass2);
+					.constructParametricType(clazz, genericClass1, genericClass2);
 			return objectMapper.readValue(str, type);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
