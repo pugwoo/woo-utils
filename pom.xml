@@ -6,7 +6,7 @@
 	<groupId>com.pugwoo</groupId>
 	<artifactId>woo-utils</artifactId>
 	<packaging>jar</packaging>
-	<version>0.2.10</version>
+	<version>0.3.0</version>
 	
 	<name>woo-utils</name>
 	<description>the common utils</description>
@@ -54,18 +54,6 @@
             <scope>provided</scope>
 		</dependency>
 		
-		<!-- optional依赖：office相关(excel)-->
-	    <dependency>
-			<groupId>net.sf.jxls</groupId>
-			<artifactId>jxls-core</artifactId>
-			<version>1.0.5</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.jxls</groupId>
-			<artifactId>jxls-reader</artifactId>
-			<version>1.0.5</version>
-		</dependency>
-	
 	    <!-- optional依赖：Redis相关功能需要 -->
 	    <dependency>
 			<groupId>redis.clients</groupId>
