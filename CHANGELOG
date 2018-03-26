@@ -1,3 +1,6 @@
+2018年3月26日
+v0.3.1 - [improve] DateUtils接口调整，parse默认不抛出异常，提供指定抛出异常的接口
+
 2018年3月19日
 v0.3.0 - [del] 删除ExcelTemplate类，woo-utils不再提供
 

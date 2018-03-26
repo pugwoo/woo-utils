@@ -61,60 +61,71 @@ public class DateUtils {
 	}
 	
 	/**
-	 * 自动解析
+	 * 自动解析，不会抛出异常
 	 * @param date
 	 * @return
 	 */
-	public static Date parse(String date) throws ParseException {
+	public static Date parse(String date) {
 		if(date == null || date.trim().isEmpty()) {
 			return null;
 		}
-		String format = determineDateFormat(date);
-		if(format == null) {
-			throw new ParseException("Unparseable date: \"" + date +
-				"\". Supported formats: " + DATE_FORMAT_REGEXPS.values(), -1);
+		String pattern = determineDateFormat(date);
+		if(pattern == null) {
+			LOGGER.error("date parse, pattern not support, date:{}", date);
+			return null;
 		}
-		return new SimpleDateFormat(format).parse(date);
+		try {
+			return new SimpleDateFormat(pattern).parse(date);
+		} catch (ParseException e) {
+			LOGGER.error("parse date error, date:{}", date, e);
+			return null;
+		}
 	}
 	
 	/**
-	 * 解析日期
+	 * 解析日期，不会抛出异常，如果解析失败，打log并返回null
 	 * @param date
 	 * @param pattern 日期格式pattern
 	 */
-	public static Date parse(String date, String pattern) throws ParseException {
+	public static Date parse(String date, String pattern) {
 		if(date == null || date.trim().isEmpty()) {
 			return null;
+		}
+		try {
+			return new SimpleDateFormat(pattern).parse(date);
+		} catch (ParseException e) {
+			LOGGER.error("parse date error, date:{}", date, e);
+			return null;
+		}
+	}
+	
+	/**
+	 * 自动解析，失败抛出异常
+	 * @param date
+	 * @return
+	 */
+	public static Date parseThrowException(String date) throws ParseException {
+		if(date == null || date.trim().isEmpty()) {
+			return null;
+		}
+		String pattern = determineDateFormat(date);
+		if(pattern == null) {
+			throw new ParseException("Unparseable date: \"" + date +
+					"\". Supported formats: " + DATE_FORMAT_REGEXPS.values(), -1);
 		}
 		return new SimpleDateFormat(pattern).parse(date);
 	}
 	
 	/**
-	 * 自动解析，不返回异常，当出现异常时返回null
+	 * 解析日期，失败抛出异常
 	 * @param date
 	 * @return
 	 */
-	public static Date parseSwallowException(String date) {
-		try {
-			return parse(date);
-		} catch (ParseException e) {
-			LOGGER.error("parse fail:{}", date, e);
+	public static Date parseThrowException(String date, String pattern) throws ParseException {
+		if(date == null || date.trim().isEmpty()) {
 			return null;
 		}
-	}
-	
-	/**
-	 * 解析日期，不返回异常，当出现异常时返回null
-	 * @param date
-	 * @return
-	 */
-	public static Date parseSwallowException(String date, String pattern) {
-		try {
-			return parse(date, pattern);
-		} catch (ParseException e) {
-			LOGGER.error("parse fail:{}", date, e);
-			return null;
-		}
+		return new SimpleDateFormat(pattern).parse(date);
 	}
 	
 	/**
