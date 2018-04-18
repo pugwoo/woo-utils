@@ -12,7 +12,63 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.method.HandlerMethod;
+
 public class NetUtils {
+	
+	/**
+	 * 一种简单的CSRF检查方案，用于Spring MVC框架
+	 * 背景：（鉴于每个请求带csrfToken的方式成本过高，前后端依赖加重）
+	 *       （为每个请求指定只有POST方法支持，可以有效防御CSRF，但容易人为疏忽忘加，其次每个接口都加上也增加了工作量）。
+	 * 方案：对于api接口（判断方式是接口方法注解了ResponseBody或类注解了RestController），
+	 *       判断其Referer是否有值且(和目标api同域名或属于白名单域名)，
+	 *       否则csrf校验不通过。
+	 * @param request
+	 * @param handler spring mvc拦截器的handler参数，只处理HandlerMethod类型
+	 * @param whiteDomains 域名白名单，只有系统涉及到跨域才需要设置这个，**不需要带协议和端口**，不检查这两者，例如www.abc.com或112.123.234.456
+	 * @return 返回true表示csrf校验通过，返回false为不通过
+	 */
+	public static boolean csrfPassed(HttpServletRequest request, Object handler, String... whiteDomains) {
+		if(!(handler instanceof HandlerMethod)) {
+			return true;
+		}
+		HandlerMethod handlerMethod = (HandlerMethod) handler;
+		boolean isResponseBody = handlerMethod.getMethodAnnotation(ResponseBody.class) != null;
+		boolean isRestController = false;
+		try {
+			Class<?> clazz = Class.forName("org.springframework.web.bind.annotation.RestController");
+			if(clazz != null) {
+				isRestController = handlerMethod.getBeanType().getAnnotation(RestController.class) != null;
+			}
+		} catch (Exception e) { // RestController is since spring mvc 4, so if it exists
+		}
+		if(!(isResponseBody || isRestController)) {
+			return true;
+		}
+		
+		String referer = request.getHeader("Referer");
+		if(referer == null || referer.trim().isEmpty()) {
+			return false;
+		}
+		
+		String hostname = NetUtils.getHostname(request);
+		if(whiteDomains != null && whiteDomains.length > 0) {
+			for(String domain : whiteDomains) {
+				if(hostname.equalsIgnoreCase(domain)) {
+					return true;
+				}
+			}
+		}
+		
+		String urlHostname = NetUtils.getUrlHostname(referer);
+		if(urlHostname.equalsIgnoreCase(hostname)) {
+			return true;
+		}
+		
+		return false;
+	}
 	
 	/**
 	 * 获得本机的ipv4的所有ip列表，排除本机ip 127.开头的
