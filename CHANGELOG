@@ -1,3 +1,6 @@
+2018年4月19日
+v0.3.3 - [improve] 优化NetUtils.csrfPassed方法，不需要再制定域名白名单了，和CORS彻底解耦
+
 2018年4月18日
 v0.3.2 - [add] 新增NetUtils.csrfPassed方法
 

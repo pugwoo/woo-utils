@@ -18,56 +18,58 @@ import org.springframework.web.method.HandlerMethod;
 
 public class NetUtils {
 	
+	private static boolean isExistRestController = false; // spring 4.0+才有RestController，因此判断下是否有RestController
+	
+	static {
+		try {
+			Class<?> clazz = Class.forName("org.springframework.web.bind.annotation.RestController");
+			isExistRestController = clazz != null;
+		} catch (Exception e) { // ignore
+		}
+	}
+	
 	/**
 	 * 一种简单的CSRF检查方案，用于Spring MVC框架
-	 * 背景：（鉴于每个请求带csrfToken的方式成本过高，前后端依赖加重）
-	 *       （为每个请求指定只有POST方法支持，可以有效防御CSRF，但容易人为疏忽忘加，其次每个接口都加上也增加了工作量）。
-	 * 方案：对于api接口（判断方式是接口方法注解了ResponseBody或类注解了RestController），
-	 *       判断其Referer是否有值且(和目标api同域名或属于白名单域名)，
-	 *       否则csrf校验不通过。
+	 * 有两种其它方案：1. 每个请求带csrfToken，但每个请求带csrfToken的方式成本过高，前后端依赖加重
+	 *       2.为每个请求指定只有POST方法支持，可以有效防御CSRF，但容易人为疏忽忘加，其次每个接口都加上也增加了工作量
+	 *       
+	 * 本方案：对于api接口（判断方式是接口方法注解了ResponseBody或类注解了RestController），
+	 *       要求其为ajax请求，否则csrf校验不通过。
+	 *       为了加强安全性，再加上判断其Referer必须有值
+	 * 
+	 * 说明：ajax请求在现代浏览器中，除非服务器CORS头部允许，否则会被浏览器拦截。
+	 * 
 	 * @param request
 	 * @param handler spring mvc拦截器的handler参数，只处理HandlerMethod类型
-	 * @param whiteDomains 域名白名单，只有系统涉及到跨域才需要设置这个，**不需要带协议和端口**，不检查这两者，例如www.abc.com或112.123.234.456
 	 * @return 返回true表示csrf校验通过，返回false为不通过
 	 */
-	public static boolean csrfPassed(HttpServletRequest request, Object handler, String... whiteDomains) {
+	public static boolean csrfPassed(HttpServletRequest request, Object handler) {
 		if(!(handler instanceof HandlerMethod)) {
 			return true;
 		}
+		
 		HandlerMethod handlerMethod = (HandlerMethod) handler;
 		boolean isResponseBody = handlerMethod.getMethodAnnotation(ResponseBody.class) != null;
 		boolean isRestController = false;
-		try {
-			Class<?> clazz = Class.forName("org.springframework.web.bind.annotation.RestController");
-			if(clazz != null) {
-				isRestController = handlerMethod.getBeanType().getAnnotation(RestController.class) != null;
-			}
-		} catch (Exception e) { // RestController is since spring mvc 4, so if it exists
+		if(isExistRestController) {
+			isRestController = handlerMethod.getBeanType().getAnnotation(RestController.class) != null;
 		}
 		if(!(isResponseBody || isRestController)) {
 			return true;
 		}
 		
+		// jquery及常规js库请求都会带上该头部，不带上该头部的js库不要采用
+	    String requestedWithHeader = request.getHeader("X-Requested-With");
+	    if(!"XMLHttpRequest".equals(requestedWithHeader)) {
+	    	return false;
+	    }
+		
 		String referer = request.getHeader("Referer");
 		if(referer == null || referer.trim().isEmpty()) {
 			return false;
 		}
-		
-		String hostname = NetUtils.getHostname(request);
-		if(whiteDomains != null && whiteDomains.length > 0) {
-			for(String domain : whiteDomains) {
-				if(hostname.equalsIgnoreCase(domain)) {
-					return true;
-				}
-			}
-		}
-		
-		String urlHostname = NetUtils.getUrlHostname(referer);
-		if(urlHostname.equalsIgnoreCase(hostname)) {
-			return true;
-		}
-		
-		return false;
+
+		return true;
 	}
 	
 	/**
