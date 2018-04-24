@@ -1,3 +1,6 @@
+2018年4月24日
+v0.3.4 - [improve] 优化JSON序列化对不存在enum的支持，返回null
+
 2018年4月19日
 v0.3.3 - [improve] 优化NetUtils.csrfPassed方法，不需要再制定域名白名单了，和CORS彻底解耦
 
