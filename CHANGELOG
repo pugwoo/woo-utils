@@ -1,3 +1,6 @@
+2018年4月27日
+v0.3.5 - [add] 增加redisHelper根据pattern获得key和值的接口
+
 2018年4月24日
 v0.3.4 - [improve] 优化JSON序列化对不存在enum的支持，返回null
 

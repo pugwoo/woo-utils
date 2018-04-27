@@ -1,5 +1,9 @@
 package com.pugwoo.wooutils.redis;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import redis.clients.jedis.Jedis;
 
 public interface RedisHelper {
@@ -64,6 +68,42 @@ public interface RedisHelper {
 	 * @return
 	 */
 	<T> T getObject(String key, Class<T> clazz);
+	
+	/**
+	 * 通过keys批量获得redis的key和值
+	 * @param keys
+	 * @return 个数和顺序和keys一直，如果key不存在，则其值为null。整个命令操作失败则返回null
+	 */
+	List<String> getStrings(List<String> keys);
+	
+	/**
+	 * 通过keys批量获得redis的key和值
+	 * @param keys
+	 * @return 个数和顺序和keys一直，如果key不存在，则其值为null。整个命令操作失败则返回null
+	 */
+	<T> List<T> getObjects(List<String> keys, Class<T> clazz);
+	
+	/**
+	 * 通过pattern获得redis的所有key
+	 * @param pattern
+	 * @return 失败返回null
+	 */
+	Set<String> getKeys(String pattern);
+	
+	/**
+	 * 获得redis满足pattern的所有key和值
+	 * @param pattern
+	 * @return 失败返回null
+	 */
+	Map<String, String> getStrings(String pattern);
+	
+	/**
+	 * 获得redis满足pattern的所有key和值
+	 * @param pattern
+	 * @param clazz
+	 * @return 失败返回null
+	 */
+	<T> Map<String, T> getObjects(String pattern, Class<T> clazz);
 	
 	/**
 	 * 删除指定的key

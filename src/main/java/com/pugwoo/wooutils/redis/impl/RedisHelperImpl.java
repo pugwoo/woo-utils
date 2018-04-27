@@ -1,11 +1,17 @@
 package com.pugwoo.wooutils.redis.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.redis.IRedisObjectConverter;
 import com.pugwoo.wooutils.redis.RedisHelper;
 import com.pugwoo.wooutils.redis.RedisLimitParam;
@@ -201,6 +207,103 @@ public class RedisHelperImpl implements RedisHelper {
 		}
 		
 		return redisObjectConverter.convertToObject(value, clazz);
+	}
+	
+	@Override
+	public List<String> getStrings(List<String> keys) {
+		if(keys == null || keys.isEmpty()) {
+			return new ArrayList<>();
+		}
+		Jedis jedis = null;
+		try {
+			jedis = getJedisConnection();
+			List<String> strs = jedis.mget(keys.toArray(new String[0]));
+			return strs;
+		} catch (Exception e) {
+			LOGGER.error("operate jedis error, keys:{}", keys, e);
+			return null;
+		} finally {
+			if (jedis != null) {
+				try {
+					jedis.close();
+				} catch (Exception e) {
+					LOGGER.error("close jedis error, keys:{}", keys, e);
+				}
+			}
+		}
+	}
+	
+	@Override
+	public <T> List<T> getObjects(List<String> keys, Class<T> clazz) {
+		if(redisObjectConverter == null) {
+			throw new RuntimeException("IRedisObjectConverter is null");
+		}
+		List<String> values = getStrings(keys);
+		if(values == null) {
+			return null;
+		}
+		return ListUtils.transform(values, 
+				o -> redisObjectConverter.convertToObject(o, clazz));
+	}
+	
+	@Override
+	public Set<String> getKeys(String pattern) {
+		Jedis jedis = null;
+		try {
+			jedis = getJedisConnection();
+			return jedis.keys(pattern);
+		} catch (Exception e) {
+			LOGGER.error("operate jedis KEYS error, pattern:{}", pattern, e);
+			return null;
+		} finally {
+			if (jedis != null) {
+				try {
+					jedis.close();
+				} catch (Exception e) {
+					LOGGER.error("close jedis error, pattern:{}", pattern, e);
+				}
+			}
+		}
+	}
+	
+	@Override
+	public Map<String, String> getStrings(String pattern) {
+		Set<String> keys = getKeys(pattern);
+		if(keys == null) return null;
+		if(keys.isEmpty()) {
+			return new HashMap<>();
+		}
+		
+		List<String> keyList = new ArrayList<>(keys);
+		List<String> vals = getStrings(keyList);
+		if(vals == null) return null;
+		if(keyList.size() != vals.size()) {
+			return null;
+		}
+		Map<String, String> map = new HashMap<>();
+		for(int i = 0; i < keyList.size(); i++) {
+			map.put(keyList.get(i), vals.get(i));
+		}
+		
+		return map;
+	}
+	
+	@Override
+	public <T> Map<String, T> getObjects(String pattern, Class<T> clazz) {
+		if(redisObjectConverter == null) {
+			throw new RuntimeException("IRedisObjectConverter is null");
+		}
+		
+		Map<String, String> vals = getStrings(pattern);
+		if(vals == null) return null;
+		
+		Map<String, T> result = new HashMap<>();
+		for(Entry<String, String> e : vals.entrySet()) {
+			result.put(e.getKey(), redisObjectConverter.
+					convertToObject(e.getValue(), clazz));
+		}
+		
+		return result;
 	}
 	
 	@Override
