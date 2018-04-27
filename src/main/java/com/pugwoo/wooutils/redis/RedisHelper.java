@@ -84,21 +84,21 @@ public interface RedisHelper {
 	<T> List<T> getObjects(List<String> keys, Class<T> clazz);
 	
 	/**
-	 * 通过pattern获得redis的所有key
+	 * 通过pattern获得redis的所有key。pattern格式详见https://redis.io/commands/keys
 	 * @param pattern
 	 * @return 失败返回null
 	 */
 	Set<String> getKeys(String pattern);
 	
 	/**
-	 * 获得redis满足pattern的所有key和值
+	 * 获得redis满足pattern的所有key和值。pattern格式详见https://redis.io/commands/keys
 	 * @param pattern
 	 * @return 失败返回null
 	 */
 	Map<String, String> getStrings(String pattern);
 	
 	/**
-	 * 获得redis满足pattern的所有key和值
+	 * 获得redis满足pattern的所有key和值。pattern格式详见https://redis.io/commands/keys
 	 * @param pattern
 	 * @param clazz
 	 * @return 失败返回null
