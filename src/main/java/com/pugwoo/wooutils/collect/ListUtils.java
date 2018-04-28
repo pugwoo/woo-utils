@@ -2,10 +2,12 @@ package com.pugwoo.wooutils.collect;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -142,95 +144,92 @@ public class ListUtils {
 		
 		return list;
 	}
-	
+
 	/**
-	 * list交集，算法复杂度:n^2
+	 * list交集，返回List a和List b中都有的值，去重，不保证顺序。
+	 * 算法时间复杂度:O(n)，空间复杂度O(n)
 	 */
-	public static <E extends Comparable<? super E>> List<E> intersection(List<E> a, List<E> b) {
-		if(a == null || b == null) {
+	public static <E> List<E> intersection(List<E> a, List<E> b) {
+		if(a == null || b == null || a.isEmpty() || b.isEmpty()) {
 			return new ArrayList<>();
 		}
-		List<E> result = new ArrayList<>();
-		for(E e1 : a) {
-			for(E e2 : b) {
-				if(e1 == e2 || e1.compareTo(e2) == 0) {
-					result.add(e1);
-					break;
-				}
-			}
-		}
-		return result;
+		Set<E> set = new HashSet<>(b);
+		return filter(a, o -> set.contains(o));
 	}
-	
+
 	/**
-	 * list交集，当a和b中两个元素都有，才放入返回值中。算法复杂度:n^2
+	 * list并集，返回List a或List b有的值，去重，不保证顺序。
+	 * 算法时间复杂度:O(n)，空间复杂度O(n)
 	 */
-	public static <E> List<E> intersection(List<E> a, List<E> b, Comparator<? super E> c) {
-		if(a == null || b == null) {
-			return new ArrayList<>();
-		}
-		List<E> result = new ArrayList<>();
-		for(E e1 : a) {
-			for(E e2 : b) {
-				if(e1 == e2 || c.compare(e1, e2) == 0) {
-					result.add(e1);
-					break;
-				}
-			}
-		}
-		return result;
-	}
-	
-	/**
-	 * list并集，如果b有a没有的，则加入a（不对a和b中的重复元素进行去重）。算法复杂度:n^2
-	 */
-	public static <E extends Comparable<? super E>> List<E> union(List<E> a, List<E> b) {
-		List<E> result = new ArrayList<>();
+	public static <E> List<E> union(List<E> a, List<E> b) {
+		Set<E> result = new HashSet<>();
 		if(a != null) {
 			result.addAll(a);
 		}
-		if(a != null && b != null) {
-			for(E e1 : b) {
-				boolean isExist = false;
-				for(E e2 : a) {
-					if(e1 == e2 || e1.compareTo(e2) == 0) {
-						isExist =  true;
-						break;
-					}
-				}
-				if(!isExist) {
-					result.add(e1);
-				}
-			}
+		if(b != null) {
+			result.addAll(b);
 		}
-		return result;
+		return new ArrayList<>(result);
 	}
 	
 	/**
-	 * list并集，如果b有a没有的，则加入a（不对a和b中的重复元素进行去重）。算法复杂度:n^2
+	 * list相减，返回List a中有但是List b中没有的数据，去重，不保证顺序。
 	 */
-	public static <E> List<E> union(List<E> a, List<E> b, Comparator<? super E> c) {
-		List<E> result = new ArrayList<>();
-		if(a != null) {
-			result.addAll(a);
+	public static <E> List<E> sub(List<E> a, List<E> b) {
+		if(a == null || a.isEmpty()) {
+			return new ArrayList<>();
 		}
-		if(a != null && b != null) {
-			for(E e1 : b) {
-				boolean isExist = false;
-				for(E e2 : a) {
-					if(e1 == e2 || c.compare(e1, e2) == 0) {
-						isExist =  true;
-						break;
-					}
-				}
-				if(!isExist) {
-					result.add(e1);
-				}
-			}
+		if(b == null || b.isEmpty()) {
+			return new ArrayList<>(a);
 		}
-		return result;
+		Set<E> bSet = new HashSet<>(b);
+		return ListUtils.filter(a, o -> !bSet.contains(o));
 	}
 	
+	/**
+	 * 返回List a和List b的笛卡尔积列表
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static <E1, E2> List<Entry<E1, E2>> cartesianProduct(List<E1> a, List<E2> b) {
+		if(a == null || a.isEmpty() || b == null || b.isEmpty()) {
+			return new ArrayList<>();
+		}
+		final List<Entry<E1, E2>> result = new ArrayList<>();
+		ListUtils.forEach(a, o -> {
+			ListUtils.forEach(b, p -> result.add(new MyEntry(o, p)));
+		});
+		return result;
+	}
+
+	static final class MyEntry<K, V> implements Entry<K, V> {
+	    private final K key;
+	    private V value;
+	    public MyEntry(K key, V value) {
+	        this.key = key;
+	        this.value = value;
+	    }
+	    @Override
+	    public K getKey() {
+	        return key;
+	    }
+	    @Override
+	    public V getValue() {
+	        return value;
+	    }
+	    @Override
+	    public V setValue(V value) {
+	        V old = this.value;
+	        this.value = value;
+	        return old;
+	    }
+	}
+
+	/**
+	 * 数值求和
+	 * @param list
+	 * @param mapper
+	 * @return
+	 */
 	public static <T, R> BigDecimal sum(List<T> list, Function<? super T, ? extends R> mapper) {
 		BigDecimal sum = BigDecimal.ZERO;
 		if(list == null) {
