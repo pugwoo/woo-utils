@@ -131,6 +131,22 @@ public class ListUtils {
 		}
 	}
 	
+	/**
+	 * list中是否包含有符合条件的元素
+	 * @param list
+	 * @param predicate
+	 * @return
+	 */
+	public static <T> boolean contains(List<T> list, Predicate<? super T> predicate) {
+		if(list == null) return false;
+		for(T t : list) {
+			if(predicate.test(t)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	@SafeVarargs
 	public static <E> List<E> newArrayList(E... elements) {
 		if(elements == null || elements.length == 0) {

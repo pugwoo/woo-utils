@@ -1,3 +1,6 @@
+2018年4月29日
+v0.3.7 - [add] 增加ListUtils的contains方法
+
 2018年4月28日
 v0.3.6 - [add] 增加ListUtils的sub方法，同时优化intersection和union方法
 
