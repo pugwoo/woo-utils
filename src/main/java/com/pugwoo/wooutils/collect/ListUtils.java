@@ -90,6 +90,19 @@ public class ListUtils {
 	}
 	
 	/**
+	 * 转换list为set
+	 * @param list
+	 * @param mapper 支持lambda写法
+	 * @return
+	 */
+	public static <T, R> Set<R> toSet(List<T> list, Function<? super T, ? extends R> mapper) {
+		if(list == null) {
+			return new HashSet<>();
+		}
+		return list.stream().map(mapper).collect(Collectors.toSet());
+	}
+	
+	/**
 	 * 转换list为map,返回的是LinkedHashMap，顺序和list一样
 	 * @param list
 	 * @param keyMapper
