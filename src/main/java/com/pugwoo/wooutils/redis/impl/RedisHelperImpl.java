@@ -425,7 +425,9 @@ public class RedisHelperImpl implements RedisHelper {
 	}
 
 	public void setPort(Integer port) {
-		this.port = port;
+		if(port != null && port >= 0) {
+			this.port = port;
+		}
 	}
 	
 	public Integer getMaxConnection() {
