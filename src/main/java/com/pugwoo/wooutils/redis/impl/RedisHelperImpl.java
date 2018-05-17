@@ -441,7 +441,9 @@ public class RedisHelperImpl implements RedisHelper {
 	}
 
 	public void setDatabase(Integer database) {
-		this.database = database;
+		if(database != null && database >= 0) {
+			this.database = database;
+		}
 	}
 
 	public IRedisObjectConverter getRedisObjectConverter() {
