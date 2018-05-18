@@ -31,7 +31,9 @@ public class RedisHelperImpl implements RedisHelper {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(RedisHelperImpl.class);
 	
-	private String host = "127.0.0.1";
+	/**约定：当host为null或blank时，表示不初始化*/
+	protected String host = null;
+	
 	private Integer port = 6379;
 	private Integer maxConnection = 128;
 	private String password = null;
@@ -41,7 +43,7 @@ public class RedisHelperImpl implements RedisHelper {
 	private IRedisObjectConverter redisObjectConverter;
 	
 	/**
-	 * 单例的JedisPool，实际项目中可以配置在string，也可以是懒加载
+	 * 单例的JedisPool，懒加载初始化
 	 */
 	private JedisPool pool;
 	
@@ -49,7 +51,7 @@ public class RedisHelperImpl implements RedisHelper {
 	public Jedis getJedisConnection() {
 		if(pool == null) {
 			synchronized (this) {
-				if(pool == null) {
+				if(pool == null && host != null && !host.trim().isEmpty()) {
 					JedisPoolConfig poolConfig = new JedisPoolConfig();
 					poolConfig.setMaxTotal(maxConnection); // 最大链接数
 					poolConfig.setMaxIdle(64);

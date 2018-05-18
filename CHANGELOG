@@ -1,3 +1,6 @@
+2018年5月18日
+v0.3.10 -[del] 移除RedisHelperImpl的ip和port默认值，当配置不全时，不初始化
+
 2018年5月17日
 v0.3.9 - [improve] RedisHelperImpl不允许设置null值给database和port属性，且必须>=0
 
