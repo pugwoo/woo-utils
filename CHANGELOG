@@ -1,3 +1,9 @@
+2018年5月31日
+v0.4.0 - [add] 新增将List数据结构转换成树形Tree数据结构的工具TreeUtils
+       - [add] StringTools增加isBlank isEmpty isNotBlank isNotEmpty isIn方法
+       - [improve] 更新pom.xml中slf4j-api和jackson-databind至最新版本
+       - [add] 增加EnglishNumberToWords工具类
+
 2018年5月18日
 v0.3.10 -[del] 移除RedisHelperImpl的ip和port默认值，当配置不全时，不初始化
 

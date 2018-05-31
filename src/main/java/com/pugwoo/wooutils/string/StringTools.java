@@ -1,5 +1,6 @@
 package com.pugwoo.wooutils.string;
 
+import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -8,6 +9,44 @@ import java.util.Random;
  */
 public class StringTools {
 	
+	public static boolean isEmpty(String str) {
+		return str == null || str.isEmpty();
+	}
+	
+	public static boolean isNotEmpty(String str) {
+		return !isEmpty(str);
+	}
+	
+	public static boolean isBlank(String str) {
+        if(isEmpty(str)) return true;
+        for (int i = 0; i < str.length(); i++) {
+            if (!Character.isWhitespace(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+	}
+	
+	public static boolean isNotBlank(String str) {
+		return !isBlank(str);
+	}
+	
+	/**
+	 * 判断字符串str是否在strSet列表中
+	 * @param str
+	 * @param strSet
+	 * @return
+	 */
+	public static boolean isIn(String str, String... strSet) {
+		if(strSet == null) return false;
+		for(String s : strSet) {
+			if(Objects.equals(str, s)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * 把obj转换成string，如果obj为null，返回null
 	 * @param obj
