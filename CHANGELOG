@@ -1,3 +1,6 @@
+2018年6月3日
+v0.4.1 - [add] StringTools增加isInIgnoreCase方法
+
 2018年5月31日
 v0.4.0 - [add] 新增将List数据结构转换成树形Tree数据结构的工具TreeUtils
        - [add] StringTools增加isBlank isEmpty isNotBlank isNotEmpty isIn方法

@@ -46,6 +46,25 @@ public class StringTools {
 		}
 		return false;
 	}
+	
+	/**
+	 * 判断字符串str是否在strSet列表中,不区分大小写
+	 * @param str
+	 * @param strSet
+	 * @return
+	 */
+	public static boolean isInIgnoreCase(String str, String... strSet) {
+		if(strSet == null) return false;
+		for(String s : strSet) {
+			if(str == null && s == null) {
+				return true;
+			}
+			if(str != null && str.equalsIgnoreCase(s)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * 把obj转换成string，如果obj为null，返回null
