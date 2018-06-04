@@ -6,6 +6,16 @@ import java.util.List;
 import java.util.Map;
 
 public class TestJson {
+	
+	public static class MyClass {
+		private Map<String, Object> map;
+		public Map<String, Object> getMap() {
+			return map;
+		}
+		public void setMap(Map<String, Object> map) {
+			this.map = map;
+		}
+	}
 
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
@@ -36,6 +46,10 @@ public class TestJson {
 		String json2 = "{\"arr\":\"20180102\"}";
 		Map<String, Date> m = JSON.parse(json2, Map.class, String.class, Date.class);
 		System.out.println(m);
+		
+		// ====== 
+		MyClass myclass = JSON.parse("{\"map\":\"\"}", MyClass.class);
+		System.out.println(JSON.toJson(myclass));
 		
 	}
 	

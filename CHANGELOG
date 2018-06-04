@@ -1,3 +1,6 @@
+2018年6月4日
+v0.4.2 - [improve] JSON转换支持将空字符设置为null赋值给对象
+
 2018年6月3日
 v0.4.1 - [add] StringTools增加isInIgnoreCase方法
 
