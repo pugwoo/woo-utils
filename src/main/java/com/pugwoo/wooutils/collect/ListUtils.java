@@ -160,6 +160,27 @@ public class ListUtils {
 		return false;
 	}
 	
+	/**
+	 * list中mapper映射的值是否有重复，【不包括null值的比较，null值不包括在重复判断中】
+	 * @param list
+	 * @param mapper
+	 * @return
+	 */
+	public static <T, R> boolean hasDuplicate(List<T> list,
+			Function<? super T, ? extends R> mapper) {
+		Set<R> sets = new HashSet<>();
+		for(T t : list) {
+			if(t == null) continue;
+			R r = mapper.apply(t);
+			if(r == null) continue;
+			if(sets.contains(r)) {
+				return true;
+			}
+			sets.add(r);
+		}
+		return false;
+	}
+
 	@SafeVarargs
 	public static <E> List<E> newArrayList(E... elements) {
 		if(elements == null || elements.length == 0) {

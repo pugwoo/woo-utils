@@ -1,3 +1,6 @@
+2018年6月9日
+v0.4.3 - [add] ListUtils增加hasDuplicate工具
+
 2018年6月4日
 v0.4.2 - [improve] JSON转换支持将空字符设置为null赋值给对象
 
