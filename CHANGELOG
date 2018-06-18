@@ -1,3 +1,6 @@
+2018年6月18日
+v0.4.4 - [fix] 修复NetUtils.csrfPassed对上传文件判断错误的问题
+
 2018年6月9日
 v0.4.3 - [add] ListUtils增加hasDuplicate工具
 
