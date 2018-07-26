@@ -9,7 +9,8 @@ import redis.clients.jedis.Jedis;
 public interface RedisHelper {
 
 	/**
-	 * 拿Jedis连接，用完Jedis之后【必须】close jedis，这个非常重要
+	 * 拿Jedis连接，用完Jedis之后【必须】close jedis，这个非常重要。
+	 * @return 当发生异常或配置信息不足时，返回null
 	 */
 	Jedis getJedisConnection();
 	

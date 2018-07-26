@@ -1,3 +1,6 @@
+2018年7月26日
+v0.4.5 - [fix] 修复jedis拿connection时抛出异常，导致资源可能没有回收的问题
+
 2018年6月18日
 v0.4.4 - [fix] 修复NetUtils.csrfPassed对上传文件判断错误的问题
 

@@ -68,7 +68,17 @@ public class RedisHelperImpl implements RedisHelper {
 				}
 			}
 		}
-		return pool.getResource();
+		if(pool == null) {return null;}
+		Jedis jedis = null;
+		try {
+			jedis = pool.getResource();
+		} catch (Exception e) {
+			if(jedis != null) {
+				jedis.close();
+				jedis = null;
+			}
+		}
+		return jedis;
 	}
 	
 	@Override
