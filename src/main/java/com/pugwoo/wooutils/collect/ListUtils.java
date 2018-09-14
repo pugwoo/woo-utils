@@ -1,13 +1,8 @@
 package com.pugwoo.wooutils.collect;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -103,7 +98,7 @@ public class ListUtils {
 	}
 	
 	/**
-	 * 转换list为map,返回的是LinkedHashMap，顺序和list一样
+	 * 转换list为map,返回的是LinkedHashMap，顺序和list一样。如果key相同，值会被最后一个覆盖。
 	 * @param list
 	 * @param keyMapper
 	 * @param valueMapper
@@ -117,12 +112,40 @@ public class ListUtils {
 		}
 		Map<K, V> map = new LinkedHashMap<>();
 		for(T t : list) {
-			if(t == null) continue;
+			if(t == null) {continue;}
 			map.put(keyMapper.apply(t), valueMapper.apply(t));
 		}
 		return map;
 	}
-	
+
+	/**
+	 * 转换list为map<Key, List<>>
+	 * @param list
+	 * @param keyMapper
+	 * @param valueMapper
+	 * @return
+	 */
+	public static <T, K, V> Map<K, List<V>> toMapList(List<T> list,
+			Function<? super T, ? extends K> keyMapper,
+			Function<? super T, ? extends V> valueMapper) {
+		if(list == null) {
+			return new HashMap<>();
+		}
+		Map<K, List<V>> map = new HashMap<>();
+		for(T t : list) {
+			if(t == null) {continue;}
+			K key = keyMapper.apply(t);
+			List<V> values = map.get(key);
+			if(values == null) {
+				values = new ArrayList<>();
+				map.put(key, values);
+			}
+			V value = valueMapper.apply(t);
+			values.add(value);
+		}
+		return map;
+	}
+
 	/**
 	 * filter一个list
 	 * @param list
