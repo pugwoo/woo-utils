@@ -3,16 +3,18 @@ package com.pugwoo.wooutils.redis;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import redis.clients.jedis.Jedis;
 
 public interface RedisHelper {
 
 	/**
-	 * 拿Jedis连接，用完Jedis之后【必须】close jedis，这个非常重要。
-	 * @return 当发生异常或配置信息不足时，返回null
+	 * 传入jedis，然后自行实现逻辑，最后会自动关闭jedis资源
+	 * @param jedisToFunc
+	 * @return 返回jedisToFunc的返回值
 	 */
-	Jedis getJedisConnection();
+	<R> R execute(Function<Jedis, R> jedisToFunc);
 	
 	/**
 	 * 设置字符串

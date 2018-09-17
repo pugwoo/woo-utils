@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.Objects;
 import java.util.Set;
 
@@ -45,10 +46,9 @@ public class RedisHelperImpl implements RedisHelper {
 	/**
 	 * 单例的JedisPool，懒加载初始化
 	 */
-	private JedisPool pool;
+	private volatile JedisPool pool;
 	
-	@Override
-	public Jedis getJedisConnection() {
+	private Jedis getJedisConnection() {
 		if(pool == null) {
 			synchronized (this) {
 				if(pool == null && host != null && !host.trim().isEmpty()) {
@@ -82,6 +82,23 @@ public class RedisHelperImpl implements RedisHelper {
 	}
 	
 	@Override
+	public <R> R execute(Function<Jedis, R> jedisToFunc) {
+		Jedis jedis = null;
+		try {
+			jedis = getJedisConnection();
+			return jedisToFunc.apply(jedis);
+		} finally {
+			if(jedis != null) {
+				try {
+					jedis.close();
+				} catch (Exception e) {
+					LOGGER.error("close jedis error", e);
+				}
+			}
+		}
+	}
+	
+	@Override
 	protected void finalize() throws Throwable {
 		if(pool != null && !pool.isClosed()) {
 			pool.close();
@@ -94,23 +111,15 @@ public class RedisHelperImpl implements RedisHelper {
 		if(value == null) { // null值不需要设置
 			return true;
 		}
-		Jedis jedis = null;
-		try {
-			jedis = getJedisConnection();
-			jedis.setex(key, expireSecond, value);
-			return true;
-		} catch (Exception e) {
-			LOGGER.error("operate jedis error, key:{}, value:{}", key, value, e);
-			return false;
-		} finally {
-			if (jedis != null) {
-				try {
-					jedis.close();
-				} catch (Exception e) {
-					LOGGER.error("close jedis error, key:{}, value:{}", key, value, e);
-				}
+		return execute(jedis -> {
+			try {
+				jedis.setex(key, expireSecond, value);
+				return true;
+			} catch (Exception e) {
+				LOGGER.error("operate jedis error, key:{}, value:{}", key, value, e);
+				return false;
 			}
-		}
+		});
 	}
 	
 	@Override
@@ -127,85 +136,53 @@ public class RedisHelperImpl implements RedisHelper {
 		if(value == null) { // null值不需要设置
 			return true;
 		}
-		Jedis jedis = null;
-		try {
-			jedis = getJedisConnection();
-			String result = jedis.set(key, value, "NX", "EX", expireSecond);
-			return result != null;
-		} catch (Exception e) {
-			LOGGER.error("operate jedis error, key:{}, value:{}", key, value, e);
-			return false;
-		} finally {
-			if (jedis != null) {
-				try {
-					jedis.close();
-				} catch (Exception e) {
-					LOGGER.error("close jedis error, key:{}, value:{}", key, value, e);
-				}
+		return execute(jedis -> {
+			try {
+				String result = jedis.set(key, value, "NX", "EX", expireSecond);
+				return result != null;
+			} catch (Exception e) {
+				LOGGER.error("operate jedis error, key:{}, value:{}", key, value, e);
+				return false;
 			}
-		}
+		});
 	}
 	
 	@Override
 	public boolean setExpire(String key, int expireSecond) {
-		Jedis jedis = null;
-		try {
-			jedis = getJedisConnection();
-			jedis.expire(key, expireSecond);
-			return true;
-		} catch (Exception e) {
-			LOGGER.error("operate jedis error, key:{}", key, e);
-			return false;
-		} finally {
-			if (jedis != null) {
-				try {
-					jedis.close();
-				} catch (Exception e) {
-					LOGGER.error("close jedis error, key:{}", key, e);
-				}
+		return execute(jedis -> {
+			try {
+				jedis.expire(key, expireSecond);
+				return true;
+			} catch (Exception e) {
+				LOGGER.error("operate jedis error, key:{}", key, e);
+				return false;
 			}
-		}
+		});
 	}
 	
 	@Override
 	public long getExpireSecond(String key) {
-		Jedis jedis = null;
-		try {
-			jedis = getJedisConnection();
-			return jedis.ttl(key);
-		} catch (Exception e) {
-			LOGGER.error("operate jedis error, key:{}", key, e);
-			return -999;
-		} finally {
-			if (jedis != null) {
-				try {
-					jedis.close();
-				} catch (Exception e) {
-					LOGGER.error("close jedis error, key:{}", key, e);
-				}
+		return (long) execute(jedis -> {
+			try {
+				return jedis.ttl(key);
+			} catch (Exception e) {
+				LOGGER.error("operate jedis error, key:{}", key, e);
+				return -999L;
 			}
-		}
+		});
 	}
 	
 	@Override
 	public String getString(String key) {
-		Jedis jedis = null;
-		try {
-			jedis = getJedisConnection();
-			String str = jedis.get(key);
-			return str;
-		} catch (Exception e) {
-			LOGGER.error("operate jedis error, key:{}", key, e);
-			return null;
-		} finally {
-			if (jedis != null) {
-				try {
-					jedis.close();
-				} catch (Exception e) {
-					LOGGER.error("close jedis error, key:{}", key, e);
-				}
+		return execute(jedis -> {
+			try {
+				String str = jedis.get(key);
+				return str;
+			} catch (Exception e) {
+				LOGGER.error("operate jedis error, key:{}", key, e);
+				return null;
 			}
-		}
+		});
 	}
 	
 	@Override
@@ -226,23 +203,16 @@ public class RedisHelperImpl implements RedisHelper {
 		if(keys == null || keys.isEmpty()) {
 			return new ArrayList<>();
 		}
-		Jedis jedis = null;
-		try {
-			jedis = getJedisConnection();
-			List<String> strs = jedis.mget(keys.toArray(new String[0]));
-			return strs;
-		} catch (Exception e) {
-			LOGGER.error("operate jedis error, keys:{}", keys, e);
-			return null;
-		} finally {
-			if (jedis != null) {
-				try {
-					jedis.close();
-				} catch (Exception e) {
-					LOGGER.error("close jedis error, keys:{}", keys, e);
-				}
+		
+		return execute(jedis -> {
+			try {
+				List<String> strs = jedis.mget(keys.toArray(new String[0]));
+				return strs;
+			} catch (Exception e) {
+				LOGGER.error("operate jedis error, keys:{}", keys, e);
+				return null;
 			}
-		}
+		});
 	}
 	
 	@Override
@@ -260,22 +230,14 @@ public class RedisHelperImpl implements RedisHelper {
 	
 	@Override
 	public Set<String> getKeys(String pattern) {
-		Jedis jedis = null;
-		try {
-			jedis = getJedisConnection();
-			return jedis.keys(pattern);
-		} catch (Exception e) {
-			LOGGER.error("operate jedis KEYS error, pattern:{}", pattern, e);
-			return null;
-		} finally {
-			if (jedis != null) {
-				try {
-					jedis.close();
-				} catch (Exception e) {
-					LOGGER.error("close jedis error, pattern:{}", pattern, e);
-				}
+		return execute(jedis -> {
+			try {
+				return jedis.keys(pattern);
+			} catch (Exception e) {
+				LOGGER.error("operate jedis KEYS error, pattern:{}", pattern, e);
+				return null;
 			}
-		}
+		});
 	}
 	
 	@Override
@@ -320,23 +282,15 @@ public class RedisHelperImpl implements RedisHelper {
 	
 	@Override
 	public boolean remove(String key) {
-		Jedis jedis = null;
-		try {
-			jedis = getJedisConnection();
-			jedis.del(key);
-			return true;
-		} catch (Exception e) {
-			LOGGER.error("operate jedis error, key:{}", key, e);
-			return false;
-		} finally {
-			if (jedis != null) {
-				try {
-					jedis.close();
-				} catch (Exception e) {
-					LOGGER.error("close jedis error, key:{}", key, e);
-				}
+		return execute(jedis -> {
+			try {
+				jedis.del(key);
+				return true;
+			} catch (Exception e) {
+				LOGGER.error("operate jedis error, key:{}", key, e);
+				return false;
 			}
-		}
+		});
 	}
 	
 	@Override
@@ -344,41 +298,34 @@ public class RedisHelperImpl implements RedisHelper {
 		if(value == null) { // 不支持value设置为null
 			return false;
 		}
-		Jedis jedis = null;
-		try {
-			jedis = getJedisConnection();
-			jedis.watch(key);
-			String readOldValue = jedis.get(key);
-			if(Objects.equals(readOldValue, oldValue)) {
-				Transaction tx = jedis.multi();
-				Response<String> result = null;
-				if(expireSeconds != null && expireSeconds >= 0) {
-					result = tx.setex(key, expireSeconds, value);
-				} else {
-					result = tx.set(key, value);
-				}
+		
+		return execute(jedis -> {
+			try {
+				jedis.watch(key);
+				String readOldValue = jedis.get(key);
+				if(Objects.equals(readOldValue, oldValue)) {
+					Transaction tx = jedis.multi();
+					Response<String> result = null;
+					if(expireSeconds != null && expireSeconds >= 0) {
+						result = tx.setex(key, expireSeconds, value);
+					} else {
+						result = tx.set(key, value);
+					}
 
-				List<Object> results = tx.exec();
-				if(results == null || result == null || result.get() == null) {
-					return false;
+					List<Object> results = tx.exec();
+					if(results == null || result == null || result.get() == null) {
+						return false;
+					} else {
+						return true;
+					}
 				} else {
-					return true;
+					return false;
 				}
-			} else {
+			} catch (Exception e) {
+				LOGGER.error("compareAndSet error,key:{}, value:{}, oldValue:{}", key, value, oldValue);
 				return false;
 			}
-		} catch (Exception e) {
-			LOGGER.error("compareAndSet error,key:{}, value:{}, oldValue:{}", key, value, oldValue);
-			return false;
-		} finally {
-			if (jedis != null) {
-				try {
-					jedis.close();
-				} catch (Exception e) {
-					LOGGER.error("close jedis error, key:{}", key, e);
-				}
-			}
-		}
+		});
 	}
 
 	@Override

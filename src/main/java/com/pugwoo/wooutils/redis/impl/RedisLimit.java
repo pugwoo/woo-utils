@@ -11,8 +11,6 @@ import com.pugwoo.wooutils.redis.RedisHelper;
 import com.pugwoo.wooutils.redis.RedisLimitParam;
 import com.pugwoo.wooutils.redis.RedisLimitPeroidEnum;
 
-import redis.clients.jedis.Jedis;
-
 /**
  * 使用redis控制全局的操作次数限制。可用于限制自然单位时间（天、小时、分钟、周等），全局的总操作次数。<br>
  * <br>
@@ -68,47 +66,43 @@ public class RedisLimit {
 			return -1;
 		}
 		
-		Jedis jedis = null;
-		try {
-			key = getKey(limitParam, key);
-			jedis = redisHelper.getJedisConnection();
-
-			Long retVal = null;
-			if(count == 1) {
-				retVal = jedis.incr(key);
-			} else {
-				retVal = jedis.incrBy(key, count);
-			}
-			
-			if(retVal == null) {
-				LOGGER.error("useLimitCount fail,namespace:{},key:{},count:{},ret is null",
-						limitParam.getNamespace(), key, count);
-				return -1;
-			}
-			
-			if(retVal == count && limitParam.getLimitPeroid().getExpireSecond() >= 0) {
-				jedis.expire(key, limitParam.getLimitPeroid().getExpireSecond());
-			}
-			
-			if(retVal <= limitParam.getLimitCount()) {
-				return retVal;
-			} else {
-				if(count == 1) { // 还原现场
-					jedis.decr(key);
+		final String fkey = getKey(limitParam, key);
+		
+		return (long) redisHelper.execute(jedis -> {
+			try {
+				Long retVal = null;
+				if(count == 1) {
+					retVal = jedis.incr(fkey);
 				} else {
-					jedis.decrBy(key, count);
+					retVal = jedis.incrBy(fkey, count);
 				}
-				return -1; // 已经超额
+				
+				if(retVal == null) {
+					LOGGER.error("useLimitCount fail,namespace:{},key:{},count:{},ret is null",
+							limitParam.getNamespace(), fkey, count);
+					return -1L;
+				}
+				
+				if(retVal == count && limitParam.getLimitPeroid().getExpireSecond() >= 0) {
+					jedis.expire(fkey, limitParam.getLimitPeroid().getExpireSecond());
+				}
+				
+				if(retVal <= limitParam.getLimitCount()) {
+					return retVal;
+				} else {
+					if(count == 1) { // 还原现场
+						jedis.decr(fkey);
+					} else {
+						jedis.decrBy(fkey, count);
+					}
+					return -1L; // 已经超额
+				}
+			} catch (Exception e) {
+				LOGGER.error("getLimitCount error, namespace:{}, key:{}",
+						limitParam.getNamespace(), fkey, e);
+				return -1L;
 			}
-		} catch (Exception e) {
-			LOGGER.error("getLimitCount error, namespace:{}, key:{}",
-					limitParam.getNamespace(), key, e);
-			return -1;
-		} finally {
-			if(jedis != null) {
-				jedis.close();
-			}
-		}
+		});
 	}
 	
 	/**
