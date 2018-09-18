@@ -10,7 +10,10 @@ import redis.clients.jedis.Jedis;
 public interface RedisHelper {
 
 	/**
-	 * 传入jedis，然后自行实现逻辑，最后会自动关闭jedis资源
+	 * 传入jedis，然后自行实现逻辑，最后会自动关闭jedis资源。
+	 * 
+	 * 该方法用于替换原来getJedisConnection方法
+	 * 
 	 * @param jedisToFunc
 	 * @return 返回jedisToFunc的返回值
 	 */

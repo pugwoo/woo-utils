@@ -2,7 +2,10 @@ package com.pugwoo.wooutils.redis;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
+import java.util.UUID;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.json.JSON;
@@ -13,9 +16,10 @@ public class TestRedisHelper {
 	
 	public static RedisHelper getRedisHelper() {
 		RedisHelperImpl redisHelper = new RedisHelperImpl();
-		redisHelper.setHost("127.0.0.1");
+		redisHelper.setHost("192.168.0.101");
 		redisHelper.setPort(6379);
-		redisHelper.setPassword("");
+		redisHelper.setPassword("123456789");
+		redisHelper.setDatabase(1);
 		
 		IRedisObjectConverter redisObjectConverter = new JsonRedisObjectConverter();
 		redisHelper.setRedisObjectConverter(redisObjectConverter);
@@ -23,31 +27,28 @@ public class TestRedisHelper {
 		return redisHelper;
 	}
 	
-	static class Student {
-		@SuppressWarnings("unused")
-		private Long id;
-		@SuppressWarnings("unused")
-		private String name;
-		@SuppressWarnings("unused")
-		private Date birth;
-		@SuppressWarnings("unused")
-		private List<BigDecimal> score;
-		
-		// 对于jackson field序列化  setter也不是必须的
-		public void setId(Long id) {
-			this.id = id;
-		}
-		public void setName(String name) {
-			this.name = name;
-		}
-		public void setBirth(Date birth) {
-			this.birth = birth;
-		}
-		public void setScore(List<BigDecimal> score) {
-			this.score = score;
-		}
+	@Test
+	public void test1() {
+		RedisHelper redisHelper = getRedisHelper();
+		String key = "mytest" + UUID.randomUUID().toString();
+		String value = UUID.randomUUID().toString();
+		redisHelper.setString(key, 1000, value);
+		String value2 = redisHelper.getString(key);
+	    Assert.assertTrue(value.equals(value2));
 	}
-
+	
+	@Test
+	public void test2() {
+		RedisHelper redisHelper = getRedisHelper();
+		String key = "mytest" + UUID.randomUUID().toString();
+		boolean result1 = redisHelper.setStringIfNotExist(key, 60, "you");
+		boolean result2 = redisHelper.setStringIfNotExist(key, 60, "you");
+		boolean result3 = redisHelper.setStringIfNotExist(key, 60, "you");
+		Assert.assertTrue(result1);
+		Assert.assertFalse(result2);
+		Assert.assertFalse(result3);
+	}
+	
 	public static void main(String[] args) {
 		RedisHelper redisHelper = getRedisHelper();
 		System.out.println(redisHelper.setStringIfNotExist("hi", 60, "you"));
@@ -63,6 +64,6 @@ public class TestRedisHelper {
 		
 		redisHelper.setObject("student", 3600, student);
 		Student fromRedis = redisHelper.getObject("student", Student.class);
-		System.out.println(JSON.toJson(fromRedis)); // 这里会输出{}，因为没有getter，得用debug看数据
+		System.out.println(JSON.toJson(fromRedis));
 	}
 }

@@ -12,9 +12,10 @@
 	
 	<!-- redis -->
 	<bean id="redisHelper" class="com.pugwoo.wooutils.redis.impl.RedisHelperImpl">
-	    <property name="host" value="127.0.0.1"/>
+	    <property name="host" value="192.168.0.101"/>
 	    <property name="port" value="6379"/>
-	    <property name="password" value=""/>
+	    <property name="password" value="123456789"/>
+	    <property name="database" value="1" />
 	</bean>
 
 	<bean class="com.pugwoo.wooutils.redis.RedisSyncAspect" />
