@@ -3,9 +3,12 @@ package com.pugwoo.wooutils.redis;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Transaction;
 
 public interface RedisHelper {
 
@@ -18,6 +21,21 @@ public interface RedisHelper {
 	 * @return 返回jedisToFunc的返回值
 	 */
 	<R> R execute(Function<Jedis, R> jedisToFunc);
+	
+	/**
+	 * 按顺序执行pipeline，返回所有执行的结果列表
+	 * @param pipeline
+	 * @return
+	 */
+	List<Object> executePipeline(Consumer<Pipeline> pipeline);
+	
+	/**
+	 * 执行redis事务，keys是需要watch的key
+	 * @param transaction
+	 * @param keys
+	 * @return
+	 */
+	List<Object> executeTransaction(Consumer<Transaction> transaction, String ...keys);
 	
 	/**
 	 * 设置字符串

@@ -2,6 +2,7 @@ package com.pugwoo.wooutils.redis;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.Assert;
@@ -47,6 +48,31 @@ public class TestRedisHelper {
 		Assert.assertTrue(result1);
 		Assert.assertFalse(result2);
 		Assert.assertFalse(result3);
+	}
+	
+	@Test
+	public void test3() {
+		RedisHelper redisHelper = getRedisHelper();
+		List<Object> objs = redisHelper.executePipeline(pipeline -> {
+			pipeline.set("hello", "world");
+			pipeline.get("hello");
+		});
+		for(Object obj : objs) {
+			System.out.println(obj);
+		}
+	}
+	
+	@Test
+	public void test4() {
+		RedisHelper redisHelper = getRedisHelper();
+		String key = UUID.randomUUID().toString();
+		List<Object> objs = redisHelper.executeTransaction(transaction -> {
+			transaction.set(key, "hello");
+			transaction.get(key);
+		}, key);
+		for(Object obj : objs) {
+			System.out.println(obj);
+		}
 	}
 	
 	public static void main(String[] args) {

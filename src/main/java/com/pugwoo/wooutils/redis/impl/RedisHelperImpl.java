@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.Objects;
 import java.util.Set;
@@ -20,6 +21,7 @@ import com.pugwoo.wooutils.redis.RedisLimitParam;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Protocol;
 import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
@@ -87,6 +89,48 @@ public class RedisHelperImpl implements RedisHelper {
 		try {
 			jedis = getJedisConnection();
 			return jedisToFunc.apply(jedis);
+		} finally {
+			if(jedis != null) {
+				try {
+					jedis.close();
+				} catch (Exception e) {
+					LOGGER.error("close jedis error", e);
+				}
+			}
+		}
+	}
+	
+	@Override
+	public List<Object> executePipeline(Consumer<Pipeline> pipeline) {
+		Jedis jedis = null;
+		try {
+			jedis = getJedisConnection();
+			Pipeline jedisPipeline = jedis.pipelined();
+			pipeline.accept(jedisPipeline);
+			return jedisPipeline.syncAndReturnAll();
+		} finally {
+			if(jedis != null) {
+				try {
+					jedis.close();
+				} catch (Exception e) {
+					LOGGER.error("close jedis error", e);
+				}
+			}
+		}
+	}
+	
+	@Override
+	public List<Object> executeTransaction(Consumer<Transaction> transaction, String... keys) {
+		Jedis jedis = null;
+		try {
+			jedis = getJedisConnection();
+            if (keys != null && keys.length > 0) {
+                jedis.watch(keys);
+            }
+            
+            Transaction jedisTransaction = jedis.multi();
+            transaction.accept(jedisTransaction);
+            return jedisTransaction.exec();
 		} finally {
 			if(jedis != null) {
 				try {
