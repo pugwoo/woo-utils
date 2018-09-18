@@ -1,3 +1,7 @@
+2018年9月18日
+v0.4.7 - [add] RedisHelper增加execute executePipeline executeTransaction 3个方法
+       - [del] RedisHelper移出掉getJedisConnection方法，请使用execute
+
 2018年9月14日
 v0.4.6 - [add] ListUtils增加toMapList方法
 
