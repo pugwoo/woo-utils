@@ -155,6 +155,7 @@ public class Browser {
 	/**
 	 * post方式请求HTTP
 	 * @param httpUrl
+	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @return
 	 * @throws IOException
 	 */
@@ -173,6 +174,7 @@ public class Browser {
 	/**
 	 * post方式请求HTTP
 	 * @param httpUrl
+	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @return
 	 * @throws IOException
 	 */
@@ -201,6 +203,7 @@ public class Browser {
 	/**
 	 * post方式请求HTTP
 	 * @param httpUrl
+	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @return
 	 * @throws IOException
 	 */
@@ -221,7 +224,7 @@ public class Browser {
 	/**
 	 * post方式请求HTTP
 	 * @param httpUrl
-	 * @param outputStream 如果指定了输出流，则输出到指定的输出流，此时返回的值没有html正文bytes
+	 * @param outputStream 如果指定了输出流，则输出到指定的输出流，此时返回的值没有html正文bytes; outputStream会自动close掉
 	 * @return
 	 * @throws IOException
 	 */
@@ -233,6 +236,7 @@ public class Browser {
 	/**
 	 * post方式请求HTTP
 	 * @param httpUrl
+	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @return
 	 * @throws IOException
 	 */
@@ -244,7 +248,7 @@ public class Browser {
 	 * post方式请求HTTP，异步方式
 	 * @param httpUrl
 	 * @param inputStream
-	 * @param outputStream 如果指定了输出流，则输出到指定的输出流，此时返回的值没有html正文bytes
+	 * @param outputStream 如果指定了输出流，则输出到指定的输出流，此时返回的值没有html正文bytes; outputStream会自动close掉
 	 * @return
 	 * @throws IOException
 	 */
@@ -307,6 +311,7 @@ public class Browser {
 	 * 1. 如果是301或302跳转，且跳转链接不同于当前链接，则再请求跳转的URL
 	 * 
 	 * @param httpUrl
+	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @return
 	 * @throws IOException
 	 */
@@ -319,6 +324,7 @@ public class Browser {
 	 * 1. 如果是301或302跳转，且跳转链接不同于当前链接，则再请求跳转的URL
 	 * 
 	 * @param httpUrl
+	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @return
 	 * @throws IOException
 	 */
@@ -344,7 +350,7 @@ public class Browser {
 	 * 
 	 * @param httpUrl
 	 * @param params
-	 * @param outputStream
+	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @return
 	 */
 	public HttpResponse get(String httpUrl, Map<String, Object> params, OutputStream outputStream) 
@@ -358,7 +364,7 @@ public class Browser {
 	 * 
 	 * @param httpUrl
 	 * @param params
-	 * @param outputStream
+	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @return
 	 */
 	public HttpResponse getAsync(String httpUrl, Map<String, Object> params, OutputStream outputStream) 
@@ -371,6 +377,7 @@ public class Browser {
 	 * 1. 如果是301或302跳转，且跳转链接不同于当前链接，则再请求跳转的URL
 	 * 
 	 * @param httpUrl
+	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @return
 	 * @throws IOException
 	 */
@@ -456,7 +463,7 @@ public class Browser {
 	 * 构造httpResponse
 	 * @param urlConnection
 	 * @param httpResponse
-	 * @param outputStream
+	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @param isAsync 是否异步，只有当outputStream!=null时，该值才有效。
 	 *        当isAsync为true时，HttpResponse可以获得已下载的字节数。
 	 * @throws IOException 
@@ -515,12 +522,26 @@ public class Browser {
 							future.isFinished = true;
 						} catch (IOException e) {
 							LOGGER.error("outputStream write error", e);
+						} finally {
+							try {
+								outputStream.close();
+							} catch (IOException e) {
+								LOGGER.error("outputStrema close error", e);
+							}
 						}
 					}
-				}).start();;
+				}).start();
 			} else {
-				while((len = in.read(buf)) != -1) {
-					outputStream.write(buf, 0, len);
+				try {
+					while((len = in.read(buf)) != -1) {
+						outputStream.write(buf, 0, len);
+					}
+				} finally {
+					try {
+						outputStream.close();
+					} catch (IOException e) {
+						LOGGER.error("outputStrema close error", e);
+					}
 				}
 			}
 		} else {
