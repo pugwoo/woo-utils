@@ -3,6 +3,8 @@ package com.pugwoo.wooutils.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.Scanner;
 
 /**
@@ -43,6 +45,17 @@ public class IOUtils {
 		String content = scanner.useDelimiter("\\Z").next();
 		scanner.close();
 		return content;
+	}
+
+	/**
+	 * 获取MyPipe管道对象<br/>
+	 *  调用者使用后请自行调用 .close 方法关闭
+	 * @return MyPipe
+	 */
+	public static MyPipe getPipe() throws IOException {
+		PipedInputStream inputStream = new PipedInputStream();
+		PipedOutputStream outputStream = new PipedOutputStream(inputStream);
+		return new MyPipe(inputStream, outputStream);
 	}
 
 }
