@@ -48,9 +48,8 @@ public class IOUtils {
 	}
 
 	/**
-	 * 获取MyPipe管道对象<br/>
-	 *  调用者使用后请自行调用 .close 方法关闭
-	 * @return MyPipe
+	 * 获取一条管道，也即提供了这条管道的输出流和输入流。
+	 *  调用者使用后请自行调用 inputStream和outputStream的close方法关闭流
 	 */
 	public static MyPipe getPipe() throws IOException {
 		PipedInputStream inputStream = new PipedInputStream();
