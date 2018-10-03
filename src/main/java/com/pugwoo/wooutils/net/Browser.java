@@ -11,6 +11,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,7 +107,19 @@ public class Browser {
 	public void addRequestProperty(String key, String value) {
 		requestProperty.put(key, value);
 	}
-	
+
+	/**设置请求时的头部，RequestProperty，该设置是Browser实例全局的。<br/>
+	 * 设置HttpServletRequest的所有头部信息
+	 * @param request HttpServletRequest
+	 */
+	public void addRequestProperty(HttpServletRequest request) {
+		Enumeration<String> headerNames = request.getHeaderNames();
+		while(headerNames.hasMoreElements()) {
+			String headerName = headerNames.nextElement();
+			addRequestProperty(headerName, request.getHeader(headerName));
+		}
+	}
+
 	/**
 	 * 自行添加cookie
 	 * @param domain 域名，例如abc.com
