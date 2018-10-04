@@ -1,3 +1,6 @@
+2018年10月3日
+v0.4.9 - [add] Net.Browser提供通过HttpServletRequest设置头部方法
+
 2018年10月1日
 v0.4.8 - [fix] Net.Browser对于OutputStream下载完后应该close掉
        - [add] IOUtils增加获取一条管道的方法getPipe
