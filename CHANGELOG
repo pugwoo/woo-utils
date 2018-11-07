@@ -1,3 +1,6 @@
+2018年11月6日
+v0.5.0 - [add] 新增对比同一个类两个对象是否相等的工具EqualUtils
+
 2018年10月3日
 v0.4.9 - [add] Net.Browser提供通过HttpServletRequest设置头部方法
 
