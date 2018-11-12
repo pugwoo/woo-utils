@@ -92,21 +92,37 @@ public class EqualUtils {
             return Objects.equals(a.toString(), b.toString());
         }
 
+        if(a.getClass().isArray() || b.getClass().isArray()) {
+            if(!a.getClass().isArray() || !b.getClass().isArray()) {
+                return false;
+            }
+            return compareArray(a, b);
+        }
+
+        if(a instanceof List || b instanceof  List) {
+            if(!(a instanceof  List) || !(b instanceof List)) {
+                return false;
+            }
+            return compareList((List<?>) a, (List<?>) b);
+        }
+
+        if(a instanceof Map || b instanceof Map) {
+            if(!(a instanceof Map) || !(b instanceof Map)) {
+                return false;
+            }
+            return compareMap((Map<?, ?>) a, (Map<?, ?>) b);
+        }
+
+        if(a instanceof Set || b instanceof Set) {
+            if(!(a instanceof Set) || !(b instanceof Set)) {
+                return false;
+            }
+            return compareSet((Set<?>) a, (Set<?>) b);
+        }
+
         if(a.getClass().equals(b.getClass())) {
             if(a instanceof Comparable) {
                 return ((Comparable) a).compareTo(b) == 0;
-            }
-            if(a.getClass().isArray()) {
-                return compareArray(a, b);
-            }
-            if(a instanceof List) {
-                return compareList((List<?>) a, (List<?>) b);
-            }
-            if(a instanceof Map) {
-                return compareMap((Map<?, ?>) a, (Map<?, ?>) b);
-            }
-            if(a instanceof Set) {
-                return compareSet((Set<?>) a, (Set<?>) b);
             }
 
             // 用户自定义对象，对于每个get方法的值进行比对
@@ -156,24 +172,31 @@ public class EqualUtils {
 
     private boolean compareArray(Object a, Object b) {
         if(a instanceof int[]) {
+            if(!(b instanceof int[])) {return false;}
             return Arrays.equals((int[])a, (int[])b);
         }
         if(a instanceof byte[]) {
+            if(!(b instanceof byte[])) {return false;}
             return Arrays.equals((byte[])a, (byte[])b);
         }
         if(a instanceof char[]) {
+            if(!(b instanceof char[])) {return false;}
             return Arrays.equals((char[])a, (char[])b);
         }
         if(a instanceof long[]) {
+            if(!(b instanceof long[])) {return false;}
             return Arrays.equals((long[])a, (long[])b);
         }
         if(a instanceof float[]) {
+            if(!(b instanceof float[])) {return false;}
             return Arrays.equals((float[])a, (float[])b);
         }
         if(a instanceof short[]) {
+            if(!(b instanceof short[])) {return false;}
             return Arrays.equals((short[])a, (short[])b);
         }
         if(a instanceof double[]) {
+            if(!(b instanceof double[])) {return false;}
             return Arrays.equals((double[])a, (double[])b);
         }
         if(a instanceof boolean[]) {
@@ -182,6 +205,11 @@ public class EqualUtils {
 
         // 现在a已经是Object[]
         Object[] arrA = (Object[]) a;
+        if(b instanceof int[] || b instanceof byte[] || b instanceof char[] || b instanceof long[]
+           || b instanceof float[] || b instanceof short[] || b instanceof double[] || b instanceof boolean[]) {
+            return false;
+        }
+
         Object[] arrB = (Object[]) b;
         if(arrA.length != arrB.length) {
             return false;
