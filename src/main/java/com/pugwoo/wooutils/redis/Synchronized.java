@@ -32,7 +32,7 @@ public @interface Synchronized {
 	/**
 	 * 当进程/线程没有拿到锁时，阻塞等待的时间，单位毫秒，默认10000毫秒
 	 * （取10秒这个值考虑的是人类等待计算机反馈的不耐烦的大概时间）。
-	 * 如果需要阻塞，请设置为0.
+	 * 如果不需要阻塞，请设置为0.
 	 * @return
 	 */
 	int waitLockMillisecond() default 10000;
