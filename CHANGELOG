@@ -1,5 +1,5 @@
 2018年12月14日
-v0.5.2 - [update] Browser的user agent更新
+v0.5.2(未发布) - [update] Browser的user agent更新
        - [modify] Browser的addRequestProperty方法修改为addRequestHeader
 
 2018年11月12日
