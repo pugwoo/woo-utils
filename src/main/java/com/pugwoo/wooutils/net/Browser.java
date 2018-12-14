@@ -101,22 +101,22 @@ public class Browser {
 		}
 	}
 	
-	/**设置请求时的头部，RequestProperty，该设置是Browser实例全局的。
+	/**设置请求时的头部，该设置是Browser实例全局的。
 	 * 注意：请不要用这个方法设置cookie，请使用addCookie方法
 	 */
-	public void addRequestProperty(String key, String value) {
+	public void addRequestHeader(String key, String value) {
 		requestProperty.put(key, value);
 	}
 
-	/**设置请求时的头部，RequestProperty，该设置是Browser实例全局的。<br/>
+	/**设置请求时的头部，该设置是Browser实例全局的。<br/>
 	 * 设置HttpServletRequest的所有头部信息
 	 * @param request HttpServletRequest
 	 */
-	public void addRequestProperty(HttpServletRequest request) {
+	public void addRequestHeader(HttpServletRequest request) {
 		Enumeration<String> headerNames = request.getHeaderNames();
 		while(headerNames.hasMoreElements()) {
 			String headerName = headerNames.nextElement();
-			addRequestProperty(headerName, request.getHeader(headerName));
+			addRequestHeader(headerName, request.getHeader(headerName));
 		}
 	}
 
@@ -476,7 +476,6 @@ public class Browser {
 	/**
 	 * 构造httpResponse
 	 * @param urlConnection
-	 * @param httpResponse
 	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @param isAsync 是否异步，只有当outputStream!=null时，该值才有效。
 	 *        当isAsync为true时，HttpResponse可以获得已下载的字节数。
