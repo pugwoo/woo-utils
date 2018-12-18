@@ -1,6 +1,7 @@
 2018年12月14日
-v0.5.2(未发布) - [update] Browser的user agent更新
+v0.5.2 - [update] Browser的user agent更新
        - [modify] Browser的addRequestProperty方法修改为addRequestHeader
+       - [add] 增加归并排序工具类MergeSortUtils
 
 2018年11月12日
 v0.5.1 - [improve] 工具EqualUtils增加对不同类的对象的比对
