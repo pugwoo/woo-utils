@@ -1,3 +1,6 @@
+2018年12月20日
+v0.5.3 - [add] 增加DateUtils的getDaysToToday方法
+
 2018年12月14日
 v0.5.2 - [update] Browser的user agent更新
        - [modify] Browser的addRequestProperty方法修改为addRequestHeader
