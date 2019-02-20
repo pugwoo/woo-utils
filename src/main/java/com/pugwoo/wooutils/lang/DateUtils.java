@@ -1,14 +1,14 @@
 package com.pugwoo.wooutils.lang;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DateUtils {
 	
@@ -176,6 +176,9 @@ public class DateUtils {
 	public static long getDaysToToday(Date date) {
 		long now = System.currentTimeMillis();
 		long today = now - (now % (24 * 3600 * 1000)) - timezoneOffset;
+		if(now - today >= (24 * 3600 * 1000)) {
+			today += (24 * 3600 * 1000);
+		}
 		long dateTimestamp = date.getTime();
 		if(dateTimestamp < today) {
 			return (today - dateTimestamp) / (24 * 3600 * 1000) + 1;
