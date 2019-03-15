@@ -113,6 +113,7 @@ public interface RedisHelper {
 	 * @param pattern
 	 * @return 失败返回null
 	 */
+	@Deprecated
 	Set<String> getKeys(String pattern);
 	
 	/**
@@ -121,6 +122,7 @@ public interface RedisHelper {
 	 * @param pattern
 	 * @return 失败返回null
 	 */
+	@Deprecated
 	Map<String, String> getStrings(String pattern);
 	
 	/**
@@ -130,6 +132,7 @@ public interface RedisHelper {
 	 * @param clazz
 	 * @return 失败返回null
 	 */
+	@Deprecated
 	<T> Map<String, T> getObjects(String pattern, Class<T> clazz);
 	
 	/**
