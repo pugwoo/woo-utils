@@ -1,14 +1,14 @@
 package com.pugwoo.wooutils.redis;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Transaction;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.Transaction;
 
 public interface RedisHelper {
 
@@ -109,6 +109,7 @@ public interface RedisHelper {
 	
 	/**
 	 * 通过pattern获得redis的所有key。pattern格式详见https://redis.io/commands/keys
+	 * 【重要：redis的keys对于大量key的情况有性能问题，应尽量少用keys】
 	 * @param pattern
 	 * @return 失败返回null
 	 */
@@ -116,6 +117,7 @@ public interface RedisHelper {
 	
 	/**
 	 * 获得redis满足pattern的所有key和值。pattern格式详见https://redis.io/commands/keys
+	 * 【重要：redis的keys对于大量key的情况有性能问题，应尽量少用keys】
 	 * @param pattern
 	 * @return 失败返回null
 	 */
@@ -123,6 +125,7 @@ public interface RedisHelper {
 	
 	/**
 	 * 获得redis满足pattern的所有key和值。pattern格式详见https://redis.io/commands/keys
+	 * 【重要：redis的keys对于大量key的情况有性能问题，应尽量少用keys】
 	 * @param pattern
 	 * @param clazz
 	 * @return 失败返回null
