@@ -2,6 +2,7 @@ package com.pugwoo.wooutils.redis;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.ScanResult;
 import redis.clients.jedis.Transaction;
 
 import java.util.List;
@@ -106,10 +107,19 @@ public interface RedisHelper {
 	 * @return 个数和顺序和keys一直，如果key不存在，则其值为null。整个命令操作失败则返回null
 	 */
 	<T> List<T> getObjects(List<String> keys, Class<T> clazz);
+
+	/**
+	 * 使用scan的方式获得key的列表【建议少用，适用于非高频的定时任务中】
+	 * @param cursor 上次查询的游标位置，第一次查询传null或空字符串
+	 * @param pattern 匹配字符串
+	 * @param count 查询的总数
+	 * @return 返回的是匹配到的redis key
+	 */
+	ScanResult<String> getKeys(String cursor, String pattern, int count);
 	
 	/**
 	 * 通过pattern获得redis的所有key。pattern格式详见https://redis.io/commands/keys
-	 * 【重要：redis的keys对于大量key的情况有性能问题，应尽量少用keys】
+	 * 【重要：redis的keys对于大量key的情况有性能问题，应尽量少用keys；如果确实需要，请用scan代替】
 	 * @param pattern
 	 * @return 失败返回null
 	 */
@@ -118,7 +128,7 @@ public interface RedisHelper {
 	
 	/**
 	 * 获得redis满足pattern的所有key和值。pattern格式详见https://redis.io/commands/keys
-	 * 【重要：redis的keys对于大量key的情况有性能问题，应尽量少用keys】
+	 * 【重要：redis的keys对于大量key的情况有性能问题，应尽量少用keys；如果确实需要，请用scan代替】
 	 * @param pattern
 	 * @return 失败返回null
 	 */
@@ -127,7 +137,7 @@ public interface RedisHelper {
 	
 	/**
 	 * 获得redis满足pattern的所有key和值。pattern格式详见https://redis.io/commands/keys
-	 * 【重要：redis的keys对于大量key的情况有性能问题，应尽量少用keys】
+	 * 【重要：redis的keys对于大量key的情况有性能问题，应尽量少用keys；如果确实需要，请用scan代替】
 	 * @param pattern
 	 * @param clazz
 	 * @return 失败返回null

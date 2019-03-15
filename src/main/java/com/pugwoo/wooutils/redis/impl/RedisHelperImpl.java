@@ -1,30 +1,17 @@
 package com.pugwoo.wooutils.redis.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.Objects;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.redis.IRedisObjectConverter;
 import com.pugwoo.wooutils.redis.RedisHelper;
 import com.pugwoo.wooutils.redis.RedisLimitParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import redis.clients.jedis.*;
 
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.Protocol;
-import redis.clients.jedis.Response;
-import redis.clients.jedis.Transaction;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * 大部分实现时间: 2016年11月2日 15:10:21
@@ -271,8 +258,28 @@ public class RedisHelperImpl implements RedisHelper {
 		return ListUtils.transform(values, 
 				o -> redisObjectConverter.convertToObject(o, clazz));
 	}
-	
+
 	@Override
+	public ScanResult<String> getKeys(String cursor, String pattern, int count) {
+		if(cursor == null) {
+			cursor = "";
+		}
+		final String _cursor = cursor;
+		return execute(jedis -> {
+			try {
+				ScanParams scanParams = new ScanParams();
+				scanParams.match(pattern);
+				scanParams.count(count);
+				return jedis.scan(_cursor, scanParams);
+			} catch (Exception e) {
+				LOGGER.error("operate jedis SCAN error, pattern:{}, cursor:{}, count:{}",
+						pattern, _cursor, count, e);
+				return null;
+			}
+		});
+	}
+
+	@Override @Deprecated
 	public Set<String> getKeys(String pattern) {
 		return execute(jedis -> {
 			try {
@@ -284,7 +291,7 @@ public class RedisHelperImpl implements RedisHelper {
 		});
 	}
 	
-	@Override
+	@Override @Deprecated
 	public Map<String, String> getStrings(String pattern) {
 		Set<String> keys = getKeys(pattern);
 		if(keys == null) return null;
@@ -306,7 +313,7 @@ public class RedisHelperImpl implements RedisHelper {
 		return map;
 	}
 	
-	@Override
+	@Override @Deprecated
 	public <T> Map<String, T> getObjects(String pattern, Class<T> clazz) {
 		if(redisObjectConverter == null) {
 			throw new RuntimeException("IRedisObjectConverter is null");

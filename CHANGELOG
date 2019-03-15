@@ -1,3 +1,5 @@
+v0.5.5 - [improve] 废弃redis的keys操作，使用scan代替
+
 2019年2月20日
 v0.5.4 - [fix] 修复DateUtils.getDaysToToday在每天8点钟之前的计算错误
 

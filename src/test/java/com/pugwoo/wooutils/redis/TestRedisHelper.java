@@ -6,6 +6,7 @@ import com.pugwoo.wooutils.redis.impl.JsonRedisObjectConverter;
 import com.pugwoo.wooutils.redis.impl.RedisHelperImpl;
 import org.junit.Assert;
 import org.junit.Test;
+import redis.clients.jedis.ScanResult;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -16,11 +17,11 @@ public class TestRedisHelper {
 	
 	public static RedisHelper getRedisHelper() {
 		RedisHelperImpl redisHelper = new RedisHelperImpl();
-		redisHelper.setHost("192.168.0.101");
-		redisHelper.setPort(6379);
-		redisHelper.setPassword("123456789");
-		redisHelper.setDatabase(1);
-		
+		redisHelper.setHost("10.100.99.40");
+		redisHelper.setPort(31512);
+		// redisHelper.setPassword("123456789");
+		redisHelper.setDatabase(0);
+
 		IRedisObjectConverter redisObjectConverter = new JsonRedisObjectConverter();
 		redisHelper.setRedisObjectConverter(redisObjectConverter);
 		
@@ -55,6 +56,7 @@ public class TestRedisHelper {
 		List<Object> objs = redisHelper.executePipeline(pipeline -> {
 			pipeline.set("hello", "world");
 			pipeline.get("hello");
+
 		});
 		for(Object obj : objs) {
 			System.out.println(obj);
@@ -73,6 +75,23 @@ public class TestRedisHelper {
 			System.out.println(obj);
 		}
 	}
+
+	@Test
+	public void testScan() {
+	    RedisHelper redisHelper = getRedisHelper();
+        ScanResult<String> keys = redisHelper.getKeys(null, "*", 1);
+        for(String key : keys.getResult()) {
+            System.out.println(key);
+        }
+
+        System.out.println("===================");
+
+        keys = redisHelper.getKeys(keys.getStringCursor(), "*", 1);
+        for(String key : keys.getResult()) {
+            System.out.println(key);
+        }
+
+    }
 	
 	public static void main(String[] args) {
 		RedisHelper redisHelper = getRedisHelper();
