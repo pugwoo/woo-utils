@@ -1,17 +1,16 @@
 package com.pugwoo.wooutils.redis;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.json.JSON;
 import com.pugwoo.wooutils.redis.impl.JsonRedisObjectConverter;
 import com.pugwoo.wooutils.redis.impl.RedisHelperImpl;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 public class TestRedisHelper {
 	
@@ -51,7 +50,7 @@ public class TestRedisHelper {
 	}
 	
 	@Test
-	public void test3() {
+	public void testPipeline() {
 		RedisHelper redisHelper = getRedisHelper();
 		List<Object> objs = redisHelper.executePipeline(pipeline -> {
 			pipeline.set("hello", "world");
