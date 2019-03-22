@@ -45,7 +45,7 @@ public class Browser {
 	private Map<String, String> requestProperty = new HashMap<String, String>();
 
 	/** 默认浏览器userAgent: Chrome Win10*/
-	private String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36";
+	private String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.26 Safari/537.36 Core/1.63.6823.400";
 
 	public void setUserAgent(String userAgent) {
 		this.USER_AGENT = userAgent;
