@@ -1,16 +1,19 @@
 package com.pugwoo.wooutils.net;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import org.junit.Test;
+
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
-
 public class TestBrowser {
+
+	@Test
+	public void testGet1() throws Exception {
+		Browser browser = new Browser();
+		HttpResponse resp = browser.get("http://www.baidu.com");
+		System.out.println(resp.getContentString());
+	}
 	
 	// 测试上传文件
 	@Test
