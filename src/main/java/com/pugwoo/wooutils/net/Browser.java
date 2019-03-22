@@ -31,7 +31,7 @@ public class Browser {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(Browser.class);
 	
-	public class HttpResponseFuture {
+	public static class HttpResponseFuture {
 		/**已经下载的字节数*/
 		public long downloadedBytes;
 		/**是否已经下载完成*/
@@ -49,6 +49,16 @@ public class Browser {
 
 	public void setUserAgent(String userAgent) {
 		this.USER_AGENT = userAgent;
+	}
+
+	private String charset = "utf8";
+
+	/**
+	 * 设置整个Browser实例全局的字符编码，默认utf8
+	 * @param charset
+	 */
+	public void setCharset(String charset) {
+		this.charset = charset;
 	}
 	
 	/**连接和读取的超时时间，也即最长的超时时间是timeoutSeconds*2*/
@@ -595,7 +605,7 @@ public class Browser {
 	
 	/**multipart/form-data编码方式
 	 * @throws IOException */
-	private static byte[] buildPostString(Map<String, Object> params, String boundary)
+	private byte[] buildPostString(Map<String, Object> params, String boundary)
 			throws IOException {
 		if(params == null || params.isEmpty()) {
 			return new byte[0];
@@ -603,19 +613,19 @@ public class Browser {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		for(Entry<String, Object> entry : params.entrySet()) {
-			baos.write(("--" + boundary + "\r\n").getBytes());
+			baos.write(toBytes("--" + boundary + "\r\n"));
 			String str = "Content-Disposition: form-data; name=\"" + 
-					URLEncoder.encode(entry.getKey(), "UTF-8") + "\"";
-			baos.write(str.getBytes());
+				 urlEncode(entry.getKey()) + "\"";
+			baos.write(toBytes(str));
 			if(entry.getValue() instanceof BrowserPostFile) {
 				BrowserPostFile file = (BrowserPostFile) entry.getValue();
 				String str1 = "; filename=\"" + 
-						URLEncoder.encode(file.getFilename(), "UTF-8") + "\"\r\n";
-				baos.write(str1.getBytes());
+					urlEncode(file.getFilename()) + "\"\r\n";
+				baos.write(toBytes(str1));
 				String contentType = "Content-Type: " + file.getContentType();
-				baos.write(contentType.getBytes());
+				baos.write(toBytes(contentType));
 			}
-			baos.write("\r\n\r\n".getBytes());
+			baos.write(toBytes("\r\n\r\n"));
 			if(entry.getValue() instanceof BrowserPostFile) {
 				BrowserPostFile file = (BrowserPostFile) entry.getValue();
 				if(file.getBytes() != null) {
@@ -636,54 +646,46 @@ public class Browser {
 			} else {
 				Object value = entry.getValue();
 				if(value == null) {value = "";}
-				baos.write(value.toString().getBytes());
+				baos.write(toBytes(value.toString()));
 			}
-			baos.write("\r\n".getBytes());
+			baos.write(toBytes("\r\n"));
 		}
 		
 		if(!params.isEmpty()) {
-			baos.write(("--" + boundary + "--").getBytes());
+			baos.write(toBytes(("--" + boundary + "--")));
 		}
 		
 		return baos.toByteArray();
 	}
 
 	/**转换成json格式*/
-	private static byte[] buildPostJson(Object obj) {
+	private byte[] buildPostJson(Object obj) {
 	    if(obj == null) {
 	        return new byte[0];
         }
-        return JSON.toJson(obj).getBytes();
+        return toBytes(JSON.toJson(obj));
     }
 	
 	/**application/x-www-form-urlencoded编码方式*/
-	private static byte[] buildPostString(Map<String, Object> params) {
+	private byte[] buildPostString(Map<String, Object> params) {
 		if(params == null || params.isEmpty()) {
 			return new byte[0];
 		}
 		StringBuilder sb = new StringBuilder();
 		boolean needAppendAnd = false;
 		for(Entry<String, Object> entry : params.entrySet()) {
-			try {
-				if(needAppendAnd) {
-					sb.append("&");
-				}
-				sb.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-				sb.append("=");
-				if(entry.getValue() != null) {
-					sb.append(URLEncoder.encode(entry.getValue().toString(), "UTF-8"));
-				}
-				needAppendAnd = true;
-			} catch (UnsupportedEncodingException e) {
-				LOGGER.error("UnsupportedEncodingException", e);
+			if(needAppendAnd) {
+				sb.append("&");
 			}
+			sb.append(urlEncode(entry.getKey()));
+			sb.append("=");
+			if(entry.getValue() != null) {
+				sb.append(urlEncode(entry.getValue().toString()));
+			}
+			needAppendAnd = true;
 		}
-		
-		try {
-			return sb.toString().getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			return new byte[0];
-		}
+
+		return toBytes(sb.toString());
 	}
 	
 	/**
@@ -692,7 +694,7 @@ public class Browser {
 	 * @param params
 	 * @return
 	 */
-	private static String appendParamToUrl(String httpUrl, Map<String, Object> params) {
+	private String appendParamToUrl(String httpUrl, Map<String, Object> params) {
 		if(params == null || params == null || params.isEmpty()) {
 			return httpUrl;
 		}
@@ -709,22 +711,56 @@ public class Browser {
 		
 		boolean needAppendAnd = false;
 		for(Entry<String, Object> entry : params.entrySet()) {
-			try {
-				if(needAppendAnd) {
-					sb.append("&");
-				}
-				sb.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-				sb.append("=");
-				if(entry.getValue() != null) {
-					sb.append(URLEncoder.encode(entry.getValue().toString(), "UTF-8"));
-				}
-				needAppendAnd = true;
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
+			if(needAppendAnd) {
+				sb.append("&");
 			}
+			sb.append(urlEncode(entry.getKey()));
+			sb.append("=");
+			if(entry.getValue() != null) {
+				sb.append(urlEncode(entry.getValue().toString()));
+			}
+			needAppendAnd = true;
 		}
 		
 		return sb.toString();
+	}
+
+	private byte[] toBytes(String str) {
+		if(str == null) {
+			return new byte[0];
+		}
+		if(charset == null) {
+			return str.getBytes();
+		} else {
+			try {
+				return str.getBytes(charset);
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.error("transform string:{} to byte[] fail, charset:{}",
+						str, charset, e);
+				return new byte[0];
+			}
+		}
+	}
+
+	private String urlEncode(String str) {
+		if(str == null) {
+			return "";
+		}
+		if(charset == null) {
+			try {
+				return URLEncoder.encode(str, "utf8");
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.error("url encode string:{} fail, charset:utf8", str, e);
+				return "";
+			}
+		} else {
+			try {
+				return URLEncoder.encode(str, charset);
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.error("url encode string:{} fail, charset:{}", str, charset, e);
+				return "";
+			}
+		}
 	}
 	
 }
