@@ -1,31 +1,17 @@
 package com.pugwoo.wooutils.net;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.URL;
-import java.net.URLEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.net.ssl.*;
+import javax.servlet.http.HttpServletRequest;
+import java.io.*;
+import java.net.*;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import javax.servlet.http.HttpServletRequest;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 2016年2月4日 15:16:42 
@@ -145,7 +131,7 @@ public class Browser {
 	}
 	
 	/**
-	 * post方式请求HTTP
+	 * post方式请求HTTP，params使用queryString或formdata方式组装
 	 * @param httpUrl
 	 * @return
 	 * @throws IOException
@@ -167,7 +153,7 @@ public class Browser {
 	}
 	
 	/**
-	 * post方式请求HTTP
+	 * post方式请求HTTP，params使用queryString或formdata方式组装
 	 * @param httpUrl
 	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @return
@@ -186,7 +172,7 @@ public class Browser {
 	}
 	
 	/**
-	 * post方式请求HTTP
+	 * post方式请求HTTP，params使用queryString或formdata方式组装
 	 * @param httpUrl
 	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @return
