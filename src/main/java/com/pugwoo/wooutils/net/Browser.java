@@ -1,5 +1,6 @@
 package com.pugwoo.wooutils.net;
 
+import com.pugwoo.wooutils.json.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +16,7 @@ import java.util.Map.Entry;
 
 /**
  * 2016年2月4日 15:16:42 
- * 模拟一个浏览器发HTTP请求，不包括页面处理
+ * 模拟一个浏览器发HTTP请求，不包括页面处理。默认编码是utf8，可以全局指定编码
  * 
  * 计划支持的特性：
  * 1. 支持指定为输出流 【done】
@@ -164,12 +165,50 @@ public class Browser {
 			String boundary = "----WebKitFormBoundaryYp0ZBDEHwALiqVW5";
 			Map<String, String> header = new HashMap<>();
 			header.put("Content-Type", "multipart/form-data; boundary=" + boundary);
-			return post(httpUrl, new ByteArrayInputStream(buildPostString(params, boundary)),
+			return _post(httpUrl, new ByteArrayInputStream(buildPostString(params, boundary)),
 					outputStream, false, header);
 		} else {
 			return post(httpUrl, buildPostString(params), outputStream);
 		}
 	}
+
+    /**
+     * post方式请求HTTP，转换成json形式提交
+     * @param httpUrl
+     * @param toJson
+     * @return
+     */
+    public HttpResponse postJson(String httpUrl, Object toJson) throws IOException {
+        return postJson(httpUrl, buildPostJson(toJson), null);
+    }
+
+    /**
+     * post方式请求HTTP，转换成json形式提交
+     * @param httpUrl
+     * @param toJson
+     * @param outputStream
+     * @return
+     */
+	public HttpResponse postJson(String httpUrl, Object toJson, OutputStream outputStream) throws IOException {
+        Map<String, String> header = new HashMap<>();
+        header.put("Content-Type", "application/json");
+        return _post(httpUrl, new ByteArrayInputStream(buildPostJson(toJson)),
+                outputStream, false, header);
+    }
+
+    /**
+     * 异步post方式请求HTTP，转换成json形式提交
+     * @param httpUrl
+     * @param toJson
+     * @param outputStream
+     * @return
+     */
+    public HttpResponse postJsonAsync(String httpUrl, Object toJson, OutputStream outputStream) throws IOException {
+        Map<String, String> header = new HashMap<>();
+        header.put("Content-Type", "application/json");
+        return _post(httpUrl, new ByteArrayInputStream(buildPostJson(toJson)),
+                outputStream, true, header);
+    }
 	
 	/**
 	 * post方式请求HTTP，params使用queryString或formdata方式组装
@@ -183,7 +222,7 @@ public class Browser {
 			String boundary = "----WebKitFormBoundaryYp0ZBDEHwALiqVW5";
 			Map<String, String> header = new HashMap<>();
 			header.put("Content-Type", "multipart/form-data; boundary=" + boundary);
-			return post(httpUrl, new ByteArrayInputStream(buildPostString(params, boundary)),
+			return _post(httpUrl, new ByteArrayInputStream(buildPostString(params, boundary)),
 					outputStream, true, header);
 		} else {
 			return postAsync(httpUrl, buildPostString(params), outputStream);
@@ -230,7 +269,7 @@ public class Browser {
 	 */
 	public HttpResponse post(String httpUrl, InputStream inputStream, OutputStream outputStream)
 			throws IOException {
-		return post(httpUrl, inputStream, outputStream, false, null);
+		return _post(httpUrl, inputStream, outputStream, false, null);
 	}
 	
 	/**
@@ -254,10 +293,10 @@ public class Browser {
 	 */
 	public HttpResponse postAsync(String httpUrl, InputStream inputStream, OutputStream outputStream)
 	        throws IOException {
-		return post(httpUrl, inputStream, outputStream, true, null);
+		return _post(httpUrl, inputStream, outputStream, true, null);
 	}
 	
-	private HttpResponse post(String httpUrl, InputStream inputStream, OutputStream outputStream,
+	private HttpResponse _post(String httpUrl, InputStream inputStream, OutputStream outputStream,
 			boolean isAsync, Map<String, String> requestHeader) throws IOException {
 		IOException ie = null;
 		for(int i = 0; i < retryTimes; i++) {
@@ -608,6 +647,14 @@ public class Browser {
 		
 		return baos.toByteArray();
 	}
+
+	/**转换成json格式*/
+	private static byte[] buildPostJson(Object obj) {
+	    if(obj == null) {
+	        return new byte[0];
+        }
+        return JSON.toJson(obj).getBytes();
+    }
 	
 	/**application/x-www-form-urlencoded编码方式*/
 	private static byte[] buildPostString(Map<String, Object> params) {

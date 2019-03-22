@@ -1,5 +1,5 @@
 2019年3月22日
-v0.5.6 - [add] Browser增加postJson方法
+v0.5.6 - [add] Browser增加postJson方法，支持全局设置编码字符集
 
 2019年3月15日
 v0.5.5 - [improve] 废弃redis的keys操作，使用scan代替
