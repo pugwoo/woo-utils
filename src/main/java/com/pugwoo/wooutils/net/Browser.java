@@ -189,7 +189,7 @@ public class Browser {
      * @return
      */
     public HttpResponse postJson(String httpUrl, Object toJson) throws IOException {
-        return postJson(httpUrl, buildPostJson(toJson), null);
+        return postJson(httpUrl, toJson, null);
     }
 
     /**

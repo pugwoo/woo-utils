@@ -1,3 +1,6 @@
+2019年4月2日
+v0.5.7 - [fix] 修复postJson(String httpUrl, Object toJson)方法转json错误的问题
+
 2019年3月22日
 v0.5.6 - [add] Browser增加postJson方法，支持全局设置编码字符集
 
