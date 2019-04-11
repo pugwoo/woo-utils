@@ -1,10 +1,6 @@
 package com.pugwoo.wooutils.io;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.io.*;
 import java.util.Scanner;
 
 /**
@@ -32,6 +28,23 @@ public class IOUtils {
 	      total += r;
 	    }
 	    return total;
+	}
+
+	/**
+	 * 读取所有的输入流数据为byte[]
+	 * @param in
+	 * @return
+	 */
+	public static byte[] readAll(InputStream in) throws IOException {
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		int nRead;
+		byte[] data = new byte[4096];
+		while ((nRead = in.read(data, 0, data.length)) != -1) {
+			buffer.write(data, 0, nRead);
+		}
+
+		buffer.flush();
+		return buffer.toByteArray();
 	}
 	
 	/**

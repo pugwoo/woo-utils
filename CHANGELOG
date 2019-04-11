@@ -1,3 +1,5 @@
+v0.5.8 - [add] 增加IOUtils从inputStream读取为byte[]的方法
+
 2019年4月2日
 v0.5.7 - [fix] 修复postJson(String httpUrl, Object toJson)方法转json错误的问题
 
