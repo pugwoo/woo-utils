@@ -32,7 +32,7 @@ public class IOUtils {
 
 	/**
 	 * 读取所有的输入流数据为byte[]
-	 * @param in
+	 * @param in 读取完后in不会关闭
 	 * @return
 	 */
 	public static byte[] readAll(InputStream in) throws IOException {
@@ -46,10 +46,29 @@ public class IOUtils {
 		buffer.flush();
 		return buffer.toByteArray();
 	}
+
+	/**
+	 * 读取所有的输入流数据为byte[]
+	 * @param in 自动关闭
+	 * @return
+	 */
+	public static byte[] readAllAndClose(InputStream in) throws IOException {
+		try {
+			return readAll(in);
+		} finally {
+			if(in != null) {
+				try {
+					in.close();
+				} catch (Exception e) {
+					// ignore
+				}
+			}
+		}
+	}
 	
 	/**
 	 * 读取input所有数据到String中，可用于读取文件内容到String。
-	 * @param in
+	 * @param in 读取完后in不会关闭
 	 * @param charset
 	 * @return
 	 */
@@ -58,6 +77,26 @@ public class IOUtils {
 		String content = scanner.useDelimiter("\\Z").next();
 		scanner.close();
 		return content;
+	}
+
+	/**
+	 * 读取input所有数据到String中，可用于读取文件内容到String。
+	 * @param in 读取完后in自动关闭
+	 * @param charset
+	 * @return
+	 */
+	public static String readAllAndClose(InputStream in, String charset) {
+		try {
+			return readAll(in, charset);
+		} finally {
+			if(in != null) {
+				try {
+					in.close();
+				} catch (Exception e) {
+					// ignore
+				}
+			}
+		}
 	}
 
 	/**
