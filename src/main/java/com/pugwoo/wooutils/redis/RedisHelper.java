@@ -112,8 +112,8 @@ public interface RedisHelper {
 	 * 使用scan的方式获得key的列表【建议少用，适用于非高频的定时任务中】
 	 * @param cursor 上次查询的游标位置，第一次查询传null或空字符串
 	 * @param pattern 匹配字符串
-	 * @param count 查询的总数
-	 * @return 返回的是匹配到的redis key
+	 * @param count 扫描的总数，注意这个不是期望返回的key的总数，redis返回的数量不一定等于count
+	 * @return 返回的是匹配到的redis keys，返回值中的cursor如果等于0，则表示scan已经到头
 	 */
 	ScanResult<String> getKeys(String cursor, String pattern, int count);
 	
