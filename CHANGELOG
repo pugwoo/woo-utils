@@ -1,3 +1,5 @@
+v0.6.0 - [modify] 修改pom为默认引入依赖，之前是需要手工加入，现在如果需要减少jar包依赖，则自行exclude掉
+
 2019年4月11日
 v0.5.8 - [add] 增加IOUtils从inputStream读取为byte[]的方法
 
