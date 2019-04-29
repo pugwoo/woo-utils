@@ -105,7 +105,7 @@ public class Browser {
 		requestProperty.put(key, value);
 	}
 
-	/**设置请求时的头部，该设置是Browser实例全局的。<br/>
+	/**设置请求时的头部，该设置是Browser实例全局的。<br>
 	 * 设置HttpServletRequest的所有头部信息
 	 * @param request HttpServletRequest
 	 */
