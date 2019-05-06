@@ -21,6 +21,15 @@
         </dependency>
 ```
 
+提供脚本动态功能：
+```xml
+        <dependency>
+            <groupId>org.mvel</groupId>
+            <artifactId>mvel2</artifactId>
+            <version>2.4.4.Final</version>
+        </dependency>
+```
+
 提供redis的基本操作：
 
 ```xml

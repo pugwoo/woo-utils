@@ -6,7 +6,7 @@
 	<groupId>com.pugwoo</groupId>
 	<artifactId>woo-utils</artifactId>
 	<packaging>jar</packaging>
-	<version>0.6.0</version>
+	<version>0.6.1-SNAPSHOT</version>
 	
 	<name>woo-utils</name>
 	<description>the common utils</description>
@@ -52,6 +52,13 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.9.8</version>
+        </dependency>
+
+        <!-- 脚本动态相关功能 -->
+        <dependency>
+            <groupId>org.mvel</groupId>
+            <artifactId>mvel2</artifactId>
+            <version>2.4.4.Final</version>
         </dependency>
 
         <!-- Redis相关功能需要 -->
