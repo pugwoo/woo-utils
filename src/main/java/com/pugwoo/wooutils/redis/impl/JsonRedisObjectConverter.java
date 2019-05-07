@@ -18,7 +18,8 @@ import com.pugwoo.wooutils.redis.IRedisObjectConverter;
 public class JsonRedisObjectConverter implements IRedisObjectConverter {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(JsonRedisObjectConverter.class);
-	
+
+	// 这里并没有使用到封装的JSON工具类，是因为这里的序列化和反序列化不依赖于getter/setter同时相对单一稳定
 	protected ObjectMapper mapper;
 	{
 		mapper  = new ObjectMapper();
