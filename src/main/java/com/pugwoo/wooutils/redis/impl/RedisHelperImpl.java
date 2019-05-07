@@ -228,7 +228,33 @@ public class RedisHelperImpl implements RedisHelper {
 		
 		return redisObjectConverter.convertToObject(value, clazz);
 	}
-	
+
+    @Override
+    public <T> T getObject(String key, Class<T> clazz, Class<?> genericClass) {
+        if (redisObjectConverter == null) {
+            throw new RuntimeException("IRedisObjectConverter is null");
+        }
+        String value = getString(key);
+        if (value == null) {
+            return null;
+        }
+
+        return redisObjectConverter.convertToObject(value, clazz, genericClass);
+    }
+
+    @Override
+    public <T> T getObject(String key, Class<T> clazz, Class<?> genericClass1, Class<?> genericClass2) {
+        if (redisObjectConverter == null) {
+            throw new RuntimeException("IRedisObjectConverter is null");
+        }
+        String value = getString(key);
+        if (value == null) {
+            return null;
+        }
+
+        return redisObjectConverter.convertToObject(value, clazz, genericClass1, genericClass2);
+    }
+
 	@Override
 	public List<String> getStrings(List<String> keys) {
 		if(keys == null || keys.isEmpty()) {
