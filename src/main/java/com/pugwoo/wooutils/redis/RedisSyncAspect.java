@@ -1,11 +1,13 @@
 package com.pugwoo.wooutils.redis;
 
-import java.lang.reflect.Method;
-
+import com.pugwoo.wooutils.collect.MapUtils;
+import com.pugwoo.wooutils.json.JSON;
+import com.pugwoo.wooutils.string.StringTools;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.mvel2.MVEL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -13,6 +15,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+
+import java.lang.reflect.Method;
+import java.util.Map;
 
 @EnableAspectJAutoProxy
 @Aspect
@@ -39,18 +44,33 @@ public class RedisSyncAspect implements ApplicationContextAware, InitializingBea
 		String namespace = sync.namespace();
 		int expireSecond = sync.expireSecond();
 		int waitLockMillisecond = sync.waitLockMillisecond();
+
+		String key = "-";
+        String keyScript = sync.keyScript();
+        if(StringTools.isNotBlank(keyScript)) {
+			Object[] args = pjp.getArgs();
+			Map<String, Object> context =MapUtils.of("args", args);
+			try {
+				Object result = MVEL.eval(keyScript.trim(), context);
+				if(result != null) {
+					key = result.toString();
+				}
+			} catch (Throwable e) {
+				LOGGER.error("eval keyScript fail, keyScript:{}, args:{}", keyScript, JSON.toJson(args));
+			}
+		}
 		
 		int a = 0, b = 1; // 构造兔子数列
 		
 		long start = System.currentTimeMillis();
 		while(true) {
-			boolean requireLock = redisHelper.requireLock(namespace, "-", expireSecond);
+			boolean requireLock = redisHelper.requireLock(namespace, key, expireSecond);
 			if(requireLock) {
 				try {
 					RedisSyncContext.set(true, true);
 					return pjp.proceed();
 				} finally {
-					redisHelper.releaseLock(namespace, "-");
+					redisHelper.releaseLock(namespace, key);
 				}
 			}
 			

@@ -21,6 +21,12 @@ public @interface Synchronized {
 	 * @return
 	 */
 	String namespace();
+
+	/**
+	 * [可选] 分布式锁的不同的key的mvel表达式脚本，可以从参数列表变量args中获取
+	 * @return 【重要】如果脚本执行出错，则打log，并等价于空字符串，并不会抛出异常阻止调用进行
+	 */
+	String keyScript() default "";
 	
 	/**
 	 * 事务超时的秒数，如果使用者超过这个时间还没有主动释放锁，那么redis会自动释放掉该锁。

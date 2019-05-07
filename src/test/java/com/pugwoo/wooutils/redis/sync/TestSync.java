@@ -17,9 +17,8 @@ public class TestSync {
 	
 	@Test
 	public void test() throws Exception {
-		helloService.hello("nick");
-		helloService.hello2();
-		
+		helloService.hello("nick", -1);
+
 		for(int i = 0; i < 10; i++) {
 			final int a = i;
 			new Thread(new Runnable() {
@@ -27,7 +26,7 @@ public class TestSync {
 				public void run() {
 					try {
 						while (true) {
-							helloService.hello("nick" + a);
+							helloService.hello("nick", a);
 							System.out.println("线程" + a +
 									"执行结果详情: 是否执行了方法:" + RedisSyncContext.getHaveRun());
 							if(RedisSyncContext.getHaveRun()) {
