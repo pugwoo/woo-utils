@@ -69,7 +69,30 @@ public class RedisHelperImpl implements RedisHelper {
 		}
 		return jedis;
 	}
-	
+
+	@Override
+	public boolean isOk() {
+		Jedis jedis = null;
+		try {
+			jedis = getJedisConnection();
+			if(jedis == null) {
+				return false;
+			}
+			return "a".equals(jedis.ping("a"));
+		} catch (Exception e) {
+			LOGGER.error("check redis isOk fail", e);
+			return false;
+		} finally {
+			if(jedis != null) {
+				try {
+					jedis.close();
+				} catch (Exception e) {
+					LOGGER.error("close jedis error", e);
+				}
+			}
+		}
+	}
+
 	@Override
 	public <R> R execute(Function<Jedis, R> jedisToFunc) {
 		Jedis jedis = null;

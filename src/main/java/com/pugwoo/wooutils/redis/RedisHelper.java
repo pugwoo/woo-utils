@@ -14,6 +14,12 @@ import java.util.function.Function;
 public interface RedisHelper {
 
 	/**
+	 * 检查redis是否已经准备就绪，包括ip端口、密码等是否已经正确，服务器端是否已经正常ping-pong
+	 * @return
+	 */
+	boolean isOk();
+
+	/**
 	 * 传入jedis，然后自行实现逻辑，最后会自动关闭jedis资源。
 	 * 
 	 * 该方法用于替换原来getJedisConnection方法

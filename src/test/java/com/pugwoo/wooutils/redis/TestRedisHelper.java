@@ -15,15 +15,21 @@ public class TestRedisHelper {
 	
 	public static RedisHelper getRedisHelper() {
 		RedisHelperImpl redisHelper = new RedisHelperImpl();
-		redisHelper.setHost("10.100.99.40");
-		redisHelper.setPort(31512);
-		// redisHelper.setPassword("123456789");
+		redisHelper.setHost("192.168.0.101");
+		redisHelper.setPort(6379);
+		redisHelper.setPassword("123456789");
 		redisHelper.setDatabase(0);
 
 		IRedisObjectConverter redisObjectConverter = new JsonRedisObjectConverter();
 		redisHelper.setRedisObjectConverter(redisObjectConverter);
 		
 		return redisHelper;
+	}
+
+	@Test
+	public void test0() {
+		RedisHelper redisHelper = getRedisHelper();
+		System.out.println(redisHelper.isOk());
 	}
 	
 	@Test
