@@ -96,6 +96,8 @@ public class HiSpeedCacheAspect {
 					dataMap.remove(cacheKey);
 				});
 				removeList.add(key);
+			}else {
+				break;
 			}
 		}
 		removeList.forEach(item->{
