@@ -53,17 +53,6 @@ servlet一般由运行容器提供，实际项目中也不用特别提供，所�
 		</dependency>
 ```
 
-工具中提供了一个spring mvc下csrf的，需要引入spring mvc，一般如果项目是web，都会用spring mvc，也都自动引入了，因此woo-utils不会自动引入：
-
-```xml
-		<dependency>
-		    <groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-			<version>${spring.version}</version>
-		    <scope>provided</scope>
-		</dependency>
-```
-
 Redis的分布式锁注解方式使用到了spring aop，需要自行引入：
 
 ```xml
