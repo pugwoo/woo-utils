@@ -21,10 +21,13 @@ public @interface HiSpeedCache {
      */
     String keyScript() default "";
 
-
     /**
      * 高速缓存的超时时间，默认1秒，建议使用1到10秒
      */
     int expireSecond() default 1;
 
+    /**
+     * 当缓存接口被访问时，自动设定后续自动刷新缓存的时间。缓存将以expireSecond的频率持续更新continueFetchSecond秒。
+     */
+    int continueFetchSecond() default 0;
 }

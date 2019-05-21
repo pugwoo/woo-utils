@@ -24,9 +24,17 @@ public class HiSpeedCacheAspect {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HiSpeedCacheAspect.class);
 
 	private static Map<String, Object> dataMap = new ConcurrentHashMap<>(); // 存缓存数据的
-	private static Map<Long, List<String>> expireLineMap = new LinkedHashMap<>(); // 存数据超时时间的，超时时间 -> 对应于该超时时间的key的列表
-	// private static Map<String, Long> keyExpireMap = new ConcurrentHashMap<>(); // 每个key的超时时间，key -> 超时时间
+	private static Map<Long, List<String>> expireLineMap = new TreeMap<>(); // 存数据超时时间的，超时时间 -> 对应于该超时时间的key的列表
+
+	private static  Map<String ,ProceedingJoinPoint>  serviceMap = new ConcurrentHashMap<>();
+
+	private static  Map<String,Long> keyExpireMap = new ConcurrentHashMap<>(); // 每个key的超时时间，key -> 超时时间
+
+	private static  Map<String ,List<Long>> intervalMap  = new ConcurrentHashMap<>(); //缓存更新时间的map
+
 	private static volatile CleanExpireDataTask cleanThread = null;
+
+	private static volatile ContinueUpdateTask continueThread = null;
 
 	@Around("@annotation(com.pugwoo.wooutils.cache.HiSpeedCache) execution(* *.*(..))")
     public Object around(ProceedingJoinPoint pjp) throws Throwable {
@@ -36,7 +44,6 @@ public class HiSpeedCacheAspect {
 		String methodName = targetMethod.getName();
 
 		HiSpeedCache hiSpeedCache = targetMethod.getAnnotation(HiSpeedCache.class);
-
 		String key = "";
 		String keyScript = hiSpeedCache.keyScript();
 		if(StringTools.isNotBlank(keyScript)) {
@@ -53,13 +60,28 @@ public class HiSpeedCacheAspect {
 		}
 
 		String cacheKey = clazzName + "." + methodName + ":" + targetMethod.hashCode() + (key.isEmpty() ? "" : ":" + key);
+
+		int fetchSecond = hiSpeedCache.continueFetchSecond();
+		long expireSecond = hiSpeedCache.expireSecond();
+		if(fetchSecond != 0 ){
+			expireSecond = fetchSecond;
+			initIntervalTime(cacheKey,hiSpeedCache.expireSecond(),fetchSecond);
+		}
+		long expireTime = expireSecond*1000+System.currentTimeMillis();
+
+		if(!serviceMap.containsKey(cacheKey)){
+			serviceMap.put(cacheKey,pjp);
+		}
+
+		setExpireTime(expireTime,cacheKey);
+
 		if(dataMap.containsKey(cacheKey)) {
 			return dataMap.get(cacheKey);
 		}
+
 		Object ret = pjp.proceed();
-		long expireTime = hiSpeedCache.expireSecond()*1000+System.currentTimeMillis();
 		dataMap.put(cacheKey, ret);
-		setExpireTime(expireTime,cacheKey);
+
 		if (cleanThread == null) {
 			synchronized (CleanExpireDataTask.class) {
 				if (cleanThread == null) {
@@ -68,10 +90,48 @@ public class HiSpeedCacheAspect {
 				}
 			}
 		}
+
+		if( fetchSecond != 0 ){
+			if (continueThread == null) {
+				synchronized (CleanExpireDataTask.class) {
+					if (continueThread == null) {
+						continueThread = new ContinueUpdateTask();
+						continueThread.start();
+					}
+				}
+			}
+		}
+
 		return  ret;
     }
 
-    private  synchronized  static  void setExpireTime(long expireTime,String cacheKey){
+    private synchronized static void initIntervalTime(String cacheKey , int expireTime, int continueTime){
+
+		int length = (int) Math.ceil(continueTime/(expireTime*1.0));
+		long startTime = System.currentTimeMillis();
+		List<Long> intervals = new ArrayList<>();
+		for (int i=0 ;i<length ;i++){
+			intervals.add(startTime+expireTime*i*1000);
+		}
+		intervalMap.put(cacheKey,intervals);
+	}
+
+    private synchronized static void setExpireTime(long expireTime,String cacheKey){
+		// 清理 之前保存下来的 expireLineMap
+		if(keyExpireMap.containsKey(cacheKey)){
+			Long defaultExpire = keyExpireMap.get(cacheKey);
+			if(expireLineMap.containsKey(defaultExpire)){
+				List<String> expireList = expireLineMap.get(defaultExpire);
+				if(expireList.size()==1){
+					expireLineMap.remove(defaultExpire);
+				}else {
+					expireList.removeIf(key ->key.equals(cacheKey));
+				}
+				keyExpireMap.remove(cacheKey);
+			}
+		}
+
+		// 设置 超时时间
 		if(expireLineMap.containsKey(expireTime)){
 			List<String> expireList = expireLineMap.get(expireTime);
 			expireList.add(cacheKey);
@@ -80,6 +140,9 @@ public class HiSpeedCacheAspect {
 			lists.add(cacheKey);
 			expireLineMap.put(expireTime,lists);
 		}
+		// 增加映射关系
+		keyExpireMap.put(cacheKey,expireTime);
+
 	}
 
 	/**
@@ -94,6 +157,9 @@ public class HiSpeedCacheAspect {
 			if(key<System.currentTimeMillis()){
 				entry.getValue().forEach(cacheKey->{
 					dataMap.remove(cacheKey);
+					serviceMap.remove(cacheKey);
+					keyExpireMap.remove(cacheKey);
+					intervalMap.remove(cacheKey);
 				});
 				removeList.add(key);
 			}else {
@@ -104,6 +170,35 @@ public class HiSpeedCacheAspect {
 			expireLineMap.remove(item);
 		});
 
+	}
+
+	private synchronized  static void refreshResult(){
+		for (Map.Entry<String,ProceedingJoinPoint> entry : serviceMap.entrySet()){
+			String cacheKey = entry.getKey();
+			if(intervalMap.containsKey(cacheKey)){
+				List<Long> longs = intervalMap.get(cacheKey);
+				List<Long> removeList = new ArrayList<>();
+				for (Long limit : longs){
+					if(limit<System.currentTimeMillis()){
+						ProceedingJoinPoint pjps = entry.getValue();
+						Object result = null;
+						removeList.add(limit);
+						try {
+							result = pjps.proceed();
+							dataMap.put(cacheKey,result);
+						} catch (Throwable throwable) {
+							throwable.printStackTrace();
+						}
+					}else {
+						break;
+					}
+				}
+
+				removeList.forEach(item ->{
+					longs.remove(item);
+				});
+			}
+		}
 	}
 
 	private static class CleanExpireDataTask extends Thread {
@@ -118,6 +213,20 @@ public class HiSpeedCacheAspect {
 				}
 			}
 
+		}
+	}
+
+	private static class ContinueUpdateTask extends Thread {
+
+		@Override
+		public void run() {
+			while (true){
+				refreshResult();
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+				}
+			}
 		}
 	}
 
