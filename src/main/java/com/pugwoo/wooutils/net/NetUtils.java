@@ -1,5 +1,7 @@
 package com.pugwoo.wooutils.net;
 
+import com.pugwoo.wooutils.string.StringTools;
+
 import javax.servlet.http.HttpServletRequest;
 import java.net.*;
 import java.util.ArrayList;
@@ -33,13 +35,26 @@ public class NetUtils {
 
 	/**
 	 * 获得客户端的ip地址，请配合nginx配置使用
-	 * @return
+	 * @return 可能返回多个ip，以逗号分隔
 	 */
 	public static String getRemoteIp(HttpServletRequest request) {
 		String ip = request.getHeader("X-Forwarded-For");
-		if(ip == null || ip.trim().isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+		if(StringTools.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("Proxy-Client-IP");
+		}
+		if(StringTools.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("WL-Proxy-Client-IP");
+		}
+		if(StringTools.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("HTTP_CLIENT_IP");
+		}
+		if(StringTools.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+		}
+		if(StringTools.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
 			ip = request.getRemoteAddr();
 		}
+
 		return ip;
 	}
 	
