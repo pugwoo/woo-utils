@@ -33,6 +33,14 @@ public class TestHiSpeedCache {
         long end = System.currentTimeMillis();
 
         System.out.println("cost:" + (end - start) + "ms");
+
+        start = System.currentTimeMillis();
+        withCacheDemoService.getSomethingWithCache("hello");
+        withCacheDemoService.getSomethingWithCache("world");
+        withCacheDemoService.getSomethingWithCache("you");
+        end = System.currentTimeMillis();
+
+        System.out.println("cost:" + (end - start) + "ms");
     }
 
 }

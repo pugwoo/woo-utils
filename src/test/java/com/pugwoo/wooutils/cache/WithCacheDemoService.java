@@ -16,4 +16,9 @@ public class WithCacheDemoService {
         return "hello";
     }
 
+    @HiSpeedCache
+    public String getSomethingWithCache(String name) throws Exception {
+        Thread.sleep(3000);
+        return "hello";
+    }
 }

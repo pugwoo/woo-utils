@@ -17,7 +17,7 @@ public @interface HiSpeedCache {
 
     /**
      * [可选] 高速缓存的不同的key的mvel表达式脚本，可以从参数列表变量args中获取
-     * @return 【重要】如果脚本执行出错，则打log，并等价于空字符串，并不会抛出异常阻止调用进行
+     * @return 【重要】如果脚本执行出错，则打log，然后直接调用方法，等价于缓存失效。如果脚本直接结果返回null，则等价于空字符
      */
     String keyScript() default "";
 

@@ -27,7 +27,7 @@ public class HiSpeedCacheAspect {
     private static Map<Long, List<String>> expireLineMap = new TreeMap<>(); // 存数据超时时间的，超时时间 -> 对应于该超时时间的key的列表
     private static Map<String, Long> keyExpireMap = new ConcurrentHashMap<>(); // 每个key的超时时间，key -> 超时时间
 
-    private static Map<String, ProceedingJoinPoint> serviceMap = new ConcurrentHashMap<>();
+    private static Map<String, ProceedingJoinPoint> serviceMap = new ConcurrentHashMap<>(); // 缓存自动获取数据的方法以便调用
 
     private static Map<String, List<Long>> intervalMap = new ConcurrentHashMap<>(); //缓存更新时间的map
 
@@ -43,21 +43,24 @@ public class HiSpeedCacheAspect {
 
         HiSpeedCache hiSpeedCache = targetMethod.getAnnotation(HiSpeedCache.class);
         String key = "";
-        String keyScript = hiSpeedCache.keyScript();
-        if (StringTools.isNotBlank(keyScript)) {
+        String keyScript = hiSpeedCache.keyScript().trim();
+        if (StringTools.isNotEmpty(keyScript)) {
             Object[] args = pjp.getArgs();
             Map<String, Object> context = MapUtils.of("args", args);
             try {
-                Object result = MVEL.eval(keyScript.trim(), context);
-                if (result != null) {
+                Object result = MVEL.eval(keyScript, context);
+                if (result != null) { // 返回结果为null等价于keyScript为空字符串
                     key = result.toString();
                 }
             } catch (Throwable e) {
                 LOGGER.error("eval keyScript fail, keyScript:{}, args:{}", keyScript, JSON.toJson(args));
+                // 出现异常则等价于不使用缓存，直接调方法
+                return pjp.proceed();
             }
         }
 
-        String cacheKey = clazzName + "." + methodName + ":" + targetMethod.hashCode() + (key.isEmpty() ? "" : ":" + key);
+        Class<?>[] parameterTypes = targetMethod.getParameterTypes();
+        String cacheKey = clazzName + "." + methodName + ":" + toString(parameterTypes) + (key.isEmpty() ? "" : ":" + key);
 
         int fetchSecond = hiSpeedCache.continueFetchSecond();
         long expireSecond = hiSpeedCache.expireSecond();
@@ -229,4 +232,14 @@ public class HiSpeedCacheAspect {
     }
 
 
+    private static String toString(Class<?>[] parameterTypes) {
+        if(parameterTypes == null || parameterTypes.length == 0) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for(Class<?> clazz : parameterTypes) {
+            sb.append(clazz.getName()).append(",");
+        }
+        return sb.toString().substring(0, sb.length() - 1);
+    }
 }
