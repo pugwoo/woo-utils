@@ -94,7 +94,7 @@ public class HiSpeedCacheAspect {
 
         if (fetchSecond != 0) {
             if (continueThread == null) {
-                synchronized (CleanExpireDataTask.class) {
+                synchronized (ContinueUpdateTask.class) {
                     if (continueThread == null) {
                         continueThread = new ContinueUpdateTask();
                         continueThread.start();
@@ -203,35 +203,40 @@ public class HiSpeedCacheAspect {
     }
 
     private static class CleanExpireDataTask extends Thread {
-
         @Override
         public void run() {
             while (true) {
-                cleanExpireData();
+                try {
+                    cleanExpireData();
+                } catch (Throwable e) { // 保证线程存活
+                    LOGGER.error("clean expire data error", e);
+                }
                 try {
                     Thread.sleep(50);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException e) { // ignore
                 }
             }
-
         }
     }
 
     private static class ContinueUpdateTask extends Thread {
-
         @Override
         public void run() {
             while (true) {
-                refreshResult();
+                try {
+                    refreshResult();
+                } catch (Throwable e) { // 保证线程存活
+                    LOGGER.error("refresh result error", e);
+                }
                 try {
                     Thread.sleep(50);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException e) { // ignore
                 }
             }
         }
     }
 
-
+    /**将参数类型转换成字符串*/
     private static String toString(Class<?>[] parameterTypes) {
         if(parameterTypes == null || parameterTypes.length == 0) {
             return "";
