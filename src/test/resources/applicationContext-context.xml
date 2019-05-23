@@ -19,5 +19,7 @@
 	</bean>
 
 	<bean class="com.pugwoo.wooutils.redis.RedisSyncAspect" />
+
+	<bean class="com.pugwoo.wooutils.cache.HiSpeedCacheAspect" />
 	
 </beans>
