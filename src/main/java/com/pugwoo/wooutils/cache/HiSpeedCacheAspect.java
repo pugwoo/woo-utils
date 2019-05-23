@@ -130,33 +130,27 @@ public class HiSpeedCacheAspect {
 
     /**设置或修改cacheKey的超时时间，保证一个cacheKey只有一个超时时间*/
     private static void changeKeyExpireTime(String cacheKey, long expireTime) {
-        Long oldExpireTime = keyExpireMap.get(cacheKey);
-        if (oldExpireTime != null) { // 清理可能的老数据
-            List<String> keys = expireLineMap.get(oldExpireTime);
-            if(keys != null) {
-                int keysSize = keys.size();
-                if(keysSize == 0 || keysSize == 1) {
-                    synchronized (expireLineMap) {
+        synchronized (expireLineMap) {
+            Long oldExpireTime = keyExpireMap.get(cacheKey);
+            if (oldExpireTime != null) { // 清理可能的老数据
+                List<String> keys = expireLineMap.get(oldExpireTime);
+                if(keys != null) {
+                    int keysSize = keys.size();
+                    if(keysSize == 0 || keysSize == 1) {
                         expireLineMap.remove(oldExpireTime);
-                    }
-                } else {
-                    synchronized (keys) {
+                    } else {
                         keys.removeIf(o -> o == null || o.equals(cacheKey));
                     }
                 }
             }
-        }
 
-        // 设置进去新的超时时间
-        keyExpireMap.put(cacheKey, expireTime);
-        List<String> keys = expireLineMap.get(expireTime);
-        if(keys == null) {
-            keys = ListUtils.newArrayList(cacheKey);
-            synchronized (expireLineMap) {
+            // 设置进去新的超时时间
+            keyExpireMap.put(cacheKey, expireTime);
+            List<String> keys = expireLineMap.get(expireTime);
+            if(keys == null) {
+                keys = ListUtils.newArrayList(cacheKey);
                 expireLineMap.put(expireTime, keys);
-            }
-        } else {
-            synchronized (keys) {
+            } else {
                 if(!keys.contains(cacheKey)) {
                     keys.add(cacheKey);
                 }
@@ -166,17 +160,13 @@ public class HiSpeedCacheAspect {
 
     /**将某个cacheKey的下一次获取加入到更新时间线中*/
     private static void addFetchToTimeLine(long nextTime, String cacheKey) {
-        List<String> keys = fetchLineMap.get(nextTime);
-        if(keys == null) {
-            synchronized (fetchLineMap) {
+        synchronized (fetchLineMap) {
+            List<String> keys = fetchLineMap.get(nextTime);
+            if(keys == null) {
                 fetchLineMap.put(nextTime, ListUtils.newArrayList(cacheKey));
-            }
-        } else {
-            if(!keys.contains(cacheKey)) {
-                synchronized (keys) {
-                    if(!keys.contains(cacheKey)) {
-                        keys.add(cacheKey);
-                    }
+            } else {
+                if(!keys.contains(cacheKey)) {
+                    keys.add(cacheKey);
                 }
             }
         }
