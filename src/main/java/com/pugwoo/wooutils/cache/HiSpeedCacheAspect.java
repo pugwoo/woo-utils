@@ -32,7 +32,7 @@ public class HiSpeedCacheAspect {
     private static Map<String, List<Long>> intervalMap = new ConcurrentHashMap<>(); //缓存更新时间的map
 
     private static volatile CleanExpireDataTask cleanThread = null;
-    private static volatile ContinueUpdateTask continueThread = null;
+    private static volatile ContinueUpdateTask continueThread = null; // 暂时用单线程足够了
 
     @Around("@annotation(com.pugwoo.wooutils.cache.HiSpeedCache) execution(* *.*(..))")
     public Object around(ProceedingJoinPoint pjp) throws Throwable {
@@ -63,7 +63,7 @@ public class HiSpeedCacheAspect {
         String cacheKey = clazzName + "." + methodName + ":" + toString(parameterTypes) + (key.isEmpty() ? "" : ":" + key);
 
         int fetchSecond = hiSpeedCache.continueFetchSecond();
-        long expireSecond = hiSpeedCache.expireSecond();
+        int expireSecond = hiSpeedCache.expireSecond();
         if (fetchSecond != 0) {
             expireSecond = fetchSecond;
             initIntervalTime(cacheKey, hiSpeedCache.expireSecond(), fetchSecond);

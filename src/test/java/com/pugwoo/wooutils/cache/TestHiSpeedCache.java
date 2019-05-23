@@ -43,4 +43,23 @@ public class TestHiSpeedCache {
         System.out.println("cost:" + (end - start) + "ms");
     }
 
+    @Test
+    public void benchmark() throws Exception {
+
+        withCacheDemoService.getSomethingWithCache();
+
+        int times = 1000;
+        // 测试调用100万次的时间
+        long start = System.currentTimeMillis();
+        for(int i = 0; i < times; i++) {
+            withCacheDemoService.getSomethingWithCache();
+            System.out.println("i:" + i);
+        }
+        long end = System.currentTimeMillis();
+
+        System.out.println("cost:" + (end - start) + "ms");
+        System.out.println("qps:" + times / ((end - start) / 1000.0));
+
+    }
+
 }
