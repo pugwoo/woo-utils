@@ -12,8 +12,6 @@ import java.util.concurrent.atomic.AtomicLong;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class TestHiSpeedCache {
 
-
-
     @Autowired
     private WithCacheDemoService withCacheDemoService;
 

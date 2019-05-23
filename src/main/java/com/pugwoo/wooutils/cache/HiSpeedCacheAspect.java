@@ -86,19 +86,22 @@ public class HiSpeedCacheAspect {
 
         // 当缓存中没有时进行
         Object ret = pjp.proceed();
-        dataMap.put(cacheKey, ret);
 
-        long expireTime = Math.max(hiSpeedCache.expireSecond(), hiSpeedCache.continueFetchSecond())
-                * 1000 + System.currentTimeMillis();
-        if (fetchSecond > 0) {
-            ContinueFetchDTO continueFetchDTO = new ContinueFetchDTO(pjp, hiSpeedCache.expireSecond(),
-                    expireTime);
-            keyContinueFetchMap.put(cacheKey, continueFetchDTO);
-            long nextFetchTime = Math.min(hiSpeedCache.expireSecond(), hiSpeedCache.continueFetchSecond())
+        synchronized (HiSpeedCacheAspect.class) {
+            dataMap.put(cacheKey, ret);
+
+            long expireTime = Math.max(hiSpeedCache.expireSecond(), hiSpeedCache.continueFetchSecond())
                     * 1000 + System.currentTimeMillis();
-            addFetchToTimeLine(nextFetchTime, cacheKey);
+            if (fetchSecond > 0) {
+                ContinueFetchDTO continueFetchDTO = new ContinueFetchDTO(pjp, hiSpeedCache.expireSecond(),
+                        expireTime);
+                keyContinueFetchMap.put(cacheKey, continueFetchDTO);
+                long nextFetchTime = Math.min(hiSpeedCache.expireSecond(), hiSpeedCache.continueFetchSecond())
+                        * 1000 + System.currentTimeMillis();
+                addFetchToTimeLine(nextFetchTime, cacheKey);
+            }
+            changeKeyExpireTime(cacheKey, expireTime);
         }
-        changeKeyExpireTime(cacheKey, expireTime);
 
         if (cleanThread == null) {
             synchronized (CleanExpireDataTask.class) {
@@ -181,7 +184,7 @@ public class HiSpeedCacheAspect {
 
     /**
      * 从expireLineMap中，按超时顺序遍历，如果超时时间小于当前时间，则清理该key对应的List(String)列表的key dataMap
-     * 所以这里操作了dataMap和expireLineMap两张表
+     * 所以这里操作了dataMap和expireLineMap两个map
      * 对于超时时间大于当前时间的，不处理
      */
     private static void cleanExpireData() {
@@ -192,6 +195,8 @@ public class HiSpeedCacheAspect {
                 entry.getValue().forEach(cacheKey -> {
                     dataMap.remove(cacheKey);
                     keyExpireMap.remove(cacheKey);
+                    System.out.println("======" + Thread.currentThread().getName() + " remove cacheKey:"
+                       + cacheKey + ",expireTimeAt:" + key);
                 });
                 removeList.add(key);
             } else {
