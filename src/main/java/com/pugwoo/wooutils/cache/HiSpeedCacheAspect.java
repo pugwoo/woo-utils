@@ -104,6 +104,7 @@ public class HiSpeedCacheAspect {
             synchronized (CleanExpireDataTask.class) {
                 if (cleanThread == null) {
                     cleanThread = new CleanExpireDataTask();
+                    cleanThread.setName("HiSpeedCache-clean-thread");
                     cleanThread.start();
                 }
             }
@@ -114,6 +115,7 @@ public class HiSpeedCacheAspect {
                 synchronized (ContinueUpdateTask.class) {
                     if (continueThread == null) {
                         continueThread = new ContinueUpdateTask();
+                        continueThread.setName("HiSpeedCache-update-thread");
                         continueThread.start();
                     }
                 }
