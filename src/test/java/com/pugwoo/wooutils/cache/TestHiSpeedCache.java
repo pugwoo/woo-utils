@@ -10,6 +10,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class TestHiSpeedCache {
 
+
+
     @Autowired
     private WithCacheDemoService withCacheDemoService;
 
@@ -48,12 +50,12 @@ public class TestHiSpeedCache {
 
         withCacheDemoService.getSomethingWithCache();
 
-        int times = 1000;
+        int times = 1000000;
         // 测试调用100万次的时间
         long start = System.currentTimeMillis();
         for(int i = 0; i < times; i++) {
             withCacheDemoService.getSomethingWithCache();
-            System.out.println("i:" + i);
+            // System.out.println("i:" + i);
         }
         long end = System.currentTimeMillis();
 

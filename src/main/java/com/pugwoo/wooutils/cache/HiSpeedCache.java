@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 /**
  * 本地高速缓存
  * 1. 不需要依赖于redis，因此，不需要序列化和反序列化
+ * 2. 因为是高速缓存，超时时间很短，同时为了避免缓存穿透，因此一律缓存null值
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

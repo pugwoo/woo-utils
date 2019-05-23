@@ -1,5 +1,6 @@
 package com.pugwoo.wooutils.cache;
 
+import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.collect.MapUtils;
 import com.pugwoo.wooutils.json.JSON;
 import com.pugwoo.wooutils.string.StringTools;
@@ -23,16 +24,26 @@ public class HiSpeedCacheAspect {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HiSpeedCacheAspect.class);
 
+    private static class ContinueFetchDTO {
+        public volatile ProceedingJoinPoint pjp;
+        public volatile int intervalSecond; // 调用的间隔
+        public volatile long expireTimestamp; // 此次调用的过时时间（毫秒时间戳）
+        public ContinueFetchDTO(ProceedingJoinPoint pjp, int intervalSecond, long expireTimestamp) {
+            this.pjp = pjp;
+            this.intervalSecond = intervalSecond;
+            this.expireTimestamp = expireTimestamp;
+        }
+    }
+
     private static Map<String, Object> dataMap = new ConcurrentHashMap<>(); // 存缓存数据的
     private static Map<Long, List<String>> expireLineMap = new TreeMap<>(); // 存数据超时时间的，超时时间 -> 对应于该超时时间的key的列表
     private static Map<String, Long> keyExpireMap = new ConcurrentHashMap<>(); // 每个key的超时时间，key -> 超时时间
 
-    private static Map<String, ProceedingJoinPoint> serviceMap = new ConcurrentHashMap<>(); // 缓存自动获取数据的方法以便调用
-
-    private static Map<String, List<Long>> intervalMap = new ConcurrentHashMap<>(); //缓存更新时间的map
+    private static Map<String, ContinueFetchDTO> keyContinueFetchMap = new ConcurrentHashMap<>(); // 每个key持续更新的信息
+    private static Map<Long, List<String>> fetchLineMap = new TreeMap<>(); // 持续获取的时间线，里面只有每个key的最近一次获取时间
 
     private static volatile CleanExpireDataTask cleanThread = null;
-    private static volatile ContinueUpdateTask continueThread = null; // 暂时用单线程足够了
+    private static volatile ContinueUpdateTask continueThread = null; // 暂时用单线程足够了，由应用保证每个方法不应该永久卡死
 
     @Around("@annotation(com.pugwoo.wooutils.cache.HiSpeedCache) execution(* *.*(..))")
     public Object around(ProceedingJoinPoint pjp) throws Throwable {
@@ -46,16 +57,14 @@ public class HiSpeedCacheAspect {
         String keyScript = hiSpeedCache.keyScript().trim();
         if (StringTools.isNotEmpty(keyScript)) {
             Object[] args = pjp.getArgs();
-            Map<String, Object> context = MapUtils.of("args", args);
             try {
-                Object result = MVEL.eval(keyScript, context);
+                Object result = MVEL.eval(keyScript, MapUtils.of("args", args));
                 if (result != null) { // 返回结果为null等价于keyScript为空字符串
                     key = result.toString();
                 }
             } catch (Throwable e) {
                 LOGGER.error("eval keyScript fail, keyScript:{}, args:{}", keyScript, JSON.toJson(args));
-                // 出现异常则等价于不使用缓存，直接调方法
-                return pjp.proceed();
+                return pjp.proceed(); // 出现异常则等价于不使用缓存，直接调方法
             }
         }
 
@@ -63,25 +72,33 @@ public class HiSpeedCacheAspect {
         String cacheKey = clazzName + "." + methodName + ":" + toString(parameterTypes) + (key.isEmpty() ? "" : ":" + key);
 
         int fetchSecond = hiSpeedCache.continueFetchSecond();
-        int expireSecond = hiSpeedCache.expireSecond();
-        if (fetchSecond != 0) {
-            expireSecond = fetchSecond;
-            initIntervalTime(cacheKey, hiSpeedCache.expireSecond(), fetchSecond);
+        if(fetchSecond > 0) { // 持续更新时，每次接口的访问都会延长持续获取的时长(如果还没超时的话)
+            ContinueFetchDTO continueFetchDTO = keyContinueFetchMap.get(cacheKey);
+            if(continueFetchDTO != null) {
+                continueFetchDTO.pjp = pjp;
+                continueFetchDTO.expireTimestamp = fetchSecond * 1000 + System.currentTimeMillis();
+            }
         }
-        long expireTime = expireSecond * 1000 + System.currentTimeMillis();
-
-        if (!serviceMap.containsKey(cacheKey)) {
-            serviceMap.put(cacheKey, pjp);
-        }
-
-        setExpireTime(expireTime, cacheKey);
 
         if (dataMap.containsKey(cacheKey)) {
             return dataMap.get(cacheKey);
         }
 
+        // 当缓存中没有时进行
         Object ret = pjp.proceed();
         dataMap.put(cacheKey, ret);
+
+        long expireTime = Math.max(hiSpeedCache.expireSecond(), hiSpeedCache.continueFetchSecond())
+                * 1000 + System.currentTimeMillis();
+        if (fetchSecond > 0) {
+            ContinueFetchDTO continueFetchDTO = new ContinueFetchDTO(pjp, hiSpeedCache.expireSecond(),
+                    expireTime);
+            keyContinueFetchMap.put(cacheKey, continueFetchDTO);
+            long nextFetchTime = Math.min(hiSpeedCache.expireSecond(), hiSpeedCache.continueFetchSecond())
+                    * 1000 + System.currentTimeMillis();
+            addFetchToTimeLine(nextFetchTime, cacheKey);
+        }
+        changeKeyExpireTime(cacheKey, expireTime);
 
         if (cleanThread == null) {
             synchronized (CleanExpireDataTask.class) {
@@ -106,99 +123,117 @@ public class HiSpeedCacheAspect {
         return ret;
     }
 
-    private synchronized static void initIntervalTime(String cacheKey, int expireTime, int continueTime) {
-
-        int length = (int) Math.ceil(continueTime / (expireTime * 1.0));
-        long startTime = System.currentTimeMillis();
-        List<Long> intervals = new ArrayList<>();
-        for (int i = 0; i < length; i++) {
-            intervals.add(startTime + expireTime * i * 1000);
-        }
-        intervalMap.put(cacheKey, intervals);
-    }
-
-    private synchronized static void setExpireTime(long expireTime, String cacheKey) {
-        // 清理 之前保存下来的 expireLineMap
-        if (keyExpireMap.containsKey(cacheKey)) {
-            Long defaultExpire = keyExpireMap.get(cacheKey);
-            if (expireLineMap.containsKey(defaultExpire)) {
-                List<String> expireList = expireLineMap.get(defaultExpire);
-                if (expireList.size() == 1) {
-                    expireLineMap.remove(defaultExpire);
+    /**设置或修改cacheKey的超时时间，保证一个cacheKey只有一个超时时间*/
+    private static void changeKeyExpireTime(String cacheKey, long expireTime) {
+        Long oldExpireTime = keyExpireMap.get(cacheKey);
+        if (oldExpireTime != null) { // 清理可能的老数据
+            List<String> keys = expireLineMap.get(oldExpireTime);
+            if(keys != null) {
+                int keysSize = keys.size();
+                if(keysSize == 0 || keysSize == 1) {
+                    synchronized (expireLineMap) {
+                        expireLineMap.remove(oldExpireTime);
+                    }
                 } else {
-                    expireList.removeIf(key -> key.equals(cacheKey));
+                    synchronized (keys) {
+                        keys.removeIf(o -> o == null || o.equals(cacheKey));
+                    }
                 }
-                keyExpireMap.remove(cacheKey);
             }
         }
 
-        // 设置 超时时间
-        if (expireLineMap.containsKey(expireTime)) {
-            List<String> expireList = expireLineMap.get(expireTime);
-            expireList.add(cacheKey);
-        } else {
-            ArrayList<String> lists = new ArrayList<>();
-            lists.add(cacheKey);
-            expireLineMap.put(expireTime, lists);
-        }
-        // 增加映射关系
+        // 设置进去新的超时时间
         keyExpireMap.put(cacheKey, expireTime);
+        List<String> keys = expireLineMap.get(expireTime);
+        if(keys == null) {
+            keys = ListUtils.newArrayList(cacheKey);
+            synchronized (expireLineMap) {
+                expireLineMap.put(expireTime, keys);
+            }
+        } else {
+            synchronized (keys) {
+                keys.add(cacheKey);
+            }
+        }
+    }
 
+    /**将某个cacheKey的下一次获取加入到更新时间线中*/
+    private static void addFetchToTimeLine(long nextTime, String cacheKey) {
+        List<String> keys = fetchLineMap.get(nextTime);
+        if(keys == null) {
+            synchronized (fetchLineMap) {
+                fetchLineMap.put(nextTime, ListUtils.newArrayList(cacheKey));
+            }
+        } else {
+            if(!keys.contains(cacheKey)) {
+                synchronized (keys) {
+                    if(!keys.contains(cacheKey)) {
+                        keys.add(cacheKey);
+                    }
+                }
+            }
+        }
     }
 
     /**
-     * 从expireLineMap中，按超时顺序遍历，如果超时时间小于当前时间，则清理该key对应的List<String>列表的key dataMap
+     * 从expireLineMap中，按超时顺序遍历，如果超时时间小于当前时间，则清理该key对应的List(String)列表的key dataMap
      * 所以这里操作了dataMap和expireLineMap两张表
      * 对于超时时间大于当前时间的，不处理
      */
-    private synchronized static void cleanExpireData() {
+    private static void cleanExpireData() {
         List<Long> removeList = new ArrayList<>();
         for (Map.Entry<Long, List<String>> entry : expireLineMap.entrySet()) {
             Long key = entry.getKey();
-            if (key < System.currentTimeMillis()) {
+            if (key <= System.currentTimeMillis()) {
                 entry.getValue().forEach(cacheKey -> {
                     dataMap.remove(cacheKey);
-                    serviceMap.remove(cacheKey);
                     keyExpireMap.remove(cacheKey);
-                    intervalMap.remove(cacheKey);
                 });
                 removeList.add(key);
             } else {
                 break;
             }
         }
-        removeList.forEach(item -> {
-            expireLineMap.remove(item);
-        });
-
+        synchronized (expireLineMap) {
+            removeList.forEach(item -> {
+                expireLineMap.remove(item);
+            });
+        }
     }
 
-    private synchronized static void refreshResult() {
-        for (Map.Entry<String, ProceedingJoinPoint> entry : serviceMap.entrySet()) {
-            String cacheKey = entry.getKey();
-            if (intervalMap.containsKey(cacheKey)) {
-                List<Long> longs = intervalMap.get(cacheKey);
-                List<Long> removeList = new ArrayList<>();
-                for (Long limit : longs) {
-                    if (limit < System.currentTimeMillis()) {
-                        ProceedingJoinPoint pjps = entry.getValue();
-                        Object result = null;
-                        removeList.add(limit);
-                        try {
-                            result = pjps.proceed();
-                            dataMap.put(cacheKey, result);
-                        } catch (Throwable throwable) {
-                            throwable.printStackTrace();
-                        }
-                    } else {
-                        break;
+    /**
+     * 持续调用刷新数据
+     */
+    private static void refreshResult() {
+        List<Long> removeList = new ArrayList<>();
+        for (Map.Entry<Long, List<String>> entry : fetchLineMap.entrySet()) {
+            Long key = entry.getKey();
+            if (key <= System.currentTimeMillis()) {
+                entry.getValue().forEach(cacheKey -> {
+                    ContinueFetchDTO continueFetchDTO = keyContinueFetchMap.get(cacheKey);
+                    if(continueFetchDTO == null) {
+                        return;
                     }
-                }
-
-                removeList.forEach(item -> {
-                    longs.remove(item);
+                    try {
+                        Object result = continueFetchDTO.pjp.proceed();
+                        dataMap.put(cacheKey, result);
+                    } catch (Throwable e) {
+                        LOGGER.error("refreshResult execute pjp fail, key:{}", cacheKey, e);
+                    }
+                    // 安排下一次调用
+                    long nextTime = continueFetchDTO.intervalSecond * 1000 + System.currentTimeMillis();
+                    addFetchToTimeLine(nextTime, cacheKey);
                 });
+                removeList.add(key);
+            } else {
+                break;
             }
+        }
+
+        synchronized (fetchLineMap) {
+            removeList.forEach(item -> {
+                fetchLineMap.remove(item);
+            });
         }
     }
 
