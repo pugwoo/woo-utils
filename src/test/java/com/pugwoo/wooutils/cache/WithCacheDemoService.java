@@ -12,7 +12,7 @@ public class WithCacheDemoService {
         return "hello";
     }
 
-    @HiSpeedCache(continueFetchSecond = 60)
+    @HiSpeedCache(continueFetchSecond = 10)
     public String getSomethingWithCache() throws Exception {
         System.out.println("getSomethingWithCache() is called" + new Date());
         Thread.sleep(3000);

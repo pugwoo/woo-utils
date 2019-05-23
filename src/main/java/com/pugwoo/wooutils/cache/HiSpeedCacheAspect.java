@@ -154,7 +154,9 @@ public class HiSpeedCacheAspect {
             }
         } else {
             synchronized (keys) {
-                keys.add(cacheKey);
+                if(!keys.contains(cacheKey)) {
+                    keys.add(cacheKey);
+                }
             }
         }
     }
@@ -216,14 +218,17 @@ public class HiSpeedCacheAspect {
                     if(continueFetchDTO == null) {
                         return;
                     }
+                    // 安排下一次调用
+                    long nextTime = continueFetchDTO.intervalSecond * 1000 + System.currentTimeMillis();
+
                     try {
                         Object result = continueFetchDTO.pjp.proceed();
                         dataMap.put(cacheKey, result);
+                        changeKeyExpireTime(cacheKey, Math.max(continueFetchDTO.expireTimestamp, nextTime));
                     } catch (Throwable e) {
                         LOGGER.error("refreshResult execute pjp fail, key:{}", cacheKey, e);
                     }
-                    // 安排下一次调用
-                    long nextTime = continueFetchDTO.intervalSecond * 1000 + System.currentTimeMillis();
+
                     if(nextTime <= continueFetchDTO.expireTimestamp) { // 下一次调用还在超时时间内
                         addFetchToTimeLine(nextTime, cacheKey);
                     } else {
