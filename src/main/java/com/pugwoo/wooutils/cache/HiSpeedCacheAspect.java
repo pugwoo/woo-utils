@@ -222,7 +222,11 @@ public class HiSpeedCacheAspect {
                     }
                     // 安排下一次调用
                     long nextTime = continueFetchDTO.intervalSecond * 1000 + System.currentTimeMillis();
-                    addFetchToTimeLine(nextTime, cacheKey);
+                    if(nextTime <= continueFetchDTO.expireTimestamp) { // 下一次调用还在超时时间内
+                        addFetchToTimeLine(nextTime, cacheKey);
+                    } else {
+                        keyContinueFetchMap.remove(cacheKey); // 清理continueFetchDTO
+                    }
                 });
                 removeList.add(key);
             } else {
