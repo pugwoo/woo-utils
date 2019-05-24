@@ -2,8 +2,6 @@ package com.pugwoo.wooutils.cache;
 
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-
 @Service
 public class WithCacheDemoService {
 
@@ -14,9 +12,9 @@ public class WithCacheDemoService {
 
     @HiSpeedCache(continueFetchSecond = 10)
     public String getSomethingWithCache() throws Exception {
-        System.out.println("getSomethingWithCache() is called" + new Date());
+      //  System.out.println("getSomethingWithCache() is called" + new Date());
         Thread.sleep(3000);
-        System.out.println("getSomethingWithCache() call end" + new Date());
+      //  System.out.println("getSomethingWithCache() call end" + new Date());
         return "hello";
     }
 

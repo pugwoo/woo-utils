@@ -185,8 +185,6 @@ public class HiSpeedCacheAspect {
                 entry.getValue().forEach(cacheKey -> {
                     dataMap.remove(cacheKey);
                     keyExpireMap.remove(cacheKey);
-                    System.out.println("======" + Thread.currentThread().getName() + " remove cacheKey:"
-                       + cacheKey + ",expireTimeAt:" + key);
                 });
                 removeList.add(key);
             } else {

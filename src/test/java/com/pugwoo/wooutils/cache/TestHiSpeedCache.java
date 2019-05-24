@@ -74,11 +74,11 @@ public class TestHiSpeedCache {
     public void testMultiThread() throws Exception {
         final AtomicLong succ = new AtomicLong(0);
 
-        for(int thread = 0; thread < 100; thread++) {
+        for(int thread = 0; thread < 200; thread++) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    for(int i = 0; i < 10000000; i++) {
+                    for(int i = 0; i < 1000000000; i++) {
                         try {
                             withCacheDemoService.getSomethingWithCache();
                             succ.addAndGet(1);
@@ -90,10 +90,15 @@ public class TestHiSpeedCache {
             }).start();
         }
 
-        int second = 60;
+        int second = 7200 + 7200;
         Thread.sleep(second * 1000);
         System.out.println("成功次数:" + succ.get());
         System.out.println("qps:" + succ.get() * 1.0 / second);
+
+        /**
+         * 成功次数:73923721794
+         * qps:5133591.855763889
+         */
     }
 
 }
