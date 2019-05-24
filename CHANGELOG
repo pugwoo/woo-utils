@@ -1,3 +1,5 @@
+v0.6.4 - [update] 升级pom依赖包
+
 2019年5月24日
 v0.6.3 - [add] 增加本地高速缓存支持
        - [del] 移除NetUtils中csrfPassed方法
