@@ -61,10 +61,27 @@ public class Browser {
 		this.charset = charset;
 	}
 	
-	/**连接和读取的超时时间，也即最长的超时时间是timeoutSeconds*2*/
-	private int timeoutSeconds = 60;
+	/**连接超时时间，秒*/
+	private int connectTimeoutSeconds = 10;
+    /**读取超时时间，秒*/
+	private int readTimeoutSeconds = 60;
 	/**重试次数*/
 	private int retryTimes = 10;
+
+	/**设置连接超时时间，默认10秒*/
+	public void setConnectTimeoutSeconds(int connectTimeoutSeconds) {
+		this.connectTimeoutSeconds = connectTimeoutSeconds;
+	}
+
+    /**设置读取超时时间，默认60秒*/
+	public void setReadTimeoutSeconds(int readTimeoutSeconds) {
+		this.readTimeoutSeconds = readTimeoutSeconds;
+	}
+
+	/**设置重试次数，默认10次*/
+	public void setRetryTimes(int retryTimes) {
+		this.retryTimes = retryTimes;
+	}
 	
 	/**代理*/
 	private Proxy proxy = null;
@@ -80,7 +97,8 @@ public class Browser {
 		}
 	} };
 	private SSLSocketFactory oldSSLSocketFactory = null;
-	
+
+	/**是否信任所有证书*/
 	public void setIsTrustAllCerts(boolean isTrustAllCerts) {
 		if(isTrustAllCerts) {
 			try {
@@ -475,8 +493,8 @@ public class Browser {
 		} else {
 			urlConnection = (HttpURLConnection) url.openConnection(proxy);
 		}
-		urlConnection.setConnectTimeout(timeoutSeconds * 1000);
-		urlConnection.setReadTimeout(timeoutSeconds * 1000);
+		urlConnection.setConnectTimeout(connectTimeoutSeconds * 1000);
+		urlConnection.setReadTimeout(readTimeoutSeconds * 1000);
 		urlConnection.setRequestMethod(method);
 		urlConnection.setRequestProperty("User-agent", USER_AGENT);
 		urlConnection.setRequestProperty("Referer", httpUrl);
