@@ -174,7 +174,8 @@ public class DateUtils {
 
 	/**
 	 * 获得date到当前时间间隔了多少天，如果date是今天则返回0，如果date是昨天则返回1，以此类推。
-	 * 如果是未来的日期，则返回-1、-2以此类推
+	 * 如果是未来的日期，则返回-1、-2以此类推。
+	 * 【该接口性能最佳】
 	 */
 	public static long getDaysToToday(Date date) {
 		long now = System.currentTimeMillis();
@@ -188,6 +189,35 @@ public class DateUtils {
 		} else {
 			return -((dateTimestamp - today) / (24 * 3600 * 1000));
 		}
+	}
+
+	/**
+	 * 获得指定时间date的当天的开始时间。
+	 * 例如date为2019-01-02 03:04:05时，返回2019-01-02 00:00:00
+	 * 【该接口性能最佳】
+	 */
+	public static Date getStartTimeOfDay(Date date) {
+		long now = date.getTime();
+		long today = now - (now % (24 * 3600 * 1000)) - timezoneOffset;
+		if(now - today >= (24 * 3600 * 1000)) {
+			today += (24 * 3600 * 1000);
+		}
+		return new Date(today);
+	}
+
+	/**
+	 * 获得指定时间date的当天的结束时间。
+	 * 例如date为2019-01-02 03:04:05时，返回2019-01-02 00:00:00.999
+	 * 【该接口性能最佳】
+	 */
+    public static Date getEndTimeOfDay(Date date) {
+		long now = date.getTime();
+		long today = now - (now % (24 * 3600 * 1000)) - timezoneOffset;
+		if(now - today >= (24 * 3600 * 1000)) {
+			today += (24 * 3600 * 1000);
+		}
+		today += (24 * 3600 * 1000) - 1;
+		return new Date(today);
 	}
 
 	/**

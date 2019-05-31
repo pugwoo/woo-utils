@@ -1,3 +1,5 @@
+v0.6.5 - [add] DateUtils增加getStartTimeOfDay getEndTimeOfDay等几个工具
+
 2019年5月30日
 v0.6.4 - [update] 升级pom依赖包
        - [add] Browser增加设置超时时间支持，分为连接超时和读取超时，默认为10秒和60秒
