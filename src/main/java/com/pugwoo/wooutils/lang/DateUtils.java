@@ -10,6 +10,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 特别说明：Date是有时区的，默认使用操作系统的时区
+ */
 public class DateUtils {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DateUtils.class);
