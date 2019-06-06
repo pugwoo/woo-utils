@@ -1,4 +1,6 @@
+2019年6月6日
 v0.6.5 - [add] DateUtils增加getStartTimeOfDay getEndTimeOfDay等几个工具
+       - [fix] 修复高速缓存ConcurrentModificationException异常
 
 2019年5月30日
 v0.6.4 - [update] 升级pom依赖包

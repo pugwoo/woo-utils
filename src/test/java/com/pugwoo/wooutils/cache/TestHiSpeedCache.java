@@ -90,7 +90,7 @@ public class TestHiSpeedCache {
             }).start();
         }
 
-        int second = 7200 + 7200;
+        int second = 60;
         Thread.sleep(second * 1000);
         System.out.println("成功次数:" + succ.get());
         System.out.println("qps:" + succ.get() * 1.0 / second);

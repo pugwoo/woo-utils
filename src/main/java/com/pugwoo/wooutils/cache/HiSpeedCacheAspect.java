@@ -178,20 +178,22 @@ public class HiSpeedCacheAspect {
      * 对于超时时间大于当前时间的，不处理
      */
     private static void cleanExpireData() {
-        List<Long> removeList = new ArrayList<>();
-        for (Map.Entry<Long, List<String>> entry : expireLineMap.entrySet()) {
-            Long key = entry.getKey();
-            if (key <= System.currentTimeMillis()) {
-                entry.getValue().forEach(cacheKey -> {
-                    dataMap.remove(cacheKey);
-                    keyExpireMap.remove(cacheKey);
-                });
-                removeList.add(key);
-            } else {
-                break;
-            }
-        }
         synchronized (expireLineMap) {
+
+            List<Long> removeList = new ArrayList<>();
+            for (Map.Entry<Long, List<String>> entry : expireLineMap.entrySet()) {
+                Long key = entry.getKey();
+                if (key <= System.currentTimeMillis()) {
+                    entry.getValue().forEach(cacheKey -> {
+                        dataMap.remove(cacheKey);
+                        keyExpireMap.remove(cacheKey);
+                    });
+                    removeList.add(key);
+                } else {
+                    break;
+                }
+            }
+
             removeList.forEach(item -> {
                 expireLineMap.remove(item);
             });
@@ -202,42 +204,52 @@ public class HiSpeedCacheAspect {
      * 持续调用刷新数据
      */
     private static void refreshResult() {
-        List<Long> removeList = new ArrayList<>();
-        for (Map.Entry<Long, List<String>> entry : fetchLineMap.entrySet()) {
-            Long key = entry.getKey();
-            if (key <= System.currentTimeMillis()) {
-                entry.getValue().forEach(cacheKey -> {
-                    ContinueFetchDTO continueFetchDTO = keyContinueFetchMap.get(cacheKey);
-                    if(continueFetchDTO == null) {
-                        return;
-                    }
-                    // 安排下一次调用
-                    long nextTime = continueFetchDTO.intervalSecond * 1000 + System.currentTimeMillis();
-
-                    try {
-                        Object result = continueFetchDTO.pjp.proceed();
-                        dataMap.put(cacheKey, result);
-                        changeKeyExpireTime(cacheKey, Math.max(continueFetchDTO.expireTimestamp, nextTime));
-                    } catch (Throwable e) {
-                        LOGGER.error("refreshResult execute pjp fail, key:{}", cacheKey, e);
-                    }
-
-                    if(nextTime <= continueFetchDTO.expireTimestamp) { // 下一次调用还在超时时间内
-                        addFetchToTimeLine(nextTime, cacheKey);
-                    } else {
-                        keyContinueFetchMap.remove(cacheKey); // 清理continueFetchDTO
-                    }
-                });
-                removeList.add(key);
-            } else {
-                break;
-            }
-        }
-
         synchronized (fetchLineMap) {
+
+            List<Long> removeList = new ArrayList<>();
+
+            List<Long> addFetchToTimeLine_time = new ArrayList<>();
+            List<String> addFetchToTimeLine_cacheKey = new ArrayList<>();
+
+            for (Map.Entry<Long, List<String>> entry : fetchLineMap.entrySet()) {
+                Long key = entry.getKey();
+                if (key <= System.currentTimeMillis()) {
+                    entry.getValue().forEach(cacheKey -> {
+                        ContinueFetchDTO continueFetchDTO = keyContinueFetchMap.get(cacheKey);
+                        if(continueFetchDTO == null) {
+                            return;
+                        }
+                        // 安排下一次调用
+                        long nextTime = continueFetchDTO.intervalSecond * 1000 + System.currentTimeMillis();
+
+                        try {
+                            Object result = continueFetchDTO.pjp.proceed();
+                            dataMap.put(cacheKey, result);
+                            changeKeyExpireTime(cacheKey, Math.max(continueFetchDTO.expireTimestamp, nextTime));
+                        } catch (Throwable e) {
+                            LOGGER.error("refreshResult execute pjp fail, key:{}", cacheKey, e);
+                        }
+
+                        if(nextTime <= continueFetchDTO.expireTimestamp) { // 下一次调用还在超时时间内
+                            addFetchToTimeLine_time.add(nextTime);
+                            addFetchToTimeLine_cacheKey.add(cacheKey);
+                        } else {
+                            keyContinueFetchMap.remove(cacheKey); // 清理continueFetchDTO
+                        }
+                    });
+                    removeList.add(key);
+                } else {
+                    break;
+                }
+            }
+
             removeList.forEach(item -> {
                 fetchLineMap.remove(item);
             });
+
+            for(int i = 0; i < addFetchToTimeLine_time.size(); i++) {
+                addFetchToTimeLine(addFetchToTimeLine_time.get(i), addFetchToTimeLine_cacheKey.get(i));
+            }
         }
     }
 
