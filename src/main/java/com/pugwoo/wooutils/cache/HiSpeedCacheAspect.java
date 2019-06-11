@@ -161,6 +161,18 @@ public class HiSpeedCacheAspect {
     /**将某个cacheKey的下一次获取加入到更新时间线中*/
     private static void addFetchToTimeLine(long nextTime, String cacheKey) {
         synchronized (fetchLineMap) {
+
+            // 检查一下cacheKey是否已经存在于刷新线中，如果已经存在，则不再加入
+            for(Map.Entry<Long, List<String>> e : fetchLineMap.entrySet()) {
+                if(e.getValue() != null) {
+                    for(String ck : e.getValue()) {
+                        if(ck != null && ck.equals(cacheKey)) {
+                            return; // 不加入
+                        }
+                    }
+                }
+            }
+
             List<String> keys = fetchLineMap.get(nextTime);
             if(keys == null) {
                 fetchLineMap.put(nextTime, ListUtils.newArrayList(cacheKey));

@@ -1,3 +1,5 @@
+v0.6.6 - [improve] 优化高速缓存，对于高并发情况下，也保证一个cacheKey只有一个刷新任务
+
 2019年6月6日
 v0.6.5 - [add] DateUtils增加getStartTimeOfDay getEndTimeOfDay等几个工具
        - [fix] 修复高速缓存ConcurrentModificationException异常
