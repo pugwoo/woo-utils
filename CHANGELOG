@@ -1,4 +1,6 @@
+2019年6月14日
 v0.6.6 - [improve] 优化高速缓存，对于高并发情况下，也保证一个cacheKey只有一个刷新任务
+       - [add] Hash增加sha1算法，标记为废弃
 
 2019年6月6日
 v0.6.5 - [add] DateUtils增加getStartTimeOfDay getEndTimeOfDay等几个工具

@@ -28,6 +28,7 @@ public class Hash {
 	 * @param str
 	 * @return
 	 */
+	@Deprecated
 	public static String sha1(String str) {
 		return digest("SHA-1", str.getBytes());
 	}
@@ -37,6 +38,7 @@ public class Hash {
 	 * @param bytes
 	 * @return
 	 */
+	@Deprecated
 	public static String sha1(byte[] bytes) {
 		return digest("SHA-1", bytes);
 	}
