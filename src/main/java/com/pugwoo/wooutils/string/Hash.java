@@ -22,6 +22,24 @@ public class Hash {
 	public static String md5(byte[] bytes) {
 		return digest("MD5", bytes);
 	}
+
+	/**
+	 * 摘要sha1
+	 * @param str
+	 * @return
+	 */
+	public static String sha1(String str) {
+		return digest("SHA-1", str.getBytes());
+	}
+
+	/**
+	 * 摘要sha1
+	 * @param bytes
+	 * @return
+	 */
+	public static String sha1(byte[] bytes) {
+		return digest("SHA-1", bytes);
+	}
 	
 	/**
 	 * 摘要sha256
