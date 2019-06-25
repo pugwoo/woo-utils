@@ -351,7 +351,7 @@ public class Browser {
 		        
 				return makeHttpResponse(httpUrl, urlConnection, outputStream, isAsync);
 			} catch (IOException e) {
-				LOGGER.error("get url:{} exception", httpUrl, e);
+				LOGGER.error("post url:{} exception", httpUrl, e);
 				ie = e;
 			}
 		}
