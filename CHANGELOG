@@ -1,4 +1,4 @@
-v0.6.7 -
+v0.6.7 - [improve] RedisHelper的isOk不使用ping命令来确认是否ok，采用另外方式，因为jedis 2.9.3不支持
 
 2019年6月14日
 v0.6.6 - [improve] 优化高速缓存，对于高并发情况下，也保证一个cacheKey只有一个刷新任务

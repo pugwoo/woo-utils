@@ -78,7 +78,8 @@ public class RedisHelperImpl implements RedisHelper {
 			if(jedis == null) {
 				return false;
 			}
-			return "a".equals(jedis.ping("a"));
+			jedis.get("a"); // 随便拿一个值测下，没抛异常则表示成功
+			return true;
 		} catch (Exception e) {
 			LOGGER.error("check redis isOk fail", e);
 			return false;
