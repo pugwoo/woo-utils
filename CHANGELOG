@@ -1,4 +1,7 @@
 2019年7月1日
+v0.6.8 - [improve] Browser的HttpResponse根据Browser本身的编码进行
+
+2019年7月1日
 v0.6.7 - [improve] RedisHelper的isOk不使用ping命令来确认是否ok，采用另外方式，因为jedis 2.9.3不支持
 
 2019年6月14日

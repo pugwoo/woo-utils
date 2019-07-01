@@ -1,5 +1,9 @@
 package com.pugwoo.wooutils.net;
 
+import com.pugwoo.wooutils.string.StringTools;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,6 +15,11 @@ import java.util.Map;
  * @author pugwoo@gmail.com
  */
 public class HttpResponse {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(HttpResponse.class);
+
+	/**请求的编码，可以由使用方自行指定，将在getContentString()方法中使用*/
+	private String charset;
 
 	/** HTTP状态码 */
 	private int responseCode;
@@ -75,27 +84,31 @@ public class HttpResponse {
 	 * @return
 	 */
 	public String getContentString() {
-		// 尝试自动从http header里面获得编码
-		List<String> contentType = headers.get("Content-Type");
-		if(contentType != null && contentType.size() > 0) {
-			String ctype = contentType.get(0);
-			if(ctype != null) {
-				int index = ctype.indexOf("charset=");
-				if(index > 0) {
-					String charset = ctype.substring(index + "charset=".length());
-					if(charset != null && !charset.isEmpty()) {
-						try {
-							return new String(contentBytes, charset);
-						} catch (UnsupportedEncodingException e) {
+		if(charset == null) {
+			// 尝试自动从http header里面获得编码
+			List<String> contentType = headers.get("Content-Type");
+			if(contentType != null && contentType.size() > 0) {
+				String ctype = contentType.get(0);
+				if(ctype != null) {
+					int index = ctype.indexOf("charset=");
+					if(index > 0) {
+						String cs = ctype.substring(index + "charset=".length());
+						if(StringTools.isNotBlank(cs)) {
+							charset = cs;
 						}
 					}
 				}
 			}
 		}
-		
+
+		if(charset == null) {
+			charset = "utf-8"; // 默认 utf-8编码
+		}
+
 		try {
-			return new String(contentBytes, "utf-8"); // 默认 utf-8编码
+			return new String(contentBytes, charset);
 		} catch (UnsupportedEncodingException e) {
+			LOGGER.error("convert byte[] to string error, charset:{}", charset, e);
 			return new String(contentBytes);
 		}
 	}
@@ -142,5 +155,12 @@ public class HttpResponse {
 	public void setFuture(Browser.HttpResponseFuture future) {
 		this.future = future;
 	}
-	
+
+	public String getCharset() {
+		return charset;
+	}
+
+	public void setCharset(String charset) {
+		this.charset = charset;
+	}
 }

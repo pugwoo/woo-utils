@@ -537,6 +537,7 @@ public class Browser {
 	private HttpResponse makeHttpResponse(String httpUrl, HttpURLConnection urlConnection,
 			final OutputStream outputStream, boolean isAsync) throws IOException {
 		HttpResponse httpResponse = new HttpResponse();
+		httpResponse.setCharset(charset);
 		httpResponse.setResponseCode(urlConnection.getResponseCode());
 		httpResponse.setHeaders(urlConnection.getHeaderFields());
 		
