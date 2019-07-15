@@ -1,4 +1,5 @@
-v0.7.0 - [add] 正则工具加上不区分大小写的匹配
+v0.6.9 - [add] 正则工具加上不区分大小写的匹配
+       - [improve] redis增加捕获异常的log
 
 2019年7月1日
 v0.6.8 - [improve] Browser的HttpResponse根据Browser本身的编码进行

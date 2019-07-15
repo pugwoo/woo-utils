@@ -62,8 +62,13 @@ public class RedisHelperImpl implements RedisHelper {
 		try {
 			jedis = pool.getResource();
 		} catch (Exception e) {
+			LOGGER.error("redis get jedis fail", e);
 			if(jedis != null) {
-				jedis.close();
+				try {
+					jedis.close();
+				} catch (Exception ex) {
+					LOGGER.error("close jedis fail", ex);
+				}
 				jedis = null;
 			}
 		}
