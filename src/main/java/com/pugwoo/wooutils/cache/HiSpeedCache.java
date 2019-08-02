@@ -34,7 +34,8 @@ public @interface HiSpeedCache {
 
     /**
      * 是否json克隆返回数据，默认false。
-     * 如果启动克隆，那么调用者对返回值进行修改，就不会影响缓存的值
+     * 如果启动克隆，那么调用者对返回值进行修改，就不会影响缓存的值。
+     * 【注意】当此值为true时，请自行测试验证克隆的数据是否有问题。
      */
     boolean cloneReturn() default false;
 

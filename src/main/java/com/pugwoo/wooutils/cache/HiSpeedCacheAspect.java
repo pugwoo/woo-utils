@@ -135,6 +135,11 @@ public class HiSpeedCacheAspect {
             return null;
         }
         if(hiSpeedCache.cloneReturn()) {
+            Class<?> clazz = data.getClass();
+            // 基础类型、String不需要转，相当于性能优化
+            if(clazz == String.class || clazz == Integer.class || clazz == Long.class) {
+                return data;
+            }
             Class<?> genericClass1 = hiSpeedCache.genericClass1();
             Class<?> genericClass2 = hiSpeedCache.genericClass2();
             if(genericClass1 == Void.class && genericClass2 == Void.class) {

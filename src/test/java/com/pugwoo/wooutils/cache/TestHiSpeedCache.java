@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 @ContextConfiguration(locations = {"classpath:applicationContext-context.xml"})
@@ -63,6 +65,27 @@ public class TestHiSpeedCache {
         for(int i = 0; i < times; i++) {
             withCacheDemoService.getSomethingWithCache();
             // System.out.println("i:" + i);
+        }
+        long end = System.currentTimeMillis();
+
+        System.out.println("cost:" + (end - start) + "ms");
+        System.out.println("qps:" + times / ((end - start) / 1000.0));
+    }
+
+    // 测试泛型的情况
+    @Test
+    public void benchmark2() throws Exception {
+
+        Map<String, Date> map = withCacheDemoService.getSomeDateWithCache2();
+        Date date = map.get("11");
+
+        int times = 10000;
+        // 测试调用1000万次的时间
+        long start = System.currentTimeMillis();
+        for(int i = 0; i < times; i++) {
+            Map<String, Date> map2 = withCacheDemoService.getSomeDateWithCache2();
+            Date date2 = map.get("11");
+            System.out.println("i:" + i + date2);
         }
         long end = System.currentTimeMillis();
 
