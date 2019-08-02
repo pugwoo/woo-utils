@@ -143,11 +143,11 @@ public class HiSpeedCacheAspect {
             Class<?> genericClass1 = hiSpeedCache.genericClass1();
             Class<?> genericClass2 = hiSpeedCache.genericClass2();
             if(genericClass1 == Void.class && genericClass2 == Void.class) {
-                return JSON.parse(JSON.toJson(data), data.getClass());
+                return JSON.parse(JSON.toJson(data), clazz);
             } else if (genericClass1 != Void.class && genericClass2 == Void.class) {
-                return JSON.parse(JSON.toJson(data), data.getClass(), genericClass1);
+                return JSON.parse(JSON.toJson(data), clazz, genericClass1);
             } else {
-                return JSON.parse(JSON.toJson(data), data.getClass(), genericClass1, genericClass2);
+                return JSON.parse(JSON.toJson(data), clazz, genericClass1, genericClass2);
             }
         } else {
             return data;
