@@ -41,7 +41,8 @@ public class TestHiSpeedCache {
         start = System.currentTimeMillis();
         withCacheDemoService.getSomethingWithCache("hello");
         withCacheDemoService.getSomethingWithCache("world");
-        withCacheDemoService.getSomethingWithCache("you");
+        String ret = withCacheDemoService.getSomethingWithCache("you");
+        System.out.println(ret);
         end = System.currentTimeMillis();
 
         System.out.println("cost:" + (end - start) + "ms");
@@ -74,7 +75,7 @@ public class TestHiSpeedCache {
 
     // 测试泛型的情况
     @Test
-    public void benchmark2() throws Exception {
+    public void benchmarkClone() throws Exception {
 
         Map<String, Date> map = withCacheDemoService.getSomeDateWithCache2();
         Date date = map.get("11");

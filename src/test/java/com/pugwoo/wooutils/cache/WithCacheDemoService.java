@@ -12,7 +12,7 @@ public class WithCacheDemoService {
         return "hello";
     }
 
-    @HiSpeedCache(continueFetchSecond = 10, cloneReturn = true)
+    @HiSpeedCache(continueFetchSecond = 10/*, cloneReturn = true*/)
     public String getSomethingWithCache() throws Exception {
       //  System.out.println("getSomethingWithCache() is called" + new Date());
         Thread.sleep(3000);
@@ -20,7 +20,7 @@ public class WithCacheDemoService {
         return "hello";
     }
 
-    @HiSpeedCache
+    @HiSpeedCache(cloneReturn = true)
     public String getSomethingWithCache(String name) throws Exception {
         Thread.sleep(3000);
         return "hello";
