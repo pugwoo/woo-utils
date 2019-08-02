@@ -31,4 +31,21 @@ public @interface HiSpeedCache {
      * 当缓存接口被访问时，自动设定后续自动刷新缓存的时间。缓存将以expireSecond的频率持续更新continueFetchSecond秒。
      */
     int continueFetchSecond() default 0;
+
+    /**
+     * 是否json克隆返回数据，默认false。
+     * 如果启动克隆，那么调用者对返回值进行修改，就不会影响缓存的值
+     */
+    boolean cloneReturn() default false;
+
+    /**
+     * 如果克隆的数据是泛型的，则这里支持指定泛型，这个是第1个泛型
+     */
+    Class<?> genericClass1() default Void.class;
+
+    /**
+     * 如果克隆的数据是泛型的，则这里支持指定泛型，这个是第2个泛型
+     */
+    Class<?> genericClass2() default Void.class;
+
 }

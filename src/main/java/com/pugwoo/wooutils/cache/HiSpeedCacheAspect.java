@@ -81,7 +81,8 @@ public class HiSpeedCacheAspect {
         }
 
         if (dataMap.containsKey(cacheKey)) {
-            return dataMap.get(cacheKey);
+            Object data = dataMap.get(cacheKey);
+            return processClone(hiSpeedCache, data);
         }
 
         // 当缓存中没有时进行
@@ -125,7 +126,27 @@ public class HiSpeedCacheAspect {
             }
         }
 
-        return ret;
+        return processClone(hiSpeedCache, ret);
+    }
+
+    /*处理结果值克隆的问题*/
+    private Object processClone(HiSpeedCache hiSpeedCache, Object data) {
+        if(data == null) {
+            return null;
+        }
+        if(hiSpeedCache.cloneReturn()) {
+            Class<?> genericClass1 = hiSpeedCache.genericClass1();
+            Class<?> genericClass2 = hiSpeedCache.genericClass2();
+            if(genericClass1 == Void.class && genericClass2 == Void.class) {
+                return JSON.parse(JSON.toJson(data), data.getClass());
+            } else if (genericClass1 != Void.class && genericClass2 == Void.class) {
+                return JSON.parse(JSON.toJson(data), data.getClass(), genericClass1);
+            } else {
+                return JSON.parse(JSON.toJson(data), data.getClass(), genericClass1, genericClass2);
+            }
+        } else {
+            return data;
+        }
     }
 
     /**设置或修改cacheKey的超时时间，保证一个cacheKey只有一个超时时间*/
