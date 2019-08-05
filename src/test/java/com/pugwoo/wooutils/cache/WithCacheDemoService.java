@@ -1,5 +1,6 @@
 package com.pugwoo.wooutils.cache;
 
+import com.pugwoo.wooutils.collect.ListUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -22,6 +23,12 @@ public class WithCacheDemoService {
     public Date getSomethingWithCacheCloneReturn(String name) throws Exception {
         Thread.sleep(3000);
         return new Date();
+    }
+
+    @HiSpeedCache(continueFetchSecond = 10, useRedis = true)
+    public List<Date> getSomethingWithRedis() throws Exception {
+        Thread.sleep(3000);
+        return ListUtils.newArrayList(new Date(), new Date());
     }
 
     // 支持克隆情况下的泛型

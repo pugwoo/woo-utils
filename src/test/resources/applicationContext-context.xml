@@ -18,6 +18,8 @@
 	    <property name="database" value="1" />
 	</bean>
 
+    <bean id="jsonRedisObjectConverter" class="com.pugwoo.wooutils.redis.impl.JsonRedisObjectConverter" />
+
 	<bean class="com.pugwoo.wooutils.redis.RedisSyncAspect" />
 
 	<bean class="com.pugwoo.wooutils.cache.HiSpeedCacheAspect" />

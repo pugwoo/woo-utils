@@ -7,6 +7,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -56,6 +57,21 @@ public class TestHiSpeedCache {
         System.out.println(date + "," + new Date());
         date = withCacheDemoService.getSomethingWithCacheCloneReturn("you");
         System.out.println(date + "," + new Date());
+        long end = System.currentTimeMillis();
+
+        System.out.println("cost:" + (end - start) + "ms");
+        assert (end - start) > 3000 && (end - start) < 3500;
+    }
+
+    @Test
+    public void test4() throws Exception {
+        long start = System.currentTimeMillis();
+        List<Date> dates = withCacheDemoService.getSomethingWithRedis();
+        System.out.println(dates + "," + new Date());
+        dates = withCacheDemoService.getSomethingWithRedis();
+        System.out.println(dates + "," + new Date());
+        dates = withCacheDemoService.getSomethingWithRedis();
+        System.out.println(dates + "," + new Date());
         long end = System.currentTimeMillis();
 
         System.out.println("cost:" + (end - start) + "ms");
