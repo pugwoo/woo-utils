@@ -20,39 +20,46 @@ public class TestHiSpeedCache {
     @Test
     public void test() throws Exception {
         long start = System.currentTimeMillis();
-        withCacheDemoService.getSomething();
-        withCacheDemoService.getSomething();
-        withCacheDemoService.getSomething();
+        String str = withCacheDemoService.getSomething();
+        System.out.println(str + new Date());
+        str = withCacheDemoService.getSomething();
+        System.out.println(str + new Date());
+        str = withCacheDemoService.getSomething();
+        System.out.println(str + new Date());
         long end = System.currentTimeMillis();
 
         System.out.println("cost:" + (end - start) + "ms");
+        assert (end- start) > 9000;
     }
 
     @Test
     public void test2() throws Exception {
         long start = System.currentTimeMillis();
-        withCacheDemoService.getSomethingWithCache();
-        withCacheDemoService.getSomethingWithCache();
-        withCacheDemoService.getSomethingWithCache();
+        String str = withCacheDemoService.getSomethingWithCache();
+        System.out.println(str + new Date());
+        str = withCacheDemoService.getSomethingWithCache();
+        System.out.println(str + new Date());
+        str = withCacheDemoService.getSomethingWithCache();
+        System.out.println(str + new Date());
         long end = System.currentTimeMillis();
 
         System.out.println("cost:" + (end - start) + "ms");
-
-        start = System.currentTimeMillis();
-        withCacheDemoService.getSomethingWithCache("hello");
-        withCacheDemoService.getSomethingWithCache("world");
-        String ret = withCacheDemoService.getSomethingWithCache("you");
-        System.out.println(ret);
-        end = System.currentTimeMillis();
-
-        System.out.println("cost:" + (end - start) + "ms");
+        assert (end - start) > 3000 && (end - start) < 3500;
     }
 
     @Test
-    public void testContinue() throws Exception {
-        withCacheDemoService.getSomethingWithCache();
+    public void test3() throws Exception {
+        long start = System.currentTimeMillis();
+        Date date = withCacheDemoService.getSomethingWithCacheCloneReturn("hello");
+        System.out.println(date + "," + new Date());
+        date = withCacheDemoService.getSomethingWithCacheCloneReturn("world");
+        System.out.println(date + "," + new Date());
+        date = withCacheDemoService.getSomethingWithCacheCloneReturn("you");
+        System.out.println(date + "," + new Date());
+        long end = System.currentTimeMillis();
 
-        Thread.sleep(30000);
+        System.out.println("cost:" + (end - start) + "ms");
+        assert (end - start) > 3000 && (end - start) < 3500;
     }
 
     @Test
@@ -60,12 +67,11 @@ public class TestHiSpeedCache {
 
         withCacheDemoService.getSomethingWithCache();
 
-        int times = 10000000;
-        // 测试调用1000万次的时间
+        int times = 1000000;
+        // 测试调用100万次的时间
         long start = System.currentTimeMillis();
         for(int i = 0; i < times; i++) {
             withCacheDemoService.getSomethingWithCache();
-            // System.out.println("i:" + i);
         }
         long end = System.currentTimeMillis();
 
@@ -76,17 +82,15 @@ public class TestHiSpeedCache {
     // 测试泛型的情况
     @Test
     public void benchmarkClone() throws Exception {
-
         Map<String, Date> map = withCacheDemoService.getSomeDateWithCache2();
         Date date = map.get("11");
 
-        int times = 10000;
-        // 测试调用1000万次的时间
+        int times = 100000;
+        // 测试调用10万次的时间
         long start = System.currentTimeMillis();
         for(int i = 0; i < times; i++) {
             Map<String, Date> map2 = withCacheDemoService.getSomeDateWithCache2();
             Date date2 = map.get("11");
-            System.out.println("i:" + i + date2);
         }
         long end = System.currentTimeMillis();
 

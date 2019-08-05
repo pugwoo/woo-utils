@@ -12,18 +12,16 @@ public class WithCacheDemoService {
         return "hello";
     }
 
-    @HiSpeedCache(continueFetchSecond = 10/*, cloneReturn = true*/)
+    @HiSpeedCache(continueFetchSecond = 10)
     public String getSomethingWithCache() throws Exception {
-      //  System.out.println("getSomethingWithCache() is called" + new Date());
         Thread.sleep(3000);
-      //  System.out.println("getSomethingWithCache() call end" + new Date());
         return "hello";
     }
 
-    @HiSpeedCache(cloneReturn = true)
-    public String getSomethingWithCache(String name) throws Exception {
+    @HiSpeedCache(continueFetchSecond = 10, cloneReturn = true)
+    public Date getSomethingWithCacheCloneReturn(String name) throws Exception {
         Thread.sleep(3000);
-        return "hello";
+        return new Date();
     }
 
     // 支持克隆情况下的泛型
