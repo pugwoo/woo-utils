@@ -17,7 +17,7 @@ public @interface HiSpeedCache {
     // 说明：对于本地高速缓存，使用包名+类名+方法名+方法名hashCode作为namespace，因此不需要用户指定namespace
 
     /**
-     * [可选] 高速缓存的不同的key的mvel表达式脚本，可以从参数列表变量args中获取
+     * [可选] 高速缓存的不同的key的mvel表达式脚本，可以从参数列表变量args中获取<br>
      * @return 【重要】如果脚本执行出错，则打log，然后直接调用方法，等价于缓存失效。如果脚本直接结果返回null，则等价于空字符
      */
     String keyScript() default "";
@@ -33,9 +33,9 @@ public @interface HiSpeedCache {
     int continueFetchSecond() default 0;
 
     /**
-     * 是否json克隆返回数据，默认false。
-     * 如果启动克隆，那么调用者对返回值进行修改，就不会影响缓存的值。
-     * 【注意】当此值为true时，请自行测试验证克隆的数据是否有问题。
+     * 是否json克隆返回数据，默认false。<br>
+     * 如果启动克隆，那么调用者对返回值进行修改，就不会影响缓存的值。<br>
+     * 【注意】当此值为true时，请自行测试验证克隆的数据是否有问题。<br>
      */
     boolean cloneReturn() default false;
 
@@ -48,5 +48,13 @@ public @interface HiSpeedCache {
      * 如果克隆的数据是泛型的，则这里支持指定泛型，这个是第2个泛型
      */
     Class<?> genericClass2() default Void.class;
+
+    /**
+     * 是否使用redis保存数据，默认关闭。<br>
+     * 只有当前是Spring容器且有RedisHelper的bean时，useRedis=true才生效，否则等价于useRedis=false，即便设置为true。<br>
+     * 当使用useRedis=true时，cloneReturn选项失效。<br>
+     * 【注意】当返回类型有泛型时，记得设置genericClass1或genericClass2的值，最多支持2个泛型的情况。<br>
+     */
+    boolean useRedis() default false;
 
 }

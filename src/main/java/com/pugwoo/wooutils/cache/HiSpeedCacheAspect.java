@@ -3,6 +3,7 @@ package com.pugwoo.wooutils.cache;
 import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.collect.MapUtils;
 import com.pugwoo.wooutils.json.JSON;
+import com.pugwoo.wooutils.redis.RedisHelper;
 import com.pugwoo.wooutils.string.StringTools;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -11,27 +12,42 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.mvel2.MVEL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 import java.lang.reflect.Method;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 @EnableAspectJAutoProxy
 @Aspect
-public class HiSpeedCacheAspect {
+public class HiSpeedCacheAspect implements ApplicationContextAware, InitializingBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HiSpeedCacheAspect.class);
+
+    private ApplicationContext applicationContext;
+
+    private static RedisHelper redisHelper;
 
     private static class ContinueFetchDTO {
         public volatile ProceedingJoinPoint pjp;
         public volatile int intervalSecond; // 调用的间隔
         public volatile long expireTimestamp; // 此次调用的过时时间（毫秒时间戳）
-        public ContinueFetchDTO(ProceedingJoinPoint pjp, int intervalSecond, long expireTimestamp) {
+        public volatile boolean useRedis; // 是否存放于redis
+        public volatile int expireSecond; // 来自于hiSpeedCache的超时时间 TODO 这里干脆存HiSpeedCache的对象好了
+        public ContinueFetchDTO(ProceedingJoinPoint pjp, int intervalSecond, long expireTimestamp, boolean useRedis,
+                                int expireSecond) {
             this.pjp = pjp;
             this.intervalSecond = intervalSecond;
             this.expireTimestamp = expireTimestamp;
+            this.useRedis = useRedis;
+            this.expireSecond = expireSecond;
         }
     }
 
@@ -53,6 +69,8 @@ public class HiSpeedCacheAspect {
         String methodName = targetMethod.getName();
 
         HiSpeedCache hiSpeedCache = targetMethod.getAnnotation(HiSpeedCache.class);
+        boolean useRedis = hiSpeedCache.useRedis() && redisHelper != null;
+
         String key = "";
         String keyScript = hiSpeedCache.keyScript().trim();
         if (StringTools.isNotEmpty(keyScript)) {
@@ -69,7 +87,7 @@ public class HiSpeedCacheAspect {
         }
 
         Class<?>[] parameterTypes = targetMethod.getParameterTypes();
-        String cacheKey = clazzName + "." + methodName + ":" + toString(parameterTypes) + (key.isEmpty() ? "" : ":" + key);
+        String cacheKey = "HSC:" + clazzName + "." + methodName + ":" + toString(parameterTypes) + (key.isEmpty() ? "" : ":" + key);
 
         int fetchSecond = hiSpeedCache.continueFetchSecond();
         if(fetchSecond > 0) { // 持续更新时，每次接口的访问都会延长持续获取的时长(如果还没超时的话)
@@ -80,28 +98,43 @@ public class HiSpeedCacheAspect {
             }
         }
 
-        if (dataMap.containsKey(cacheKey)) {
-            Object data = dataMap.get(cacheKey);
-            return processClone(hiSpeedCache, data);
+        // 查看数据是否有命中，有则直接返回
+        if(useRedis) {
+            String value = redisHelper.getString(cacheKey);
+            if(value != null) { // redis数据不需要clone
+                return stringToObject(targetMethod.getReturnType(), hiSpeedCache, value);
+            }
+        } else {
+            if (dataMap.containsKey(cacheKey)) {
+                Object data = dataMap.get(cacheKey);
+                return processClone(hiSpeedCache, data);
+            }
         }
 
         // 当缓存中没有时进行
         Object ret = pjp.proceed();
 
         synchronized (HiSpeedCacheAspect.class) {
-            dataMap.put(cacheKey, ret);
+            int expireSecond = Math.max(hiSpeedCache.expireSecond(), hiSpeedCache.continueFetchSecond());
+            long expireTime = expireSecond * 1000 + System.currentTimeMillis();
 
-            long expireTime = Math.max(hiSpeedCache.expireSecond(), hiSpeedCache.continueFetchSecond())
-                    * 1000 + System.currentTimeMillis();
+            if(useRedis) {
+                if(ret != null) { // redis不能放null
+                    redisHelper.setObject(cacheKey, expireSecond, ret);
+                }
+            } else {
+                dataMap.put(cacheKey, ret); // 本地缓存可以放null
+                changeKeyExpireTime(cacheKey, expireTime);
+            }
+
             if (fetchSecond > 0) {
                 ContinueFetchDTO continueFetchDTO = new ContinueFetchDTO(pjp, hiSpeedCache.expireSecond(),
-                        expireTime);
+                        expireTime, hiSpeedCache.useRedis(), hiSpeedCache.expireSecond());
                 keyContinueFetchMap.put(cacheKey, continueFetchDTO);
                 long nextFetchTime = Math.min(hiSpeedCache.expireSecond(), hiSpeedCache.continueFetchSecond())
                         * 1000 + System.currentTimeMillis();
                 addFetchToTimeLine(nextFetchTime, cacheKey);
             }
-            changeKeyExpireTime(cacheKey, expireTime);
         }
 
         if (cleanThread == null) {
@@ -151,6 +184,19 @@ public class HiSpeedCacheAspect {
             }
         } else {
             return data;
+        }
+    }
+
+    /**将string转换成json*/
+    private Object stringToObject(Class<?> returnClazz, HiSpeedCache hiSpeedCache, String jsonStr) {
+        Class<?> genericClass1 = hiSpeedCache.genericClass1();
+        Class<?> genericClass2 = hiSpeedCache.genericClass2();
+        if(genericClass1 == Void.class && genericClass2 == Void.class) {
+            return JSON.parse(jsonStr, returnClazz);
+        } else if (genericClass1 != Void.class && genericClass2 == Void.class) {
+            return JSON.parse(jsonStr, returnClazz, genericClass1);
+        } else {
+            return JSON.parse(jsonStr, returnClazz, genericClass1, genericClass2);
         }
     }
 
@@ -262,8 +308,14 @@ public class HiSpeedCacheAspect {
 
                         try {
                             Object result = continueFetchDTO.pjp.proceed();
-                            dataMap.put(cacheKey, result);
-                            changeKeyExpireTime(cacheKey, Math.max(continueFetchDTO.expireTimestamp, nextTime));
+                            if(continueFetchDTO.useRedis) {
+                                if(result != null) {
+                                    redisHelper.setObject(cacheKey, Math.max(continueFetchDTO.intervalSecond, continueFetchDTO.expireSecond), result);
+                                }
+                            } else {
+                                dataMap.put(cacheKey, result);
+                                changeKeyExpireTime(cacheKey, Math.max(continueFetchDTO.expireTimestamp, nextTime));
+                            }
                         } catch (Throwable e) {
                             LOGGER.error("refreshResult execute pjp fail, key:{}", cacheKey, e);
                         }
@@ -335,5 +387,22 @@ public class HiSpeedCacheAspect {
             sb.append(clazz.getName()).append(",");
         }
         return sb.toString().substring(0, sb.length() - 1);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if(this.redisHelper == null) { // 尝试从spring容器中拿
+            if(this.applicationContext != null) {
+                RedisHelper rh = this.applicationContext.getBean(RedisHelper.class);
+                if(rh != null) {
+                    this.redisHelper = rh;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 }
