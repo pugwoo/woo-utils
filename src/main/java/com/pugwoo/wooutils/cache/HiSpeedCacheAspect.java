@@ -129,7 +129,7 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
 
             if (fetchSecond > 0) {
                 ContinueFetchDTO continueFetchDTO = new ContinueFetchDTO(pjp, hiSpeedCache.expireSecond(),
-                        expireTime, hiSpeedCache.useRedis(), hiSpeedCache.expireSecond());
+                        expireTime, hiSpeedCache.useRedis(), hiSpeedCache.continueFetchSecond());
                 keyContinueFetchMap.put(cacheKey, continueFetchDTO);
                 long nextFetchTime = Math.min(hiSpeedCache.expireSecond(), hiSpeedCache.continueFetchSecond())
                         * 1000 + System.currentTimeMillis();
