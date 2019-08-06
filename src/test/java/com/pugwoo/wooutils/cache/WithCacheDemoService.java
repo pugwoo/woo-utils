@@ -19,13 +19,13 @@ public class WithCacheDemoService {
         return "hello";
     }
 
-    @HiSpeedCache(continueFetchSecond = 10, cloneReturn = true)
+    @HiSpeedCache(continueFetchSecond = 10, cloneReturn = true, keyScript = "args[0]")
     public Date getSomethingWithCacheCloneReturn(String name) throws Exception {
         Thread.sleep(3000);
         return new Date();
     }
 
-    @HiSpeedCache(continueFetchSecond = 10, useRedis = true)
+    @HiSpeedCache(continueFetchSecond = 10, useRedis = true, genericClass1 = Date.class)
     public List<Date> getSomethingWithRedis() throws Exception {
         Thread.sleep(3000);
         return ListUtils.newArrayList(new Date(), new Date());
