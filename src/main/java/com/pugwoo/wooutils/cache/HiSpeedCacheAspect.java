@@ -100,9 +100,19 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
 
         // 查看数据是否有命中，有则直接返回
         if(useRedis) {
-            String value = redisHelper.getString(cacheKey);
-            if(value != null) { // redis数据不需要clone
-                return stringToObject(targetMethod.getReturnType(), hiSpeedCache, value);
+            Class<?> returnClazz = targetMethod.getReturnType();
+            Class<?> genericClass1 = hiSpeedCache.genericClass1();
+            Class<?> genericClass2 = hiSpeedCache.genericClass2();
+            Object ret;
+            if(genericClass1 == Void.class && genericClass2 == Void.class) {
+                ret = redisHelper.getObject(cacheKey, returnClazz);
+            } else if (genericClass1 != Void.class && genericClass2 == Void.class) {
+                ret = redisHelper.getObject(cacheKey, returnClazz, genericClass1);
+            } else {
+                ret = redisHelper.getObject(cacheKey, returnClazz, genericClass1, genericClass2);
+            }
+            if(ret != null) { // redis数据不需要clone
+                return ret;
             }
         } else {
             if (dataMap.containsKey(cacheKey)) {
@@ -184,19 +194,6 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
             }
         } else {
             return data;
-        }
-    }
-
-    /**将string转换成json*/
-    private Object stringToObject(Class<?> returnClazz, HiSpeedCache hiSpeedCache, String jsonStr) {
-        Class<?> genericClass1 = hiSpeedCache.genericClass1();
-        Class<?> genericClass2 = hiSpeedCache.genericClass2();
-        if(genericClass1 == Void.class && genericClass2 == Void.class) {
-            return JSON.parse(jsonStr, returnClazz);
-        } else if (genericClass1 != Void.class && genericClass2 == Void.class) {
-            return JSON.parse(jsonStr, returnClazz, genericClass1);
-        } else {
-            return JSON.parse(jsonStr, returnClazz, genericClass1, genericClass2);
         }
     }
 
