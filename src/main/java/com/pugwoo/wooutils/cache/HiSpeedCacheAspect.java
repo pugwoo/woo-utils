@@ -270,7 +270,7 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
                 }
             }
 
-            removeList.forEach(item -> expireLineMap.remove(item));
+            removeList.forEach(expireLineMap::remove);
         }
     }
 
@@ -325,7 +325,7 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
                 }
             }
 
-            removeList.forEach(item -> fetchLineMap.remove(item));
+            removeList.forEach(fetchLineMap::remove);
 
             for(int i = 0; i < addFetchToTimeLine_time.size(); i++) {
                 addFetchToTimeLine(addFetchToTimeLine_time.get(i), addFetchToTimeLine_cacheKey.get(i));
@@ -336,7 +336,7 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
     private static class CleanExpireDataTask extends Thread {
         @Override
         public void run() {
-            while (true) {
+            while (true) { // 一直循环，不会退出
                 try {
                     cleanExpireData();
                 } catch (Throwable e) { // 保证线程存活
@@ -353,7 +353,7 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
     private static class ContinueUpdateTask extends Thread {
         @Override
         public void run() {
-            while (true) {
+            while (true) { // 一直循环，不会退出
                 try {
                     refreshResult();
                 } catch (Throwable e) { // 保证线程存活
