@@ -15,7 +15,8 @@
 	    <property name="host" value="192.168.0.101"/>
 	    <property name="port" value="6379"/>
 	    <property name="password" value="123456789"/>
-	    <property name="database" value="1" />
+	    <property name="database" value="0" />
+        <property name="redisObjectConverter" ref="jsonRedisObjectConverter"/>
 	</bean>
 
     <bean id="jsonRedisObjectConverter" class="com.pugwoo.wooutils.redis.impl.JsonRedisObjectConverter" />

@@ -95,7 +95,7 @@ public class BenchmarkHiSpeedCache {
             }).start();
         }
 
-        int second = 60;
+        int second = 600;
         Thread.sleep(second * 1000);
         System.out.println("成功次数:" + succ.get());
         System.out.println("qps:" + succ.get() * 1.0 / second);
