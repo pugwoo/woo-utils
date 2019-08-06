@@ -36,27 +36,23 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
     private static RedisHelper redisHelper;
 
     private static class ContinueFetchDTO {
-        public volatile ProceedingJoinPoint pjp;
-        public volatile int intervalSecond; // 调用的间隔
-        public volatile long expireTimestamp; // 此次调用的过时时间（毫秒时间戳）
-        public volatile boolean useRedis; // 是否存放于redis
-        public volatile int expireSecond; // 来自于hiSpeedCache的超时时间 TODO 这里干脆存HiSpeedCache的对象好了
-        public ContinueFetchDTO(ProceedingJoinPoint pjp, int intervalSecond, long expireTimestamp, boolean useRedis,
-                                int expireSecond) {
+        private volatile ProceedingJoinPoint pjp;
+        private volatile HiSpeedCache hiSpeedCache;
+        private volatile long expireTimestamp; // 此次调用的过时时间（毫秒时间戳）
+
+        private ContinueFetchDTO(ProceedingJoinPoint pjp, HiSpeedCache hiSpeedCache, long expireTimestamp) {
             this.pjp = pjp;
-            this.intervalSecond = intervalSecond;
+            this.hiSpeedCache = hiSpeedCache;
             this.expireTimestamp = expireTimestamp;
-            this.useRedis = useRedis;
-            this.expireSecond = expireSecond;
         }
     }
 
-    private static Map<String, Object> dataMap = new ConcurrentHashMap<>(); // 存缓存数据的
-    private static Map<Long, List<String>> expireLineMap = new TreeMap<>(); // 存数据超时时间的，超时时间 -> 对应于该超时时间的key的列表
-    private static Map<String, Long> keyExpireMap = new ConcurrentHashMap<>(); // 每个key的超时时间，key -> 超时时间
+    private static final Map<String, Object> dataMap = new ConcurrentHashMap<>(); // 存缓存数据的
+    private static final Map<Long, List<String>> expireLineMap = new TreeMap<>(); // 存数据超时时间的，超时时间 -> 对应于该超时时间的key的列表
+    private static final Map<String, Long> keyExpireMap = new ConcurrentHashMap<>(); // 每个key的超时时间，key -> 超时时间
 
-    private static Map<String, ContinueFetchDTO> keyContinueFetchMap = new ConcurrentHashMap<>(); // 每个key持续更新的信息
-    private static Map<Long, List<String>> fetchLineMap = new TreeMap<>(); // 持续获取的时间线，里面只有每个key的最近一次获取时间
+    private static final Map<String, ContinueFetchDTO> keyContinueFetchMap = new ConcurrentHashMap<>(); // 每个key持续更新的信息
+    private static final Map<Long, List<String>> fetchLineMap = new TreeMap<>(); // 持续获取的时间线，里面只有每个key的最近一次获取时间
 
     private static volatile CleanExpireDataTask cleanThread = null;
     private static volatile ContinueUpdateTask continueThread = null; // 暂时用单线程足够了，由应用保证每个方法不应该永久卡死
@@ -138,8 +134,7 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
             }
 
             if (fetchSecond > 0) {
-                ContinueFetchDTO continueFetchDTO = new ContinueFetchDTO(pjp, hiSpeedCache.expireSecond(),
-                        expireTime, hiSpeedCache.useRedis(), hiSpeedCache.continueFetchSecond());
+                ContinueFetchDTO continueFetchDTO = new ContinueFetchDTO(pjp, hiSpeedCache, expireTime);
                 keyContinueFetchMap.put(cacheKey, continueFetchDTO);
                 long nextFetchTime = Math.min(hiSpeedCache.expireSecond(), hiSpeedCache.continueFetchSecond())
                         * 1000 + System.currentTimeMillis();
@@ -275,9 +270,7 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
                 }
             }
 
-            removeList.forEach(item -> {
-                expireLineMap.remove(item);
-            });
+            removeList.forEach(item -> expireLineMap.remove(item));
         }
     }
 
@@ -301,13 +294,15 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
                             return;
                         }
                         // 安排下一次调用
-                        long nextTime = continueFetchDTO.intervalSecond * 1000 + System.currentTimeMillis();
+                        long nextTime = continueFetchDTO.hiSpeedCache.expireSecond() * 1000 + System.currentTimeMillis();
 
                         try {
                             Object result = continueFetchDTO.pjp.proceed();
-                            if(continueFetchDTO.useRedis) {
+                            if(continueFetchDTO.hiSpeedCache.useRedis()) {
                                 if(result != null) {
-                                    redisHelper.setObject(cacheKey, Math.max(continueFetchDTO.intervalSecond, continueFetchDTO.expireSecond), result);
+                                    redisHelper.setObject(cacheKey,
+                                            Math.max(continueFetchDTO.hiSpeedCache.expireSecond(),
+                                                    continueFetchDTO.hiSpeedCache.continueFetchSecond()), result);
                                 }
                             } else {
                                 dataMap.put(cacheKey, result);
@@ -330,9 +325,7 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
                 }
             }
 
-            removeList.forEach(item -> {
-                fetchLineMap.remove(item);
-            });
+            removeList.forEach(item -> fetchLineMap.remove(item));
 
             for(int i = 0; i < addFetchToTimeLine_time.size(); i++) {
                 addFetchToTimeLine(addFetchToTimeLine_time.get(i), addFetchToTimeLine_cacheKey.get(i));
@@ -387,12 +380,12 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
-        if(this.redisHelper == null) { // 尝试从spring容器中拿
-            if(this.applicationContext != null) {
+    public void afterPropertiesSet() {
+        if(redisHelper == null) { // 尝试从spring容器中拿
+            if(applicationContext != null) {
                 RedisHelper rh = this.applicationContext.getBean(RedisHelper.class);
                 if(rh != null) {
-                    this.redisHelper = rh;
+                    redisHelper = rh;
                 }
             }
         }
