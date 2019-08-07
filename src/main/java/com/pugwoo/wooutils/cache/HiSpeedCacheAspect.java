@@ -54,7 +54,7 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
     private static final Map<String, ContinueFetchDTO> keyContinueFetchMap = new ConcurrentHashMap<>(); // 每个key持续更新的信息
     private static final Map<Long, List<String>> fetchLineMap = new TreeMap<>(); // 持续获取的时间线，里面只有每个key的最近一次获取时间
 
-    private static volatile CleanExpireDataTask cleanThread = null;
+    private static volatile CleanExpireDataTask cleanThread = null; // 不需要多线程
     private static volatile ContinueUpdateTask continueThread = null; // 暂时用单线程足够了，由应用保证每个方法不应该永久卡死
 
     @Around("@annotation(com.pugwoo.wooutils.cache.HiSpeedCache) execution(* *.*(..))")
