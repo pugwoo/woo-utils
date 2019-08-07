@@ -25,9 +25,9 @@ public class ExecuteThem {
 	
 	private ExecutorService executorService;
 	
-	private List<Future<?>> futures = new ArrayList<Future<?>>();
+	private List<Future<?>> futures = new ArrayList<>();
 	
-	private List<Exception> exceptions = new ArrayList<Exception>();
+	private List<Exception> exceptions = new ArrayList<>();
 	
 	public ExecuteThem() {
 		executorService = Executors.newFixedThreadPool(10);
