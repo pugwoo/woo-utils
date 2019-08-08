@@ -5,6 +5,7 @@ import com.pugwoo.wooutils.collect.MapUtils;
 import com.pugwoo.wooutils.json.JSON;
 import com.pugwoo.wooutils.redis.RedisHelper;
 import com.pugwoo.wooutils.string.StringTools;
+import com.pugwoo.wooutils.task.ExecuteThem;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -35,6 +36,21 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
 
     private static RedisHelper redisHelper;
 
+    // 多线程执行更新数据任务，默认十个线程
+    private static ExecuteThem executeThem;
+
+    public HiSpeedCacheAspect() {
+        executeThem = new ExecuteThem(10);
+    }
+
+    /**
+     *
+     * @param nUpdateThreads 更新数据任务的线程数
+     */
+    public HiSpeedCacheAspect(int nUpdateThreads) {
+        executeThem = new ExecuteThem(nUpdateThreads);
+    }
+
     private static class ContinueFetchDTO {
         private volatile ProceedingJoinPoint pjp;
         private volatile HiSpeedCache hiSpeedCache;
@@ -57,7 +73,7 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
     private static final Map<Long, List<String>> fetchLineMap = new TreeMap<>(); // 持续获取的时间线，里面只有每个key的最近一次获取时间
 
     private static volatile CleanExpireDataTask cleanThread = null; // 不需要多线程
-    private static volatile ContinueUpdateTask continueThread = null; // 暂时用单线程足够了，由应用保证每个方法不应该永久卡死
+    private static volatile ContinueUpdateTask continueThread = null; // 不需要多线程
 
     @Around("@annotation(com.pugwoo.wooutils.cache.HiSpeedCache) execution(* *.*(..))")
     public Object around(ProceedingJoinPoint pjp) throws Throwable {
@@ -298,21 +314,27 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
                         // 安排下一次调用
                         long nextTime = continueFetchDTO.hiSpeedCache.expireSecond() * 1000 + System.currentTimeMillis();
 
-                        try {
-                            Object result = continueFetchDTO.pjp.proceed();
-                            if(continueFetchDTO.hiSpeedCache.useRedis()) {
-                                if(result != null) {
-                                    redisHelper.setObject(cacheKey,
-                                            Math.max(continueFetchDTO.hiSpeedCache.expireSecond(),
-                                                    continueFetchDTO.hiSpeedCache.continueFetchSecond()), result);
+                        // 多线程执行更新任务
+                        executeThem.add(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Object result = continueFetchDTO.pjp.proceed();
+                                    if(continueFetchDTO.hiSpeedCache.useRedis()) {
+                                        if(result != null) {
+                                            redisHelper.setObject(cacheKey,
+                                                    Math.max(continueFetchDTO.hiSpeedCache.expireSecond(),
+                                                            continueFetchDTO.hiSpeedCache.continueFetchSecond()), result);
+                                        }
+                                    } else {
+                                        dataMap.put(cacheKey, result);
+                                        changeKeyExpireTime(cacheKey, Math.max(continueFetchDTO.expireTimestamp, nextTime));
+                                    }
+                                } catch (Throwable e) {
+                                    LOGGER.error("refreshResult execute pjp fail, key:{}", cacheKey, e);
                                 }
-                            } else {
-                                dataMap.put(cacheKey, result);
-                                changeKeyExpireTime(cacheKey, Math.max(continueFetchDTO.expireTimestamp, nextTime));
                             }
-                        } catch (Throwable e) {
-                            LOGGER.error("refreshResult execute pjp fail, key:{}", cacheKey, e);
-                        }
+                        });
 
                         if(nextTime <= continueFetchDTO.expireTimestamp) { // 下一次调用还在超时时间内
                             addFetchToTimeLine_time.add(nextTime);

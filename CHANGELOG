@@ -2,6 +2,7 @@ v0.7.0 - [add] 正则工具加上不区分大小写的匹配
        - [improve] redis增加捕获异常的log
        - [improve] 高速缓存支持json克隆，默认关闭，需要需手动开启，最多支持2个泛型
        - [add] 高速缓存支持将数据存放到redis中，默认关闭
+       - [add] 高速缓存使用多线程的方式进行更新数据，默认10个线程
 
 2019年7月1日
 v0.6.8 - [improve] Browser的HttpResponse根据Browser本身的编码进行
