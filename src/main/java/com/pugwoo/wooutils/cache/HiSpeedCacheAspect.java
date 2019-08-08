@@ -47,6 +47,8 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
         }
     }
 
+    // 特别注意，因为expireLineMap和fetchLineMap不是线程安全，下面实现对其进行了synchronized，已经确认之间没有循环加锁，避免掉死锁的可能
+
     private static final Map<String, Object> dataMap = new ConcurrentHashMap<>(); // 存缓存数据的
     private static final Map<Long, List<String>> expireLineMap = new TreeMap<>(); // 存数据超时时间的，超时时间 -> 对应于该超时时间的key的列表
     private static final Map<String, Long> keyExpireMap = new ConcurrentHashMap<>(); // 每个key的超时时间，key -> 超时时间
