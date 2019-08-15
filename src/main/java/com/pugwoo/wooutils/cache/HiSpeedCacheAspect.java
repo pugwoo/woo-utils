@@ -32,6 +32,11 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HiSpeedCacheAspect.class);
 
+    /** 因为ConcurrentHashMap不能存放null值，所以用这个特殊的String来代表null值，redis同理。<br>
+    * 缓存null值是避免缓存穿透
+    * */
+    private static final String NULL_VALUE = "(NULL)HiSpeedCachee@1c9f80c1ea2a5bc3fe25516dcd77fb9d4e2ff0244eecb3b1effb19e80dfddf9";
+
     private ApplicationContext applicationContext;
 
     private static RedisHelper redisHelper;
