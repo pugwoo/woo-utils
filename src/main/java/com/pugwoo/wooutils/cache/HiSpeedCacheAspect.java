@@ -3,6 +3,7 @@ package com.pugwoo.wooutils.cache;
 import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.collect.MapUtils;
 import com.pugwoo.wooutils.json.JSON;
+import com.pugwoo.wooutils.redis.IRedisObjectConverter;
 import com.pugwoo.wooutils.redis.RedisHelper;
 import com.pugwoo.wooutils.string.StringTools;
 import com.pugwoo.wooutils.task.ExecuteThem;
@@ -32,10 +33,11 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HiSpeedCacheAspect.class);
 
-    /** 因为ConcurrentHashMap不能存放null值，所以用这个特殊的String来代表null值，redis同理。<br>
-    * 缓存null值是避免缓存穿透
-    * */
-    private static final String NULL_VALUE = "(NULL)HiSpeedCachee@1c9f80c1ea2a5bc3fe25516dcd77fb9d4e2ff0244eecb3b1effb19e80dfddf9";
+    /**
+     * 因为ConcurrentHashMap不能存放null值，所以用这个特殊的String来代表null值，redis同理。<br>
+     * 缓存null值是避免缓存穿透
+     **/
+    private static final String NULL_VALUE = "(NULL)HiSpeedCache@DpK3GovAptNICKAndKarenXSysudYrY";
 
     private ApplicationContext applicationContext;
 
@@ -119,23 +121,30 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
 
         // 查看数据是否有命中，有则直接返回
         if(useRedis) {
-            Class<?> returnClazz = targetMethod.getReturnType();
-            Class<?> genericClass1 = hiSpeedCache.genericClass1();
-            Class<?> genericClass2 = hiSpeedCache.genericClass2();
-            Object ret;
-            if(genericClass1 == Void.class && genericClass2 == Void.class) {
-                ret = redisHelper.getObject(cacheKey, returnClazz);
-            } else if (genericClass1 != Void.class && genericClass2 == Void.class) {
-                ret = redisHelper.getObject(cacheKey, returnClazz, genericClass1);
-            } else {
-                ret = redisHelper.getObject(cacheKey, returnClazz, genericClass1, genericClass2);
-            }
-            if(ret != null) { // redis数据不需要clone
-                return ret;
+            String value = redisHelper.getString(cacheKey);
+            if(value != null) { // == null则缓存没命中，应该走下面调用逻辑
+                if(value.equals(NULL_VALUE)) {
+                    return null; // 命中null值缓存
+                }
+                Class<?> returnClazz = targetMethod.getReturnType();
+                Class<?> genericClass1 = hiSpeedCache.genericClass1();
+                Class<?> genericClass2 = hiSpeedCache.genericClass2();
+
+                IRedisObjectConverter redisObjectConverter = redisHelper.getRedisObjectConverter();
+                if(genericClass1 == Void.class && genericClass2 == Void.class) {
+                    return redisObjectConverter.convertToObject(value, returnClazz);
+                } else if (genericClass1 != Void.class && genericClass2 == Void.class) {
+                    return redisObjectConverter.convertToObject(value, returnClazz, genericClass1);
+                } else {
+                    return redisObjectConverter.convertToObject(value, returnClazz, genericClass1, genericClass2);
+                }
             }
         } else {
             if (dataMap.containsKey(cacheKey)) {
                 Object data = dataMap.get(cacheKey);
+                if(data == NULL_VALUE) { // 缓存null值，因为是内存，所以可以用==比较
+                    return null;
+                }
                 return processClone(hiSpeedCache, data);
             }
         }
@@ -148,11 +157,17 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
             long expireTime = expireSecond * 1000 + System.currentTimeMillis();
 
             if(useRedis) {
-                if(ret != null) { // redis不能放null
+                if(ret != null) {
                     redisHelper.setObject(cacheKey, expireSecond, ret);
+                } else {
+                    redisHelper.setString(cacheKey, expireSecond, NULL_VALUE); // 缓存null值
                 }
             } else {
-                dataMap.put(cacheKey, ret); // 本地缓存可以放null
+                if(ret != null) {
+                    dataMap.put(cacheKey, ret);
+                } else {
+                    dataMap.put(cacheKey, NULL_VALUE); // 因为concurrentHashMap不能放null
+                }
                 changeKeyExpireTime(cacheKey, expireTime);
             }
 
@@ -326,13 +341,19 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
                                 try {
                                     Object result = continueFetchDTO.pjp.proceed();
                                     if(continueFetchDTO.hiSpeedCache.useRedis()) {
+                                        int expireSecond = Math.max(continueFetchDTO.hiSpeedCache.expireSecond(),
+                                                continueFetchDTO.hiSpeedCache.continueFetchSecond());
                                         if(result != null) {
-                                            redisHelper.setObject(cacheKey,
-                                                    Math.max(continueFetchDTO.hiSpeedCache.expireSecond(),
-                                                            continueFetchDTO.hiSpeedCache.continueFetchSecond()), result);
+                                            redisHelper.setObject(cacheKey, expireSecond , result);
+                                        } else {
+                                            redisHelper.setString(cacheKey, expireSecond, NULL_VALUE);
                                         }
                                     } else {
-                                        dataMap.put(cacheKey, result);
+                                        if(result != null) {
+                                            dataMap.put(cacheKey, result);
+                                        } else {
+                                            dataMap.put(cacheKey, NULL_VALUE); // 因为concurrentHashMap不能放null
+                                        }
                                         changeKeyExpireTime(cacheKey, Math.max(continueFetchDTO.expireTimestamp, nextTime));
                                     }
                                 } catch (Throwable e) {

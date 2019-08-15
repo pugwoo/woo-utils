@@ -14,6 +14,12 @@ import java.util.function.Function;
 public interface RedisHelper {
 
 	/**
+	 * 获得redisHelper的对象转换器
+	 * @return
+	 */
+	IRedisObjectConverter getRedisObjectConverter();
+
+	/**
 	 * 检查redis是否已经准备就绪，包括ip端口、密码等是否已经正确，服务器端是否已经正常ping-pong
 	 * @return
 	 */
@@ -87,7 +93,7 @@ public interface RedisHelper {
 	long getExpireSecond(String key);
 	
 	/**
-	 * 获取字符串，不存在返回null
+	 * 获取字符串，不存在或redis连接不上返回null
 	 * @param key
 	 * @return
 	 */

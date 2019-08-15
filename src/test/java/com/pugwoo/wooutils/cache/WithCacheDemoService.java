@@ -1,6 +1,7 @@
 package com.pugwoo.wooutils.cache;
 
 import com.pugwoo.wooutils.collect.ListUtils;
+import com.pugwoo.wooutils.lang.DateUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -13,10 +14,11 @@ public class WithCacheDemoService {
         return "hello";
     }
 
-    @HiSpeedCache(continueFetchSecond = 10)
+    @HiSpeedCache(continueFetchSecond = 60)
     public String getSomethingWithCache() throws Exception {
         Thread.sleep(3000);
-        return "hello";
+        System.out.println("String getSomethingWithCache is executed @ " + DateUtils.format(new Date()));
+        return null; // 缓存null值
     }
 
     @HiSpeedCache(continueFetchSecond = 10, cloneReturn = true, keyScript = "args[0]")

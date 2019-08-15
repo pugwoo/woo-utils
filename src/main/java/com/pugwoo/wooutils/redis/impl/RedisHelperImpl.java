@@ -513,6 +513,7 @@ public class RedisHelperImpl implements RedisHelper {
 		}
 	}
 
+	@Override
 	public IRedisObjectConverter getRedisObjectConverter() {
 		return redisObjectConverter;
 	}

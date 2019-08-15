@@ -23,7 +23,7 @@ public class BenchmarkHiSpeedCache {
 
         withCacheDemoService.getSomethingWithCache();
 
-        int times = 1000000;
+        int times = 100000000;
         // 测试调用100万次的时间
         long start = System.currentTimeMillis();
         for(int i = 0; i < times; i++) {
@@ -95,7 +95,7 @@ public class BenchmarkHiSpeedCache {
             }).start();
         }
 
-        int second = 600;
+        int second = 60;
         Thread.sleep(second * 1000);
         System.out.println("成功次数:" + succ.get());
         System.out.println("qps:" + succ.get() * 1.0 / second);
