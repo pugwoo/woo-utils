@@ -5,7 +5,7 @@
 <dependency>
     <groupId>com.pugwoo</groupId>
     <artifactId>woo-utils</artifactId>
-    <version>0.6.8</version>
+    <version>0.7.1</version>
 </dependency>
 ```
 
@@ -17,7 +17,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.8</version>
+            <version>2.9.9.3</version>
         </dependency>
 ```
 
