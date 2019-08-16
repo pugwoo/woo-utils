@@ -1,35 +1,22 @@
 package com.pugwoo.wooutils.net;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.URL;
-import java.net.URLEncoder;
+import com.pugwoo.wooutils.json.JSON;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.net.ssl.*;
+import javax.servlet.http.HttpServletRequest;
+import java.io.*;
+import java.net.*;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import javax.servlet.http.HttpServletRequest;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * 2016年2月4日 15:16:42 
- * 模拟一个浏览器发HTTP请求，不包括页面处理
+ * 模拟一个浏览器发HTTP请求，不包括页面处理。默认编码是utf8，可以全局指定编码
  * 
  * 计划支持的特性：
  * 1. 支持指定为输出流 【done】
@@ -44,7 +31,7 @@ public class Browser {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(Browser.class);
 	
-	public class HttpResponseFuture {
+	public static class HttpResponseFuture {
 		/**已经下载的字节数*/
 		public long downloadedBytes;
 		/**是否已经下载完成*/
@@ -57,17 +44,44 @@ public class Browser {
 	/**请求时的头部*/
 	private Map<String, String> requestProperty = new HashMap<String, String>();
 
-	/** 默认浏览器userAgent:QQ浏览器 Win10*/
-	private String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.104 Safari/537.36 Core/1.53.3368.400 QQBrowser/9.6.11974.400";
+	/** 默认浏览器userAgent: Chrome Win10*/
+	private String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.26 Safari/537.36 Core/1.63.6823.400";
 
 	public void setUserAgent(String userAgent) {
 		this.USER_AGENT = userAgent;
 	}
+
+	private String charset = "utf8";
+
+	/**
+	 * 设置整个Browser实例全局的字符编码，默认utf8
+	 * @param charset
+	 */
+	public void setCharset(String charset) {
+		this.charset = charset;
+	}
 	
-	/**连接和读取的超时时间，也即最长的超时时间是timeoutSeconds*2*/
-	private int timeoutSeconds = 60;
+	/**连接超时时间，秒*/
+	private int connectTimeoutSeconds = 10;
+    /**读取超时时间，秒*/
+	private int readTimeoutSeconds = 60;
 	/**重试次数*/
 	private int retryTimes = 10;
+
+	/**设置连接超时时间，默认10秒*/
+	public void setConnectTimeoutSeconds(int connectTimeoutSeconds) {
+		this.connectTimeoutSeconds = connectTimeoutSeconds;
+	}
+
+    /**设置读取超时时间，默认60秒*/
+	public void setReadTimeoutSeconds(int readTimeoutSeconds) {
+		this.readTimeoutSeconds = readTimeoutSeconds;
+	}
+
+	/**设置重试次数，默认10次*/
+	public void setRetryTimes(int retryTimes) {
+		this.retryTimes = retryTimes;
+	}
 	
 	/**代理*/
 	private Proxy proxy = null;
@@ -83,7 +97,8 @@ public class Browser {
 		}
 	} };
 	private SSLSocketFactory oldSSLSocketFactory = null;
-	
+
+	/**是否信任所有证书*/
 	public void setIsTrustAllCerts(boolean isTrustAllCerts) {
 		if(isTrustAllCerts) {
 			try {
@@ -101,22 +116,22 @@ public class Browser {
 		}
 	}
 	
-	/**设置请求时的头部，RequestProperty，该设置是Browser实例全局的。
+	/**设置请求时的头部，该设置是Browser实例全局的。
 	 * 注意：请不要用这个方法设置cookie，请使用addCookie方法
 	 */
-	public void addRequestProperty(String key, String value) {
+	public void addRequestHeader(String key, String value) {
 		requestProperty.put(key, value);
 	}
 
-	/**设置请求时的头部，RequestProperty，该设置是Browser实例全局的。<br/>
+	/**设置请求时的头部，该设置是Browser实例全局的。<br>
 	 * 设置HttpServletRequest的所有头部信息
 	 * @param request HttpServletRequest
 	 */
-	public void addRequestProperty(HttpServletRequest request) {
+	public void addRequestHeader(HttpServletRequest request) {
 		Enumeration<String> headerNames = request.getHeaderNames();
 		while(headerNames.hasMoreElements()) {
 			String headerName = headerNames.nextElement();
-			addRequestProperty(headerName, request.getHeader(headerName));
+			addRequestHeader(headerName, request.getHeader(headerName));
 		}
 	}
 
@@ -145,7 +160,7 @@ public class Browser {
 	}
 	
 	/**
-	 * post方式请求HTTP
+	 * post方式请求HTTP，params使用queryString或formdata方式组装
 	 * @param httpUrl
 	 * @return
 	 * @throws IOException
@@ -167,7 +182,7 @@ public class Browser {
 	}
 	
 	/**
-	 * post方式请求HTTP
+	 * post方式请求HTTP，params使用queryString或formdata方式组装
 	 * @param httpUrl
 	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @return
@@ -178,15 +193,53 @@ public class Browser {
 			String boundary = "----WebKitFormBoundaryYp0ZBDEHwALiqVW5";
 			Map<String, String> header = new HashMap<>();
 			header.put("Content-Type", "multipart/form-data; boundary=" + boundary);
-			return post(httpUrl, new ByteArrayInputStream(buildPostString(params, boundary)),
+			return _post(httpUrl, new ByteArrayInputStream(buildPostString(params, boundary)),
 					outputStream, false, header);
 		} else {
 			return post(httpUrl, buildPostString(params), outputStream);
 		}
 	}
+
+    /**
+     * post方式请求HTTP，转换成json形式提交
+     * @param httpUrl
+     * @param toJson
+     * @return
+     */
+    public HttpResponse postJson(String httpUrl, Object toJson) throws IOException {
+        return postJson(httpUrl, toJson, null);
+    }
+
+    /**
+     * post方式请求HTTP，转换成json形式提交
+     * @param httpUrl
+     * @param toJson
+     * @param outputStream
+     * @return
+     */
+	public HttpResponse postJson(String httpUrl, Object toJson, OutputStream outputStream) throws IOException {
+        Map<String, String> header = new HashMap<>();
+        header.put("Content-Type", "application/json");
+        return _post(httpUrl, new ByteArrayInputStream(buildPostJson(toJson)),
+                outputStream, false, header);
+    }
+
+    /**
+     * 异步post方式请求HTTP，转换成json形式提交
+     * @param httpUrl
+     * @param toJson
+     * @param outputStream
+     * @return
+     */
+    public HttpResponse postJsonAsync(String httpUrl, Object toJson, OutputStream outputStream) throws IOException {
+        Map<String, String> header = new HashMap<>();
+        header.put("Content-Type", "application/json");
+        return _post(httpUrl, new ByteArrayInputStream(buildPostJson(toJson)),
+                outputStream, true, header);
+    }
 	
 	/**
-	 * post方式请求HTTP
+	 * post方式请求HTTP，params使用queryString或formdata方式组装
 	 * @param httpUrl
 	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @return
@@ -197,7 +250,7 @@ public class Browser {
 			String boundary = "----WebKitFormBoundaryYp0ZBDEHwALiqVW5";
 			Map<String, String> header = new HashMap<>();
 			header.put("Content-Type", "multipart/form-data; boundary=" + boundary);
-			return post(httpUrl, new ByteArrayInputStream(buildPostString(params, boundary)),
+			return _post(httpUrl, new ByteArrayInputStream(buildPostString(params, boundary)),
 					outputStream, true, header);
 		} else {
 			return postAsync(httpUrl, buildPostString(params), outputStream);
@@ -244,7 +297,7 @@ public class Browser {
 	 */
 	public HttpResponse post(String httpUrl, InputStream inputStream, OutputStream outputStream)
 			throws IOException {
-		return post(httpUrl, inputStream, outputStream, false, null);
+		return _post(httpUrl, inputStream, outputStream, false, null);
 	}
 	
 	/**
@@ -268,10 +321,10 @@ public class Browser {
 	 */
 	public HttpResponse postAsync(String httpUrl, InputStream inputStream, OutputStream outputStream)
 	        throws IOException {
-		return post(httpUrl, inputStream, outputStream, true, null);
+		return _post(httpUrl, inputStream, outputStream, true, null);
 	}
 	
-	private HttpResponse post(String httpUrl, InputStream inputStream, OutputStream outputStream,
+	private HttpResponse _post(String httpUrl, InputStream inputStream, OutputStream outputStream,
 			boolean isAsync, Map<String, String> requestHeader) throws IOException {
 		IOException ie = null;
 		for(int i = 0; i < retryTimes; i++) {
@@ -298,7 +351,7 @@ public class Browser {
 		        
 				return makeHttpResponse(httpUrl, urlConnection, outputStream, isAsync);
 			} catch (IOException e) {
-				LOGGER.error("get url:{} exception", httpUrl, e);
+				LOGGER.error("post url:{} exception", httpUrl, e);
 				ie = e;
 			}
 		}
@@ -440,8 +493,8 @@ public class Browser {
 		} else {
 			urlConnection = (HttpURLConnection) url.openConnection(proxy);
 		}
-		urlConnection.setConnectTimeout(timeoutSeconds * 1000);
-		urlConnection.setReadTimeout(timeoutSeconds * 1000);
+		urlConnection.setConnectTimeout(connectTimeoutSeconds * 1000);
+		urlConnection.setReadTimeout(readTimeoutSeconds * 1000);
 		urlConnection.setRequestMethod(method);
 		urlConnection.setRequestProperty("User-agent", USER_AGENT);
 		urlConnection.setRequestProperty("Referer", httpUrl);
@@ -476,7 +529,6 @@ public class Browser {
 	/**
 	 * 构造httpResponse
 	 * @param urlConnection
-	 * @param httpResponse
 	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @param isAsync 是否异步，只有当outputStream!=null时，该值才有效。
 	 *        当isAsync为true时，HttpResponse可以获得已下载的字节数。
@@ -485,6 +537,7 @@ public class Browser {
 	private HttpResponse makeHttpResponse(String httpUrl, HttpURLConnection urlConnection,
 			final OutputStream outputStream, boolean isAsync) throws IOException {
 		HttpResponse httpResponse = new HttpResponse();
+		httpResponse.setCharset(charset);
 		httpResponse.setResponseCode(urlConnection.getResponseCode());
 		httpResponse.setHeaders(urlConnection.getHeaderFields());
 		
@@ -571,7 +624,7 @@ public class Browser {
 	
 	/**multipart/form-data编码方式
 	 * @throws IOException */
-	private static byte[] buildPostString(Map<String, Object> params, String boundary)
+	private byte[] buildPostString(Map<String, Object> params, String boundary)
 			throws IOException {
 		if(params == null || params.isEmpty()) {
 			return new byte[0];
@@ -579,19 +632,19 @@ public class Browser {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		for(Entry<String, Object> entry : params.entrySet()) {
-			baos.write(("--" + boundary + "\r\n").getBytes());
+			baos.write(toBytes("--" + boundary + "\r\n"));
 			String str = "Content-Disposition: form-data; name=\"" + 
-					URLEncoder.encode(entry.getKey(), "UTF-8") + "\"";
-			baos.write(str.getBytes());
+				 urlEncode(entry.getKey()) + "\"";
+			baos.write(toBytes(str));
 			if(entry.getValue() instanceof BrowserPostFile) {
 				BrowserPostFile file = (BrowserPostFile) entry.getValue();
 				String str1 = "; filename=\"" + 
-						URLEncoder.encode(file.getFilename(), "UTF-8") + "\"\r\n";
-				baos.write(str1.getBytes());
+					urlEncode(file.getFilename()) + "\"\r\n";
+				baos.write(toBytes(str1));
 				String contentType = "Content-Type: " + file.getContentType();
-				baos.write(contentType.getBytes());
+				baos.write(toBytes(contentType));
 			}
-			baos.write("\r\n\r\n".getBytes());
+			baos.write(toBytes("\r\n\r\n"));
 			if(entry.getValue() instanceof BrowserPostFile) {
 				BrowserPostFile file = (BrowserPostFile) entry.getValue();
 				if(file.getBytes() != null) {
@@ -612,46 +665,46 @@ public class Browser {
 			} else {
 				Object value = entry.getValue();
 				if(value == null) {value = "";}
-				baos.write(value.toString().getBytes());
+				baos.write(toBytes(value.toString()));
 			}
-			baos.write("\r\n".getBytes());
+			baos.write(toBytes("\r\n"));
 		}
 		
 		if(!params.isEmpty()) {
-			baos.write(("--" + boundary + "--").getBytes());
+			baos.write(toBytes(("--" + boundary + "--")));
 		}
 		
 		return baos.toByteArray();
 	}
+
+	/**转换成json格式*/
+	private byte[] buildPostJson(Object obj) {
+	    if(obj == null) {
+	        return new byte[0];
+        }
+        return toBytes(JSON.toJson(obj));
+    }
 	
 	/**application/x-www-form-urlencoded编码方式*/
-	private static byte[] buildPostString(Map<String, Object> params) {
+	private byte[] buildPostString(Map<String, Object> params) {
 		if(params == null || params.isEmpty()) {
 			return new byte[0];
 		}
 		StringBuilder sb = new StringBuilder();
 		boolean needAppendAnd = false;
 		for(Entry<String, Object> entry : params.entrySet()) {
-			try {
-				if(needAppendAnd) {
-					sb.append("&");
-				}
-				sb.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-				sb.append("=");
-				if(entry.getValue() != null) {
-					sb.append(URLEncoder.encode(entry.getValue().toString(), "UTF-8"));
-				}
-				needAppendAnd = true;
-			} catch (UnsupportedEncodingException e) {
-				LOGGER.error("UnsupportedEncodingException", e);
+			if(needAppendAnd) {
+				sb.append("&");
 			}
+			sb.append(urlEncode(entry.getKey()));
+			sb.append("=");
+			if(entry.getValue() != null) {
+				sb.append(urlEncode(entry.getValue().toString()));
+			}
+			needAppendAnd = true;
 		}
-		
-		try {
-			return sb.toString().getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			return new byte[0];
-		}
+
+		return toBytes(sb.toString());
 	}
 	
 	/**
@@ -660,7 +713,7 @@ public class Browser {
 	 * @param params
 	 * @return
 	 */
-	private static String appendParamToUrl(String httpUrl, Map<String, Object> params) {
+	private String appendParamToUrl(String httpUrl, Map<String, Object> params) {
 		if(params == null || params == null || params.isEmpty()) {
 			return httpUrl;
 		}
@@ -677,22 +730,56 @@ public class Browser {
 		
 		boolean needAppendAnd = false;
 		for(Entry<String, Object> entry : params.entrySet()) {
-			try {
-				if(needAppendAnd) {
-					sb.append("&");
-				}
-				sb.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-				sb.append("=");
-				if(entry.getValue() != null) {
-					sb.append(URLEncoder.encode(entry.getValue().toString(), "UTF-8"));
-				}
-				needAppendAnd = true;
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
+			if(needAppendAnd) {
+				sb.append("&");
 			}
+			sb.append(urlEncode(entry.getKey()));
+			sb.append("=");
+			if(entry.getValue() != null) {
+				sb.append(urlEncode(entry.getValue().toString()));
+			}
+			needAppendAnd = true;
 		}
 		
 		return sb.toString();
+	}
+
+	private byte[] toBytes(String str) {
+		if(str == null) {
+			return new byte[0];
+		}
+		if(charset == null) {
+			return str.getBytes();
+		} else {
+			try {
+				return str.getBytes(charset);
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.error("transform string:{} to byte[] fail, charset:{}",
+						str, charset, e);
+				return new byte[0];
+			}
+		}
+	}
+
+	private String urlEncode(String str) {
+		if(str == null) {
+			return "";
+		}
+		if(charset == null) {
+			try {
+				return URLEncoder.encode(str, "utf8");
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.error("url encode string:{} fail, charset:utf8", str, e);
+				return "";
+			}
+		} else {
+			try {
+				return URLEncoder.encode(str, charset);
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.error("url encode string:{} fail, charset:{}", str, charset, e);
+				return "";
+			}
+		}
 	}
 	
 }

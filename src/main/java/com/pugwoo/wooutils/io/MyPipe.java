@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * @date 2018-09-30
+ * 2018-09-30
  */
 public class MyPipe {
 

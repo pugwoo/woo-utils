@@ -1,15 +1,14 @@
 package com.pugwoo.wooutils.redis.impl;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.pugwoo.wooutils.redis.RedisHelper;
 import com.pugwoo.wooutils.redis.RedisLimitParam;
 import com.pugwoo.wooutils.redis.RedisLimitPeroidEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * 使用redis控制全局的操作次数限制。可用于限制自然单位时间（天、小时、分钟、周等），全局的总操作次数。<br>
@@ -163,7 +162,7 @@ public class RedisLimit {
 			time = "";
 		}
 		
-		return limitParam.getNamespace() + "-" + key + "-" + time;
+		return limitParam.getNamespace() + ":" + key + "-" + time;
 	}
 	
 	private static boolean checkParam(RedisLimitParam limitParam, String key) {

@@ -1,5 +1,8 @@
 package com.pugwoo.wooutils.lang;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -7,9 +10,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+/**
+ * 特别说明：Date是有时区的，默认使用操作系统的时区
+ */
 public class DateUtils {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DateUtils.class);
@@ -165,7 +168,58 @@ public class DateUtils {
 	}
 	
 	// ======================================
-	
+
+	// 当前系统时区距离0时区的毫秒数，例如东8区是28800000
+	private static int timezoneOffset = Calendar.getInstance().get(Calendar.ZONE_OFFSET);
+
+	/**
+	 * 获得date到当前时间间隔了多少天，如果date是今天则返回0，如果date是昨天则返回1，以此类推。
+	 * 如果是未来的日期，则返回-1、-2以此类推。
+	 * 【该接口性能最佳】
+	 */
+	public static long getDaysToToday(Date date) {
+		long now = System.currentTimeMillis();
+		long today = now - (now % (24 * 3600 * 1000)) - timezoneOffset;
+		if(now - today >= (24 * 3600 * 1000)) {
+			today += (24 * 3600 * 1000);
+		}
+		long dateTimestamp = date.getTime();
+		if(dateTimestamp < today) {
+			return (today - dateTimestamp) / (24 * 3600 * 1000) + 1;
+		} else {
+			return -((dateTimestamp - today) / (24 * 3600 * 1000));
+		}
+	}
+
+	/**
+	 * 获得指定时间date的当天的开始时间。
+	 * 例如date为2019-01-02 03:04:05时，返回2019-01-02 00:00:00
+	 * 【该接口性能最佳】
+	 */
+	public static Date getStartTimeOfDay(Date date) {
+		long now = date.getTime();
+		long today = now - (now % (24 * 3600 * 1000)) - timezoneOffset;
+		if(now - today >= (24 * 3600 * 1000)) {
+			today += (24 * 3600 * 1000);
+		}
+		return new Date(today);
+	}
+
+	/**
+	 * 获得指定时间date的当天的结束时间。
+	 * 例如date为2019-01-02 03:04:05时，返回2019-01-02 00:00:00.999
+	 * 【该接口性能最佳】
+	 */
+    public static Date getEndTimeOfDay(Date date) {
+		long now = date.getTime();
+		long today = now - (now % (24 * 3600 * 1000)) - timezoneOffset;
+		if(now - today >= (24 * 3600 * 1000)) {
+			today += (24 * 3600 * 1000);
+		}
+		today += (24 * 3600 * 1000) - 1;
+		return new Date(today);
+	}
+
 	/**
 	 * 计算两个日期的天数差，不足一天的不算。
 	 * @param date1

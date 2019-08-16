@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * 树形节点接口
  * @author sapluk
- * @date 2018-05-02
+ * 2018-05-02
  */
 public interface ITreeNode {
 	

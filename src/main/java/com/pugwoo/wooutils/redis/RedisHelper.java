@@ -1,16 +1,29 @@
 package com.pugwoo.wooutils.redis;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.ScanResult;
+import redis.clients.jedis.Transaction;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.Transaction;
-
 public interface RedisHelper {
+
+	/**
+	 * 获得redisHelper的对象转换器
+	 * @return
+	 */
+	IRedisObjectConverter getRedisObjectConverter();
+
+	/**
+	 * 检查redis是否已经准备就绪，包括ip端口、密码等是否已经正确，服务器端是否已经正常ping-pong
+	 * @return
+	 */
+	boolean isOk();
 
 	/**
 	 * 传入jedis，然后自行实现逻辑，最后会自动关闭jedis资源。
@@ -80,7 +93,7 @@ public interface RedisHelper {
 	long getExpireSecond(String key);
 	
 	/**
-	 * 获取字符串，不存在返回null
+	 * 获取字符串，不存在或redis连接不上返回null
 	 * @param key
 	 * @return
 	 */
@@ -88,11 +101,30 @@ public interface RedisHelper {
 	
 	/**
 	 * 获取对象，需要提供IRedisObjectConverter的实现对象
-	 * @param key
+	 * @param key redis key
 	 * @return
 	 */
 	<T> T getObject(String key, Class<T> clazz);
-	
+
+	/**
+	 * 获取对象，需要提供IRedisObjectConverter的实现对象
+	 *
+	 * @param key redis key
+	 * @param genericClass 支持泛型类
+	 * @return
+	 */
+	<T> T getObject(String key, Class<T> clazz, Class<?> genericClass);
+
+	/**
+	 * 获取对象，需要提供IRedisObjectConverter的实现对象
+	 *
+	 * @param key redis key
+	 * @param genericClass1 支持泛型类1
+	 * @param genericClass2 支持泛型类2
+	 * @return
+	 */
+	<T> T getObject(String key, Class<T> clazz, Class<?> genericClass1, Class<?> genericClass2);
+
 	/**
 	 * 通过keys批量获得redis的key和值
 	 * @param keys
@@ -106,27 +138,42 @@ public interface RedisHelper {
 	 * @return 个数和顺序和keys一直，如果key不存在，则其值为null。整个命令操作失败则返回null
 	 */
 	<T> List<T> getObjects(List<String> keys, Class<T> clazz);
+
+	/**
+	 * 使用scan的方式获得key的列表【建议少用，适用于非高频的定时任务中】
+	 * @param cursor 上次查询的游标位置，第一次查询传null或空字符串
+	 * @param pattern 匹配字符串
+	 * @param count 扫描的总数，注意这个不是期望返回的key的总数，redis返回的数量不一定等于count
+	 * @return 返回的是匹配到的redis keys，返回值中的cursor如果等于0，则表示scan已经到头
+	 */
+	ScanResult<String> getKeys(String cursor, String pattern, int count);
 	
 	/**
 	 * 通过pattern获得redis的所有key。pattern格式详见https://redis.io/commands/keys
+	 * 【重要：redis的keys对于大量key的情况有性能问题，应尽量少用keys；如果确实需要，请用scan代替】
 	 * @param pattern
 	 * @return 失败返回null
 	 */
+	@Deprecated
 	Set<String> getKeys(String pattern);
 	
 	/**
 	 * 获得redis满足pattern的所有key和值。pattern格式详见https://redis.io/commands/keys
+	 * 【重要：redis的keys对于大量key的情况有性能问题，应尽量少用keys；如果确实需要，请用scan代替】
 	 * @param pattern
 	 * @return 失败返回null
 	 */
+	@Deprecated
 	Map<String, String> getStrings(String pattern);
 	
 	/**
 	 * 获得redis满足pattern的所有key和值。pattern格式详见https://redis.io/commands/keys
+	 * 【重要：redis的keys对于大量key的情况有性能问题，应尽量少用keys；如果确实需要，请用scan代替】
 	 * @param pattern
 	 * @param clazz
 	 * @return 失败返回null
 	 */
+	@Deprecated
 	<T> Map<String, T> getObjects(String pattern, Class<T> clazz);
 	
 	/**

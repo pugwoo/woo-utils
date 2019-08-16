@@ -1,3 +1,74 @@
+2019年8月15日
+v0.7.1 - [fix] 修复高速缓存对null值缓存的问题
+
+2019年8月11日
+v0.7.0 - [add] 正则工具加上不区分大小写的匹配
+       - [improve] redis增加捕获异常的log
+       - [improve] 高速缓存支持json克隆，默认关闭，需要需手动开启，最多支持2个泛型
+       - [add] 高速缓存支持将数据存放到redis中，默认关闭
+       - [add] 高速缓存使用多线程的方式进行更新数据，默认10个线程
+
+2019年7月1日
+v0.6.8 - [improve] Browser的HttpResponse根据Browser本身的编码进行
+
+2019年7月1日
+v0.6.7 - [improve] RedisHelper的isOk不使用ping命令来确认是否ok，采用另外方式，因为jedis 2.9.3不支持
+
+2019年6月14日
+v0.6.6 - [improve] 优化高速缓存，对于高并发情况下，也保证一个cacheKey只有一个刷新任务
+       - [add] Hash增加sha1算法，标记为废弃
+
+2019年6月6日
+v0.6.5 - [add] DateUtils增加getStartTimeOfDay getEndTimeOfDay等几个工具
+       - [fix] 修复高速缓存ConcurrentModificationException异常
+
+2019年5月30日
+v0.6.4 - [update] 升级pom依赖包
+       - [add] Browser增加设置超时时间支持，分为连接超时和读取超时，默认为10秒和60秒
+
+2019年5月24日
+v0.6.3 - [add] 增加本地高速缓存支持
+       - [del] 移除NetUtils中csrfPassed方法
+
+2019年5月15日
+v0.6.2 - [add] redisHelper增加isOk方法
+
+2019年5月7日
+v0.6.1 - [add] 引入mvel，增加动态脚本能力
+       - [add] redis分布式锁支持从方法参数中提取参数作为redis锁的key
+
+2019年4月29日
+v0.6.0 - [modify] 修改pom为默认引入依赖，之前是需要手工加入，现在如果需要减少jar包依赖，则自行exclude掉
+
+2019年4月11日
+v0.5.8 - [add] 增加IOUtils从inputStream读取为byte[]的方法
+
+2019年4月2日
+v0.5.7 - [fix] 修复postJson(String httpUrl, Object toJson)方法转json错误的问题
+
+2019年3月22日
+v0.5.6 - [add] Browser增加postJson方法，支持全局设置编码字符集
+
+2019年3月15日
+v0.5.5 - [improve] 废弃redis的keys操作，使用scan代替
+
+2019年2月20日
+v0.5.4 - [fix] 修复DateUtils.getDaysToToday在每天8点钟之前的计算错误
+
+2018年12月20日
+v0.5.3 - [add] 增加DateUtils的getDaysToToday方法
+
+2018年12月14日
+v0.5.2 - [update] Browser的user agent更新
+       - [modify] Browser的addRequestProperty方法修改为addRequestHeader
+       - [add] 增加归并排序工具类MergeSortUtils
+
+2018年11月12日
+v0.5.1 - [improve] 工具EqualUtils增加对不同类的对象的比对
+
+2018年11月6日
+v0.5.0 - [add] 新增对比同一个类两个对象是否相等的工具EqualUtils
+
 2018年10月3日
 v0.4.9 - [add] Net.Browser提供通过HttpServletRequest设置头部方法
 

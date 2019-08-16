@@ -6,7 +6,7 @@
 	<groupId>com.pugwoo</groupId>
 	<artifactId>woo-utils</artifactId>
 	<packaging>jar</packaging>
-	<version>0.4.9-SNAPSHOT</version>
+	<version>0.7.1</version>
 	
 	<name>woo-utils</name>
 	<description>the common utils</description>
@@ -15,6 +15,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <spring.version>5.1.8.RELEASE</spring.version>
 	</properties>
 	
     <developers>
@@ -43,61 +44,58 @@
         <dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.25</version>
+			<version>1.7.27</version>
 		</dependency>
+
+        <!-- json相关功能 -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.9.3</version>
+        </dependency>
+
+        <!-- 脚本动态相关功能 -->
+        <dependency>
+            <groupId>org.mvel</groupId>
+            <artifactId>mvel2</artifactId>
+            <version>2.4.4.Final</version>
+        </dependency>
+
+        <!-- Redis相关功能需要 -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>2.10.2</version>
+        </dependency>
 		
 		<!-- optional依赖：servlet相关功能需要 -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
+            <version>4.0.1</version>
             <scope>provided</scope>
 		</dependency>
-		
-		<!-- optional依赖：NetUtils.csrfPassed() -->
-		<dependency>
-		    <groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-			<version>4.3.10.RELEASE</version>
-		    <scope>provided</scope>
-		</dependency>
-		
-	    <!-- optional依赖：Redis相关功能需要 -->
-	    <dependency>
-			<groupId>redis.clients</groupId>
-			<artifactId>jedis</artifactId>
-			<version>2.9.0</version>
-			<scope>provided</scope>
-		</dependency>
-		
+
 		<!-- optional依赖： Redis的分布式锁注解方式使用时，需要该依赖，实际上依赖Spring容器-->
 		<dependency>
 		    <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>4.3.10.RELEASE</version>
+            <version>${spring.version}</version>
             <scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjrt</artifactId>
-			<version>1.8.10</version>
+			<version>1.8.14</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
-			<version>1.8.10</version>
+			<version>1.8.14</version>
 			<scope>provided</scope>
 		</dependency>
-		
-		<!-- optional依赖：json相关功能 -->
-		<dependency>
-		    <groupId>com.fasterxml.jackson.core</groupId>
-		    <artifactId>jackson-databind</artifactId>
-		    <version>2.9.5</version>
-		    <scope>provided</scope>
-		</dependency>
-	
+
 	    <!-- 测试需要的 -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -108,7 +106,7 @@
 		<dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>4.3.10.RELEASE</version>
+            <version>${spring.version}</version>
             <scope>test</scope>
         </dependency>
 		
@@ -186,12 +184,6 @@
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
-                                <configuration>
-                                    <gpgArguments>
-                                        <arg>--pinentry-mode</arg>
-                                        <arg>loopback</arg>
-                                    </gpgArguments>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

@@ -19,7 +19,7 @@ public class RedisLock {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RedisLock.class);
 	
 	private static String getKey(String namespace, String key) {
-		return namespace + "-" + key;
+		return namespace + ":" + key;
 	}
 
 	/**

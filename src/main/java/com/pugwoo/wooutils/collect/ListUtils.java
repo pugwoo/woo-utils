@@ -119,7 +119,7 @@ public class ListUtils {
 	}
 
 	/**
-	 * 转换list为map<Key, List<>>
+	 * 转换list为map
 	 * @param list
 	 * @param keyMapper
 	 * @param valueMapper

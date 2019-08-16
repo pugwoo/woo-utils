@@ -2,12 +2,7 @@ package com.pugwoo.wooutils.task;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * 2015年7月23日 14:34:51
@@ -22,17 +17,27 @@ import java.util.concurrent.TimeUnit;
  * 【注】每个ExecuteThem调用waitAllTerminate之后，就不能再add增加任务了。
  */
 public class ExecuteThem {
-	
+
+    /**
+     * 关于使用了Executors.newFixedThreadPool说明：
+     * Executors.newFixedThreadPool有文章提示说固定线程池的缓存队列是无限长的，有内存溢出的风险。
+     * 经过测试，320万的任务堆积，大概占用139M内存，即每个任务占用约50字节。
+     * 所以任务堆积几百万本身产生的问题就要大于内存问题，所以这里仍然使用Executors.newFixedThreadPool，不会有问题。
+     */
 	private ExecutorService executorService;
 	
-	private List<Future<?>> futures = new ArrayList<Future<?>>();
+	private List<Future<?>> futures = new ArrayList<>();
 	
-	private List<Exception> exceptions = new ArrayList<Exception>();
-	
+	private List<Exception> exceptions = new ArrayList<>();
+
 	public ExecuteThem() {
 		executorService = Executors.newFixedThreadPool(10);
 	}
-	
+
+    /**
+     * 指定线程池最大线程数
+     * @param nThreads
+     */
 	public ExecuteThem(int nThreads) {
 		executorService = Executors.newFixedThreadPool(nThreads);
 	}

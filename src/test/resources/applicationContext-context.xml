@@ -8,16 +8,21 @@
 	                    http://www.springframework.org/schema/context/spring-context-4.2.xsd">
 
 	<!-- 支持注解注入 -->
-	<context:component-scan base-package="com.pugwoo.*" />
+	<context:component-scan base-package="com.pugwoo" />
 	
 	<!-- redis -->
 	<bean id="redisHelper" class="com.pugwoo.wooutils.redis.impl.RedisHelperImpl">
 	    <property name="host" value="192.168.0.101"/>
 	    <property name="port" value="6379"/>
 	    <property name="password" value="123456789"/>
-	    <property name="database" value="1" />
+	    <property name="database" value="0" />
+        <property name="redisObjectConverter" ref="jsonRedisObjectConverter"/>
 	</bean>
 
+    <bean id="jsonRedisObjectConverter" class="com.pugwoo.wooutils.redis.impl.JsonRedisObjectConverter" />
+
 	<bean class="com.pugwoo.wooutils.redis.RedisSyncAspect" />
+
+	<bean class="com.pugwoo.wooutils.cache.HiSpeedCacheAspect" />
 	
 </beans>

@@ -1,17 +1,15 @@
 package com.pugwoo.wooutils.redis;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.json.JSON;
 import com.pugwoo.wooutils.redis.impl.JsonRedisObjectConverter;
 import com.pugwoo.wooutils.redis.impl.RedisHelperImpl;
+import org.junit.Assert;
+import org.junit.Test;
+import redis.clients.jedis.ScanResult;
+
+import java.math.BigDecimal;
+import java.util.*;
 
 public class TestRedisHelper {
 	
@@ -20,12 +18,18 @@ public class TestRedisHelper {
 		redisHelper.setHost("192.168.0.101");
 		redisHelper.setPort(6379);
 		redisHelper.setPassword("123456789");
-		redisHelper.setDatabase(1);
-		
+		redisHelper.setDatabase(0);
+
 		IRedisObjectConverter redisObjectConverter = new JsonRedisObjectConverter();
 		redisHelper.setRedisObjectConverter(redisObjectConverter);
 		
 		return redisHelper;
+	}
+
+	@Test
+	public void test0() {
+		RedisHelper redisHelper = getRedisHelper();
+		System.out.println(redisHelper.isOk());
 	}
 	
 	@Test
@@ -51,11 +55,12 @@ public class TestRedisHelper {
 	}
 	
 	@Test
-	public void test3() {
+	public void testPipeline() {
 		RedisHelper redisHelper = getRedisHelper();
 		List<Object> objs = redisHelper.executePipeline(pipeline -> {
 			pipeline.set("hello", "world");
 			pipeline.get("hello");
+
 		});
 		for(Object obj : objs) {
 			System.out.println(obj);
@@ -74,7 +79,47 @@ public class TestRedisHelper {
 			System.out.println(obj);
 		}
 	}
-	
+
+	@Test
+	public void testScan() {
+	    RedisHelper redisHelper = getRedisHelper();
+        ScanResult<String> keys = redisHelper.getKeys(null, "*", 1);
+        for(String key : keys.getResult()) {
+            System.out.println(key);
+        }
+
+        System.out.println("===================");
+
+        keys = redisHelper.getKeys(keys.getStringCursor(), "*", 1);
+        for(String key : keys.getResult()) {
+            System.out.println(key);
+        }
+
+    }
+
+    @Test
+    public void test3() {
+        RedisHelper redisHelper = getRedisHelper();
+        Student student = new Student();
+        student.setId(3L);
+        student.setName("nick");
+        student.setBirth(new Date());
+        student.setScore(ListUtils.newArrayList(BigDecimal.ONE,
+                new BigDecimal(99), new BigDecimal("33.333")));
+        List<Student> list = new ArrayList<>();
+        list.add(student);
+        redisHelper.setObject("just-test111", 1000, list);
+        List<Student> list2 = redisHelper.getObject("just-test111", List.class, Student.class);
+        System.out.println(list2.get(0).getName());
+
+        Map<Integer, Student> map = new HashMap<>();
+        map.put(1, student);
+        redisHelper.setObject("just-test333", 1000, map);
+        Map<Integer, Student> map2 = redisHelper.getObject("just-test333", Map.class, Integer.class, Student.class);
+        System.out.println(map2.get(1).getId());
+    }
+
+
 	public static void main(String[] args) {
 		RedisHelper redisHelper = getRedisHelper();
 		System.out.println(redisHelper.setStringIfNotExist("hi", 60, "you"));

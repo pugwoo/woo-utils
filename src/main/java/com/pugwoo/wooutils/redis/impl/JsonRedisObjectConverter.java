@@ -1,5 +1,6 @@
 package com.pugwoo.wooutils.redis.impl;
 
+import com.fasterxml.jackson.databind.JavaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +19,8 @@ import com.pugwoo.wooutils.redis.IRedisObjectConverter;
 public class JsonRedisObjectConverter implements IRedisObjectConverter {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(JsonRedisObjectConverter.class);
-	
+
+	// 这里并没有使用到封装的JSON工具类，是因为这里的序列化和反序列化不依赖于getter/setter同时相对单一稳定
 	protected ObjectMapper mapper;
 	{
 		mapper  = new ObjectMapper();
@@ -56,4 +58,33 @@ public class JsonRedisObjectConverter implements IRedisObjectConverter {
 		}
 	}
 
+    @Override
+    public <T> T convertToObject(String str, Class<T> clazz, Class<?> genericClass) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+        try {
+            JavaType type = mapper.getTypeFactory()
+                    .constructParametricType(clazz, genericClass);
+            return mapper.readValue(str, type);
+        } catch (Exception e) {
+			LOGGER.error("convert json string to object fail", e);
+            return null;
+        }
+    }
+
+    @Override
+    public <T> T convertToObject(String str, Class<T> clazz, Class<?> genericClass1, Class<?> genericClass2) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+        try {
+            JavaType type = mapper.getTypeFactory()
+                    .constructParametricType(clazz, genericClass1, genericClass2);
+            return mapper.readValue(str, type);
+        } catch (Exception e) {
+			LOGGER.error("convert json string to object fail", e);
+            return null;
+        }
+    }
 }

@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * 将以list存储的扁平的树形数据，转换成内存中树形数据结构
  * @author sapluk
- * @date 2018-05-02
+ * 2018-05-02
  */
 public class TreeUtils {
 

@@ -1,13 +1,13 @@
 package com.pugwoo.wooutils.json;
 
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 封装起来的常用的json方法
@@ -125,7 +125,7 @@ public class JSON {
 	}
 	
 	/**
-	 * 使用json的方式克隆对象
+	 * 使用json的方式克隆对象，【不支持泛型】
 	 * @param t
 	 * @return
 	 */
