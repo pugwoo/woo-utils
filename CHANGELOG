@@ -1,5 +1,6 @@
 
 v0.7.2 - [improve] 高速缓存的使用支持项目不配置redisHelper，因为本身默认是不开启的
+       - [modify] 限定分布式锁的解锁只能由加锁者解锁，修改了RedisHelper的requireLock和releaseLock方法定义
 
 2019年8月15日
 v0.7.1 - [fix] 修复高速缓存对null值缓存的问题

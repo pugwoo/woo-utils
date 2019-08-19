@@ -60,13 +60,13 @@ public class RedisSyncAspect {
 		
 		long start = System.currentTimeMillis();
 		while(true) {
-			boolean requireLock = redisHelper.requireLock(namespace, key, expireSecond);
-			if(requireLock) {
+			String lockUuid = redisHelper.requireLock(namespace, key, expireSecond);
+			if(lockUuid != null) {
 				try {
 					RedisSyncContext.set(true, true);
 					return pjp.proceed();
 				} finally {
-					redisHelper.releaseLock(namespace, key);
+					redisHelper.releaseLock(namespace, key, lockUuid);
 				}
 			}
 			
