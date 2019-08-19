@@ -86,9 +86,13 @@ public class HiSpeedCacheAspect {
         String methodName = targetMethod.getName();
 
         HiSpeedCache hiSpeedCache = targetMethod.getAnnotation(HiSpeedCache.class);
-        boolean useRedis = hiSpeedCache.useRedis() && redisHelper != null;
-        if(hiSpeedCache.useRedis() && redisHelper == null) {
-            LOGGER.error("HiSpeedCache config useRedis=true, while there is no redisHelper");
+        boolean useRedis = false;
+        if(hiSpeedCache.useRedis()) {
+            if(redisHelper != null) {
+                useRedis = true;
+            } else {
+                LOGGER.error("HiSpeedCache config useRedis=true, while there is no redisHelper");
+            }
         }
 
         String key = "";
