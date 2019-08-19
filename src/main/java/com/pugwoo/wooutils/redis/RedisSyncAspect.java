@@ -10,10 +10,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.mvel2.MVEL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 import java.lang.reflect.Method;
@@ -21,18 +18,17 @@ import java.util.Map;
 
 @EnableAspectJAutoProxy
 @Aspect
-public class RedisSyncAspect implements ApplicationContextAware, InitializingBean {
+public class RedisSyncAspect {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(RedisSyncAspect.class);
-	
-	private ApplicationContext applicationContext;
-	
+
+	@Autowired
 	private RedisHelper redisHelper;
 
 	@Around("@annotation(com.pugwoo.wooutils.redis.Synchronized) execution(* *.*(..))")
     public Object around(ProceedingJoinPoint pjp) throws Throwable {
 		if(this.redisHelper == null) {
-			LOGGER.error("redisHelper is null, RedisSyncAspect will passthrough all method call");
+			LOGGER.error("redisHelper is null, RedisSyncAspect will pass through all method call");
 			RedisSyncContext.set(false, true);
 			return pjp.proceed();
 		}
@@ -99,21 +95,4 @@ public class RedisSyncAspect implements ApplicationContextAware, InitializingBea
 		this.redisHelper = redisHelper;
 	}
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.applicationContext = applicationContext;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		if(this.redisHelper == null) { // 尝试从spring容器中拿
-			if(this.applicationContext != null) {
-				RedisHelper rh = this.applicationContext.getBean(RedisHelper.class);
-				if(rh != null) {
-					this.redisHelper = rh;
-				}
-			}
-		}
-	}
-	
 }
