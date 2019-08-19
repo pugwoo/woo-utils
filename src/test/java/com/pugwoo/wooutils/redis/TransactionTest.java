@@ -30,13 +30,15 @@ public class TransactionTest {
 	                } catch (InterruptedException e) {
 	                    e.printStackTrace();
 	                }
-	                redisHelper.releaseLock(nameSpace,key,lockUuid);
+	                boolean succ = redisHelper.releaseLock(nameSpace,key,lockUuid);
 
-	                System.out.println(Thread.currentThread().getName() + "释放锁");
+	                System.out.println(Thread.currentThread().getName() + "释放锁,成功:" + succ);
 				}
 			});
             thread.start();
         }
+
+        System.out.println("main end");
 	}
 	
 }
