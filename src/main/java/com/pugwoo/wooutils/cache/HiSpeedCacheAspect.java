@@ -14,10 +14,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.mvel2.MVEL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 import java.lang.reflect.Method;
@@ -29,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @EnableAspectJAutoProxy
 @Aspect
-public class HiSpeedCacheAspect implements ApplicationContextAware, InitializingBean {
+public class HiSpeedCacheAspect {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HiSpeedCacheAspect.class);
 
@@ -39,9 +36,8 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
      **/
     private static final String NULL_VALUE = "(NULL)HiSpeedCache@DpK3GovAptNICKAndKarenXSysudYrY";
 
-    private ApplicationContext applicationContext;
-
-    private static RedisHelper redisHelper;
+    @Autowired(required = false)
+    private RedisHelper redisHelper;
 
     // 多线程执行更新数据任务，默认十个线程
     private static ExecuteThem executeThem;
@@ -90,7 +86,14 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
         String methodName = targetMethod.getName();
 
         HiSpeedCache hiSpeedCache = targetMethod.getAnnotation(HiSpeedCache.class);
-        boolean useRedis = hiSpeedCache.useRedis() && redisHelper != null;
+        boolean useRedis = false;
+        if(hiSpeedCache.useRedis()) {
+            if(redisHelper != null) {
+                useRedis = true;
+            } else {
+                LOGGER.error("HiSpeedCache config useRedis=true, while there is no redisHelper");
+            }
+        }
 
         String key = "";
         String keyScript = hiSpeedCache.keyScript().trim();
@@ -291,7 +294,7 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
      * 所以这里操作了dataMap和expireLineMap两个map
      * 对于超时时间大于当前时间的，不处理
      */
-    private static void cleanExpireData() {
+    private void cleanExpireData() {
         synchronized (expireLineMap) {
 
             List<Long> removeList = new ArrayList<>();
@@ -315,7 +318,7 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
     /**
      * 持续调用刷新数据
      */
-    private static void refreshResult() {
+    private void refreshResult() {
         synchronized (fetchLineMap) {
 
             List<Long> removeList = new ArrayList<>();
@@ -383,7 +386,7 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
         }
     }
 
-    private static class CleanExpireDataTask extends Thread {
+    private class CleanExpireDataTask extends Thread {
         @Override
         public void run() {
             while (true) { // 一直循环，不会退出
@@ -400,7 +403,7 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
         }
     }
 
-    private static class ContinueUpdateTask extends Thread {
+    private class ContinueUpdateTask extends Thread {
         @Override
         public void run() {
             while (true) { // 一直循环，不会退出
@@ -429,20 +432,4 @@ public class HiSpeedCacheAspect implements ApplicationContextAware, Initializing
         return sb.toString().substring(0, sb.length() - 1);
     }
 
-    @Override
-    public void afterPropertiesSet() {
-        if(redisHelper == null) { // 尝试从spring容器中拿
-            if(applicationContext != null) {
-                RedisHelper rh = this.applicationContext.getBean(RedisHelper.class);
-                if(rh != null) {
-                    redisHelper = rh;
-                }
-            }
-        }
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
 }

@@ -238,16 +238,16 @@ public interface RedisHelper {
 	 * @param namespace 命名空间，每个应用独立的空间
 	 * @param key 业务key，redis将保证同一个namespace同一个key只有一个client可以拿到锁
 	 * @param maxTransactionSeconds 单位秒，必须大于0,拿到锁之后,预计多久可以完成这个事务，如果超过这个时间还没有归还锁，那么事务将失败
-	 * @return
+	 * @return 如果加锁成功，返回锁的唯一识别字符，可用于解锁；如果加锁失败，则返回null
 	 */
-	boolean requireLock(String namespace, String key, int maxTransactionSeconds);
+	String requireLock(String namespace, String key, int maxTransactionSeconds);
 	
 	/**
 	 * 如果事务已经完成，则归还锁。
 	 * @param namespace
 	 * @param key
 	 */
-	boolean releaseLock(String namespace, String key);
+	boolean releaseLock(String namespace, String key, String lockUuid);
 	
 	/////////////////// Redis Auto Increment ID 分布式自增id //////////////////////
 	
