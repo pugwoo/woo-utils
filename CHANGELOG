@@ -1,3 +1,7 @@
+2019年8月20日
+v0.7.3 - [add] RedisHelper新增key-value匹配的删除key操作，仅当key-value匹配时才删除，使用lua脚本实现
+       - [improve] 限定分布式锁的解锁，使用key-value匹配的删除方法
+
 2019年8月19日
 v0.7.2 - [improve] 高速缓存的使用支持项目不配置redisHelper，因为本身默认是不开启的
        - [modify] 限定分布式锁的解锁只能由加锁者解锁，修改了RedisHelper的requireLock和releaseLock方法定义

@@ -182,6 +182,16 @@ public interface RedisHelper {
 	 * @return
 	 */
 	boolean remove(String key);
+
+	/**
+	 * 删除类型为String的key, 且在value正确的情况下才会被删除
+	 * @param key    key
+	 * @param value  value 只有值相同才会成功删除
+	 * @return
+	 *   - true  删除成功
+	 *   - false 删除失败 key不存在/key-value不匹配/key-value匹配后刚好失效
+	 */
+	boolean remove(String key, String value);
 	
 	/**
 	 * CAS，成功返回true，失败返回false。

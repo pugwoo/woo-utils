@@ -19,7 +19,7 @@ import java.util.UUID;
 public class RedisLock {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(RedisLock.class);
-	
+
 	private static String getKey(String namespace, String key) {
 		return namespace + ":" + key;
 	}
@@ -72,7 +72,7 @@ public class RedisLock {
 				LOGGER.warn("releaseLock namespace:{}, key:{}, lock not exist", namespace, key);
 				return true;
 			} else if (value.equals(lockUuid)) {
-				redisHelper.remove(newKey);
+				redisHelper.remove(newKey, lockUuid);
 				return true;
 			} else {
 				LOGGER.error("releaseLock namespace:{}, key:{} fail, uuid not match, redis:{}, given:{}",

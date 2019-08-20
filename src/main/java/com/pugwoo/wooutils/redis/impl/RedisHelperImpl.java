@@ -20,6 +20,14 @@ import java.util.function.Function;
 public class RedisHelperImpl implements RedisHelper {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(RedisHelperImpl.class);
+
+	/**
+	 * 删除key-value的lua脚本
+	 * 返回 1 成功 删除1个
+	 *     0  失败 删除0个 key不存在 / key-value不匹配 / key-value匹配后刚好失效
+	 */
+	private final static String REMOVE_KEY_VALUE_SCRIPT =
+			"if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
 	
 	/**约定：当host为null或blank时，表示不初始化*/
 	protected String host = null;
@@ -398,7 +406,20 @@ public class RedisHelperImpl implements RedisHelper {
 			}
 		});
 	}
-	
+
+	@Override
+	public boolean remove(String key, String value) {
+		return execute(jedis -> {
+			try {
+				Object eval = jedis.eval(REMOVE_KEY_VALUE_SCRIPT, 1, key, value);
+				return "1".equals(eval.toString());
+			} catch (Exception e) {
+				LOGGER.error("operate jedis error, key:{}", key, e);
+				return false;
+			}
+		});
+	}
+
 	@Override
 	public boolean compareAndSet(String key, String value, String oldValue, Integer expireSeconds) {
 		if(value == null) { // 不支持value设置为null
