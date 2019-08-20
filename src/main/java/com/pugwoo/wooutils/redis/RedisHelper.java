@@ -184,6 +184,16 @@ public interface RedisHelper {
 	boolean remove(String key);
 	
 	/**
+	 * key-value匹配的删除key操作
+	 * @param key    key
+	 * @param value  value 只有值相同才会成功删除
+	 * @return
+	 *   - true  删除成功
+	 *   - false 删除失败 key不存在/key-value不匹配/key-value匹配后刚好失效
+	 */
+	boolean remove(String key, String value);
+	
+	/**
 	 * CAS，成功返回true，失败返回false。
 	 * 注意：在高并发场景下，过多线程使用该方法将导致过多无用的重试，从而大幅降低性能。
 	 * @param value 不支持设置为null，请使用remove(key)
