@@ -6,7 +6,7 @@
 	<groupId>com.pugwoo</groupId>
 	<artifactId>woo-utils</artifactId>
 	<packaging>jar</packaging>
-	<version>0.7.2</version>
+	<version>0.7.3-SNAPSHOT</version>
 	
 	<name>woo-utils</name>
 	<description>the common utils</description>
