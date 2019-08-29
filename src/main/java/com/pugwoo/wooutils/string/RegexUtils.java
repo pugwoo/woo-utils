@@ -6,10 +6,36 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 正则表达式相关工具
+ * 正则表达式相关工具<br>
+ *
+ * 如果需要区分大小写，则正则表达式前面加上 (?i)
+ *
  * @author nick
  */
 public class RegexUtils {
+
+
+	/**
+	 * 检查给定的字符串是否匹配上了正则
+	 * @param str
+	 * @param regex 正则表达式
+	 * @return
+	 */
+	public static boolean isMatch(String str, String regex) {
+		Pattern pattern = Pattern.compile(regex);
+		return isMatch(str, pattern);
+	}
+
+	/**
+	 * 检查给定的字符串是否匹配上了正则
+	 * @param str
+	 * @param pattern 正则表达式
+	 * @return
+	 */
+	public static boolean isMatch(String str, Pattern pattern) {
+		Matcher m = pattern.matcher(str);
+		return m.find();
+	}
 
 	/**
 	 * 获得第一个匹配到的字符串，推荐使用group regex，
@@ -24,18 +50,13 @@ public class RegexUtils {
 	}
 
 	/**
-	 * 获得第一个匹配到的字符串，【不区分大小写】，推荐使用group regex，
+	 * 获得第一个匹配到的字符串，推荐使用group regex，
 	 * 将返回所有group的值的拼凑，推荐只用一个group，没有匹配到返回null。
 	 * @param str
-	 * @param regex
+	 * @param pattern 正则表达式
 	 * @return
 	 */
-	public static String getFirstMatchStrCaseInsensitive(String str, String regex) {
-		Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-		return getFirstMatchStr(str, p);
-	}
-
-	private static String getFirstMatchStr(String str, Pattern pattern) {
+	public static String getFirstMatchStr(String str, Pattern pattern) {
 		Matcher m = pattern.matcher(str);
 		while (m.find() == true) {
 			int groupCount = m.groupCount();
@@ -67,18 +88,13 @@ public class RegexUtils {
 	}
 
 	/**
-	 * 获得所有匹配到的字符串，【不区分大小写】，推荐使用group regex，
+	 * 获得所有匹配到的字符串，推荐使用group regex，
 	 * 将返回所有group的值的拼凑，推荐只用一个group，没有匹配到返回empty list。
 	 * @param str
-	 * @param regex
+	 * @param pattern 正则表达式
 	 * @return
 	 */
-	public static List<String> getAllMatchStrCaseInsensitive(String str, String regex) {
-		Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-		return getAllMatchStr(str, p);
-	}
-
-	private static List<String> getAllMatchStr(String str, Pattern pattern) {
+	public static List<String> getAllMatchStr(String str, Pattern pattern) {
 		Matcher m = pattern.matcher(str);
 		List<String> result = new ArrayList<String>();
 		while (m.find() == true) {
