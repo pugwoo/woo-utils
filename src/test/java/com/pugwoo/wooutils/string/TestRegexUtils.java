@@ -12,6 +12,9 @@ public class TestRegexUtils {
         assert RegexUtils.isMatch("hello", "h");
         assert !RegexUtils.isMatch("hello", "a");
 
+        assert RegexUtils.isMatch("application-prod.yaml", ".*prod.*\\.(yaml|properties)$");
+        assert RegexUtils.isMatch("application-prod.properties", ".*prod.*\\.(yaml|properties)$");
+
         // 测试大小写
         assert !RegexUtils.isMatch("Hello", "h");
         assert RegexUtils.isMatch("Hello", "(?i)h");
