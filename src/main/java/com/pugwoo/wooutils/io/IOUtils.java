@@ -1,7 +1,13 @@
 package com.pugwoo.wooutils.io;
 
+import com.pugwoo.wooutils.collect.ListUtils;
+import com.pugwoo.wooutils.string.RegexUtils;
+
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 /**
  * IO相关常用操作
@@ -107,6 +113,66 @@ public class IOUtils {
 		PipedInputStream inputStream = new PipedInputStream();
 		PipedOutputStream outputStream = new PipedOutputStream(inputStream);
 		return new MyPipe(inputStream, outputStream);
+	}
+
+
+	/**
+	 * 遍历获得所有的文件（不包括文件夹）
+	 * @param file    文件夹
+	 * @return
+	 */
+	public static List<File> listFiles(File file) {
+		if (file.isFile()) {
+			return ListUtils.newArrayList(file);
+		}
+
+		List<File> result = new ArrayList<>();
+		File[] files = file.listFiles();
+		if(files == null) {
+			return result;
+		}
+		for (File f : files) {
+			result.addAll(listFiles(f));
+		}
+		return result;
+	}
+
+	/**
+	 * 获取符合条件的文件，不包含目录
+	 *
+	 * @param file
+	 * @param regex 文件名(不包括路径)的正则表达式
+	 * @return
+	 */
+	public static List<File> listFiles(File file, String regex) {
+		return listFiles(file, Pattern.compile(regex));
+	}
+
+	/**
+	 * 获取符合条件的文件，不包含目录
+	 *
+	 * @param file
+	 * @param pattern 文件名(不包括路径)的正则表达式
+	 * @return
+	 */
+	public static List<File> listFiles(File file, Pattern pattern) {
+		if (file.isFile()) {
+			if(RegexUtils.isMatch(file.getName(), pattern)) {
+				return ListUtils.newArrayList(file);
+			} else {
+				return new ArrayList<>();
+			}
+		}
+
+		List<File> result = new ArrayList<>();
+		File[] files = file.listFiles();
+		if(files == null) {
+			return result;
+		}
+		for (File f : files) {
+			result.addAll(listFiles(f, pattern));
+		}
+		return result;
 	}
 
 }

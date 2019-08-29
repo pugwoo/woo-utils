@@ -1,5 +1,6 @@
 v0.7.4 - [add] 正则表达式增加isMatch方法
        - [del] 正则表达式去掉CaseInsensitive的几个方法
+       - [add] IOUtils增加listFiles的方法
 
 2019年8月22日
 v0.7.3 - [add] RedisHelper新增key-value匹配的删除key操作，仅当key-value匹配时才删除，使用lua脚本实现
