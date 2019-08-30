@@ -5,7 +5,7 @@
 <dependency>
     <groupId>com.pugwoo</groupId>
     <artifactId>woo-utils</artifactId>
-    <version>0.7.3</version>
+    <version>0.7.4</version>
 </dependency>
 ```
 
