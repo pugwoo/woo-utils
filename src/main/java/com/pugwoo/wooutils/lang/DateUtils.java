@@ -224,7 +224,7 @@ public class DateUtils {
 	 * 计算两个日期的天数差，不足一天的不算。
 	 * @param date1
 	 * @param date2
-	 * @return
+	 * @return 返回值都大于等于0，不关心date1和date2的顺序
 	 */
 	public static int diffDays(Date date1, Date date2) {
 		if(date1 == null || date2 == null) {
@@ -237,7 +237,7 @@ public class DateUtils {
 	 * 计算两个日期的年份差，主要用于计算年龄。不足一年的不计，一年按365天计，不考虑闰年。
 	 * @param date1
 	 * @param date2
-	 * @return
+	 * @return 返回值都大于等于0，不关心date1和date2的顺序
 	 */
 	public static int diffYears(Date date1, Date date2) {
 		return diffDays(date1, date2) / 365;

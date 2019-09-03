@@ -6,6 +6,7 @@ import com.pugwoo.wooutils.string.RegexUtils;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
@@ -80,9 +81,15 @@ public class IOUtils {
 	 */
 	public static String readAll(InputStream in, String charset) {
 		Scanner scanner = new Scanner(in, charset);
-		String content = scanner.useDelimiter("\\Z").next();
-		scanner.close();
-		return content;
+
+		try {
+			String content = scanner.useDelimiter("\\Z").next();
+			return content;
+		} catch (NoSuchElementException e) {
+			return ""; // file is empty, ignore exception
+		} finally {
+			scanner.close();
+		}
 	}
 
 	/**
