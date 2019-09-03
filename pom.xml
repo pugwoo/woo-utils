@@ -184,13 +184,6 @@
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
-                                <!-- 【重要】对于debian需要加configuration这一段，对于centos则不需要 -->
-                                <configuration>
-                                    <gpgArguments>
-                                        <arg>--pinentry-mode</arg>
-                                        <arg>loopback</arg>
-                                    </gpgArguments>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
