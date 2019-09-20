@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
+import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,15 @@ public class HiSpeedCacheAspect {
 
     @Autowired(required = false)
     private RedisHelper redisHelper;
+
+    @PostConstruct
+    private void init() {
+        if(redisHelper == null) {
+            LOGGER.info("@HiSpeedCache init success.");
+        } else {
+            LOGGER.info("@HiSpeedCache init success with redisHelper.");
+        }
+    }
 
     // 多线程执行更新数据任务，默认十个线程
     private static ExecuteThem executeThem;

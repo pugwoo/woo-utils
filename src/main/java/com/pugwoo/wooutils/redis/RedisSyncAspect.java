@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
+import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.util.Map;
 
@@ -24,6 +25,15 @@ public class RedisSyncAspect {
 
 	@Autowired
 	private RedisHelper redisHelper;
+
+	@PostConstruct
+	private void init() {
+		if(redisHelper == null) {
+			LOGGER.error("redisHelper is null, RedisSyncAspect will pass through all method call");
+		} else {
+			LOGGER.info("@Synchronized init success.");
+		}
+	}
 
 	@Around("@annotation(com.pugwoo.wooutils.redis.Synchronized) execution(* *.*(..))")
     public Object around(ProceedingJoinPoint pjp) throws Throwable {

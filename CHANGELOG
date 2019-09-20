@@ -1,3 +1,6 @@
+
+v0.7.6 - [add] 增加@Synchronized和@HiSpeedCache启动日志
+
 2019年9月3日
 v0.7.5 - [fix] 修复IOUtils.readAll(InputStream in, String charset)方法当in没有数据时抛出的异常
 
