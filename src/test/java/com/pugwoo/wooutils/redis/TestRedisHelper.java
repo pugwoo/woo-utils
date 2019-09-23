@@ -31,6 +31,20 @@ public class TestRedisHelper {
 		RedisHelper redisHelper = getRedisHelper();
 		System.out.println(redisHelper.isOk());
 	}
+
+	@Test
+	public void testRename() {
+		RedisHelper redisHelper = getRedisHelper();
+		String oldKey = UUID.randomUUID().toString();
+		String newKey = UUID.randomUUID().toString();
+		String value = UUID.randomUUID().toString();
+		redisHelper.setString(oldKey, 1000, value);
+		assert redisHelper.getString(oldKey).equals(value);
+
+		redisHelper.rename(oldKey, newKey);
+		assert redisHelper.getString(oldKey) == null;
+		assert redisHelper.getString(newKey).equals(value);
+	}
 	
 	@Test
 	public void test1() {

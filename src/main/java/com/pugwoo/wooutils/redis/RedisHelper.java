@@ -49,7 +49,15 @@ public interface RedisHelper {
 	 * @return
 	 */
 	List<Object> executeTransaction(Consumer<Transaction> transaction, String ...keys);
-	
+
+	/**
+	 * 重命名redis的key
+	 * @param oldKey
+	 * @param newKey 如果newKey已存在，会覆盖掉
+	 * @return 除非抛出异常，否则认为成功；不处理oldKey不存在的情况，认为是成功
+	 */
+	boolean rename(String oldKey, String newKey);
+
 	/**
 	 * 设置字符串
 	 * @param key

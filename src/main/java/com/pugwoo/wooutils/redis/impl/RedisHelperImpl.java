@@ -165,7 +165,24 @@ public class RedisHelperImpl implements RedisHelper {
 			}
 		}
 	}
-	
+
+	@Override
+	public boolean rename(String oldKey, String newKey) {
+		if(oldKey == null || newKey == null) {
+			return false;
+		}
+
+		return execute(jedis -> {
+			try {
+				jedis.rename(oldKey, newKey);
+				return true;
+			} catch (Exception e) {
+				LOGGER.error("rename operate jedis error, oldKey:{}, newKey:{}", oldKey, newKey, e);
+				return false;
+			}
+		});
+	}
+
 	@Override
 	protected void finalize() throws Throwable {
 		if(pool != null && !pool.isClosed()) {
@@ -184,7 +201,7 @@ public class RedisHelperImpl implements RedisHelper {
 				jedis.setex(key, expireSecond, value);
 				return true;
 			} catch (Exception e) {
-				LOGGER.error("operate jedis error, key:{}, value:{}", key, value, e);
+				LOGGER.error("setString operate jedis error, key:{}, value:{}", key, value, e);
 				return false;
 			}
 		});
