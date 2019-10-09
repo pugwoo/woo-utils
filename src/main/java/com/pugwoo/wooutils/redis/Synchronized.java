@@ -42,5 +42,11 @@ public @interface Synchronized {
 	 * @return
 	 */
 	int waitLockMillisecond() default 10000;
+
+	/**
+	 * 是否开启记录获得锁和释放锁的日志，默认关闭
+	 * @return
+	 */
+	boolean logDebug() default false;
 	
 }

@@ -72,21 +72,46 @@ public class RedisSyncAspect {
 		while(true) {
 			String lockUuid = redisHelper.requireLock(namespace, key, expireSecond);
 			if(lockUuid != null) {
+				if(sync.logDebug()) {
+					LOGGER.info("namespace:{},key:{},got lock,expire second:{},lockUuid:{},threadName:{}",
+							namespace, key, expireSecond, lockUuid, Thread.currentThread().getName());
+				}
 				try {
 					RedisSyncContext.set(true, true);
 					return pjp.proceed();
 				} finally {
-					redisHelper.releaseLock(namespace, key, lockUuid);
+					boolean result = redisHelper.releaseLock(namespace, key, lockUuid);
+					if(sync.logDebug()) {
+						if(result) {
+							LOGGER.info("namespace:{},key:{} release lock success, lockUuid:{},threadName:{}",
+									namespace, key, lockUuid, Thread.currentThread().getName());
+						} else {
+							LOGGER.error("namespace:{},key:{} release lock fail, lockUuid:{},threadName:{}",
+									namespace, key, lockUuid, Thread.currentThread().getName());
+						}
+					}
+				}
+			} else {
+				if(sync.logDebug()) {
+					LOGGER.info("namespace:{},key:{}, NOT get a lock,threadName:{}", namespace, key,
+							Thread.currentThread().getName());
 				}
 			}
 			
 			if(waitLockMillisecond == 0) {
 				RedisSyncContext.set(true, false);
+				if(sync.logDebug()) {
+					LOGGER.info("namespace:{},key:{}, give up getting a lock,threadName:{}", namespace, key,
+							Thread.currentThread().getName());
+				}
 				return null;
 			}
 			long totalWait = System.currentTimeMillis() - start;
 			if(totalWait >= waitLockMillisecond) {
 				RedisSyncContext.set(true, false);
+				if(sync.logDebug()) {
+					LOGGER.info("namespace:{},key:{}, give up getting a lock,total wait:{}ms,threadName:{}", namespace, key, totalWait, Thread.currentThread().getName());
+				}
 				return null;
 			}
 			if(waitLockMillisecond - totalWait < b) {
