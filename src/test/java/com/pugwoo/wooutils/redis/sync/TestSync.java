@@ -17,9 +17,7 @@ public class TestSync {
 	
 	@Test
 	public void test() throws Exception {
-		helloService.hello("nick", -1);
-
-		for(int i = 0; i < 10; i++) {
+		for(int i = 1; i <= 10; i++) {
 			final int a = i;
 			new Thread(new Runnable() {
 				@Override
