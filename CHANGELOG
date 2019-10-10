@@ -1,4 +1,4 @@
-
+2019年10月10日
 v0.8.0 - [add] 增加分布式锁@Synchronized心跳机制
        - [add] 增加@Synchronized和@HiSpeedCache启动日志
        - [add] 增加redisHelper的rename方法
