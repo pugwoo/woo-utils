@@ -10,6 +10,9 @@ import java.lang.annotation.Target;
  * 
  * 关于返回值：如果方法是常规返回值，当没有获取到锁时，且超过了阻塞等待时间，则返回null。
  * 如果想拿到更多的信息，可以通过RedisSyncContext拿，线程独立。
+ *
+ * 【关于锁的可重入性】@Synchronized本身是不支持锁的可重入性，原因见RedisLock类说明。但是由于AOP的特性，自身方法的递归是不涉及到AOP的，也即天然满足了锁可重入特性，所以@Synchronized是支持自身方法递归的。但是对于类之间的循环调用，则应避免。
+ *
  * @author nick markfly
  */
 @Target({ElementType.METHOD})
