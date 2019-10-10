@@ -9,7 +9,7 @@ import java.util.UUID;
 @Service
 public class HeartbeatTestService {
 
-    @Synchronized(namespace = "heartbeat", heartbeatSecond = 10, waitLockMillisecond = 10000000) // 等待时间故意设置很长，一直要等到可以执行为止
+    @Synchronized(namespace = "heartbeat", heartbeatExpireSecond = 10, waitLockMillisecond = 10000000) // 等待时间故意设置很长，一直要等到可以执行为止
     public void longTask() {
 
         String uuid = UUID.randomUUID().toString();

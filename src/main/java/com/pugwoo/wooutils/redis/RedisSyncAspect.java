@@ -29,7 +29,7 @@ public class RedisSyncAspect {
 	private RedisHelper redisHelper;
 
 	private static class HeartBeatInfo {
-		public Integer heartbeatSecond;
+		public Integer heartbeatExpireSecond;
 		public String namespace;
 		public String key;
 	}
@@ -64,14 +64,14 @@ public class RedisSyncAspect {
 		
 		String namespace = sync.namespace();
 		int expireSecond = sync.expireSecond();
-		int heartbeatSecond = sync.heartbeatSecond();
+		int heartbeatExpireSecond = sync.heartbeatExpireSecond();
 		int waitLockMillisecond = sync.waitLockMillisecond();
 
-		if(expireSecond <= 0 && heartbeatSecond <= 0) {
-			LOGGER.error("one of expireSecond or heartbeatSecond must > 0, now set heartbeatSecond to be 15");
-			heartbeatSecond = 15;
+		if(expireSecond <= 0 && heartbeatExpireSecond <= 0) {
+			LOGGER.error("one of expireSecond or heartbeatExpireSecond must > 0, now set heartbeatExpireSecond to be 15");
+			heartbeatExpireSecond = 15;
 		}
-		int _expireSecond = expireSecond > 0 ? expireSecond : heartbeatSecond;
+		int _expireSecond = expireSecond > 0 ? expireSecond : heartbeatExpireSecond;
 
 		String key = "-";
         String keyScript = sync.keyScript();
@@ -99,8 +99,8 @@ public class RedisSyncAspect {
 						LOGGER.info("namespace:{},key:{},got lock,expireSecond:{},lockUuid:{},threadName:{}",
 								namespace, key, expireSecond, lockUuid, Thread.currentThread().getName());
 					} else {
-						LOGGER.info("namespace:{},key:{},got lock,heartbeatSecond:{},lockUuid:{},threadName:{}",
-								namespace, key, heartbeatSecond, lockUuid, Thread.currentThread().getName());
+						LOGGER.info("namespace:{},key:{},got lock,heartbeatExpireSecond:{},lockUuid:{},threadName:{}",
+								namespace, key, heartbeatExpireSecond, lockUuid, Thread.currentThread().getName());
 					}
 				}
 
@@ -111,7 +111,7 @@ public class RedisSyncAspect {
 						HeartBeatInfo heartBeatInfo = new HeartBeatInfo();
 						heartBeatInfo.namespace = namespace;
 						heartBeatInfo.key = key;
-						heartBeatInfo.heartbeatSecond = heartbeatSecond;
+						heartBeatInfo.heartbeatExpireSecond = heartbeatExpireSecond;
 						heartBeatKeys.put(uuid, heartBeatInfo);
 					}
 
@@ -183,7 +183,7 @@ public class RedisSyncAspect {
 			while (true) { // 一直循环，不会退出
 				for(Map.Entry<String, HeartBeatInfo> key : heartBeatKeys.entrySet()) {
 					redisHelper.renewalLock(key.getValue().namespace, key.getValue().key,
-							key.getValue().heartbeatSecond);
+							key.getValue().heartbeatExpireSecond);
 				}
 
 				try {

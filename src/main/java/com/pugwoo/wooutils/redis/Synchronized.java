@@ -46,7 +46,7 @@ public @interface Synchronized {
      * 默认30秒，建议设置为15或30秒。分布式锁会每3秒钟向redis心跳一次。
      * @return
      */
-	int heartbeatSecond() default 30;
+	int heartbeatExpireSecond() default 30;
 	
 	/**
 	 * 当进程/线程没有拿到锁时，阻塞等待的时间，单位毫秒，默认10000毫秒
