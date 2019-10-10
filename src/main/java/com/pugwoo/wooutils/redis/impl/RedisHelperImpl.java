@@ -496,7 +496,12 @@ public class RedisHelperImpl implements RedisHelper {
 	public String requireLock(String namespace, String key, int maxTransactionSeconds) {
 		return RedisLock.requireLock(this, namespace, key, maxTransactionSeconds);
 	}
-	
+
+	@Override
+	public boolean renewalLock(String namespace, String key, int maxTransactionSeconds) {
+		return RedisLock.renewalLock(this, namespace, key, maxTransactionSeconds);
+	}
+
 	@Override
 	public boolean releaseLock(String namespace, String key, String lockUuid) {
 		return RedisLock.releaseLock(this, namespace, key, lockUuid);

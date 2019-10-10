@@ -32,11 +32,21 @@ public @interface Synchronized {
 	String keyScript() default "";
 	
 	/**
-	 * 事务超时的秒数，如果使用者超过这个时间还没有主动释放锁，那么redis会自动释放掉该锁。
+	 * 锁超时的秒数，如果使用者超过这个时间还没有主动释放锁，那么redis会自动释放掉该锁。
 	 * 请使用者合理评估任务执行时间，推荐按正常执行时间的10倍~100倍评估该时间。
+     *
+     * 当expireSecond>0时有效，如果指定了expireSecond，则heartbeatSecond失效。
 	 * @return
 	 */
-	int expireSecond() default 60;
+	int expireSecond() default 0;
+
+    /**
+     * 锁的心跳超时秒数，默认使用心跳机制。
+     * 设置心跳秒数，方便任务执行时间不定的锁。
+     * 默认30秒，建议设置为15或30秒。分布式锁会每3秒钟向redis心跳一次。
+     * @return
+     */
+	int heartbeatSecond() default 30;
 	
 	/**
 	 * 当进程/线程没有拿到锁时，阻塞等待的时间，单位毫秒，默认10000毫秒

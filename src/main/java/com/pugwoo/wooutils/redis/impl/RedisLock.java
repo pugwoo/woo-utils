@@ -57,6 +57,31 @@ public class RedisLock {
 			return null;
 		}
 	}
+
+    /**
+     * 续期锁，也即延长锁的过时时间，延长锁不需要提供lockUuid，也即延长锁不一定需要加锁者来完成
+     * @param redisHelper
+     * @param namespace
+     * @param key
+     * @param maxTransactionSeconds
+     * @return
+     */
+	public static boolean renewalLock(RedisHelper redisHelper, String namespace, String key,
+                                      int maxTransactionSeconds) {
+        if(namespace == null || key == null || key.isEmpty() || maxTransactionSeconds <= 0) {
+            LOGGER.error("renewalLock with error params: namespace:{},key:{},maxTransactionSeconds:{}",
+                    namespace, key, maxTransactionSeconds, new Exception());
+            return false;
+        }
+
+        try {
+            String newKey = getKey(namespace, key);
+            return redisHelper.setExpire(newKey, maxTransactionSeconds);
+        } catch (Exception e) {
+            LOGGER.error("renewalLock error, namespace:{}, key:{}", namespace, key, e);
+            return false;
+        }
+    }
 	
 	/**
 	 * 如果事务已经完成，则归还锁。

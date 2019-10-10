@@ -259,7 +259,17 @@ public interface RedisHelper {
 	 * @return 如果加锁成功，返回锁的唯一识别字符，可用于解锁；如果加锁失败，则返回null
 	 */
 	String requireLock(String namespace, String key, int maxTransactionSeconds);
-	
+
+	/**
+	 * 续期锁的有效期
+	 *
+	 * @param namespace 命名空间，每个应用独立的空间
+	 * @param key 业务key，redis将保证同一个namespace同一个key只有一个client可以拿到锁
+	 * @param maxTransactionSeconds 单位秒，必须大于0，锁的有效期
+	 * @return 续期成功返回true，否则返回false
+	 */
+	boolean renewalLock(String namespace, String key, int maxTransactionSeconds);
+
 	/**
 	 * 如果事务已经完成，则归还锁。
 	 * @param namespace
