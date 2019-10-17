@@ -20,4 +20,43 @@ public class RedisMsg {
     /**ack确认超时时间，秒*/
     private int ackTimeout;
 
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public long getSendTime() {
+        return sendTime;
+    }
+
+    public void setSendTime(long sendTime) {
+        this.sendTime = sendTime;
+    }
+
+    public Long getRecvTime() {
+        return recvTime;
+    }
+
+    public void setRecvTime(Long recvTime) {
+        this.recvTime = recvTime;
+    }
+
+    public int getAckTimeout() {
+        return ackTimeout;
+    }
+
+    public void setAckTimeout(int ackTimeout) {
+        this.ackTimeout = ackTimeout;
+    }
 }

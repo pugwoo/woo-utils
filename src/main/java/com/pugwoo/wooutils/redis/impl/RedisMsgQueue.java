@@ -1,9 +1,14 @@
 package com.pugwoo.wooutils.redis.impl;
 
+import com.pugwoo.wooutils.json.JSON;
 import com.pugwoo.wooutils.redis.RedisHelper;
 import com.pugwoo.wooutils.redis.RedisMsg;
+import com.pugwoo.wooutils.string.Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.UUID;
 
 /**
  * 基于redis实现的带ack机制的消息队列
@@ -12,6 +17,18 @@ import org.slf4j.LoggerFactory;
 public class RedisMsgQueue {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisMsgQueue.class);
+
+    private static String getPendingKey(String topic) {
+        return topic + ":" + "MQLIST";
+    }
+
+    private static String getDoingKey(String topic) {
+        return topic + ":" + "MQDOING";
+    }
+
+    private static String getMapKey(String topic) {
+        return topic + ":" + "MQMSG";
+    }
 
     /**
      * 发送消息，返回消息的uuid。默认的超时时间是30秒
@@ -33,8 +50,40 @@ public class RedisMsgQueue {
      * @return 消息的uuid，发送失败返回null
      */
     public static String send(RedisHelper redisHelper, String topic, String msg, int defaultAckTimeoutSec) {
-        // TODO
-        return null;
+
+        String uuid = "rmq" + Hash.md5(UUID.randomUUID().toString());
+
+        RedisMsg redisMsg = new RedisMsg();
+        redisMsg.setUuid(uuid);
+        redisMsg.setMsg(msg);
+        redisMsg.setSendTime(System.currentTimeMillis());
+        redisMsg.setAckTimeout(defaultAckTimeoutSec);
+
+        String listKey = getPendingKey(topic);
+        String mapKey = getMapKey(topic);
+
+        List<Object> result = redisHelper.executePipeline(pipeline -> {
+            pipeline.hset(mapKey, uuid, JSON.toJson(redisMsg));
+            pipeline.lpush(listKey, uuid);
+        });
+
+        boolean success = true;
+        if(result != null && result.size() == 2) {
+            if(!(result.get(0)!=null && (result.get(0) instanceof Long) && result.get(0).equals(1L))) {
+                success = false;
+                LOGGER.error("send msg:{}, content:{} fail, redis result[0] != 1", uuid, msg);
+            }
+            if(!(result.get(0)!=null && (result.get(0) instanceof Long) && ((Long)result.get(0)) > 0L)) {
+                success = false;
+                LOGGER.error("send msg:{}, content:{} fail, redis result[1] < 1", uuid, msg);
+            }
+        } else {
+            LOGGER.error("send msg:{}, content:{} fail, redis result size != 2",
+                    uuid, msg);
+            success = false;
+        }
+
+        return success ? uuid : null;
     }
 
     /**
@@ -72,5 +121,8 @@ public class RedisMsgQueue {
         // TODO
         return false;
     }
+
+
+    // TODO 还有2个定时任务任务，在Redishelperimpl中做成线程，再过来调这里
 
 }
