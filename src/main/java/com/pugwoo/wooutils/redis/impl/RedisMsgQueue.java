@@ -4,6 +4,7 @@ import com.pugwoo.wooutils.json.JSON;
 import com.pugwoo.wooutils.redis.RedisHelper;
 import com.pugwoo.wooutils.redis.RedisMsg;
 import com.pugwoo.wooutils.string.Hash;
+import com.pugwoo.wooutils.string.StringTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,8 +94,7 @@ public class RedisMsgQueue {
      * @return
      */
     public static RedisMsg receive(RedisHelper redisHelper, String topic) {
-        // TODO
-        return null;
+        return receive(redisHelper, topic, -1, null);
     }
 
     /**
@@ -102,12 +102,43 @@ public class RedisMsgQueue {
      * @param redisHelper
      * @param topic 即redis的key
      * @param waitTimeoutSec 指定接口阻塞等待时间，0表示不阻塞，-1表示永久等待，大于0为等待的秒数
-     * @param ackTimeoutSec ack确认超时的秒数
+     * @param ackTimeoutSec ack确认超时的秒数，设置为null则表示不修改，使用发送方设置的默认超时值
      * @return 如果没有接收到消息，返回null
      */
-    public static RedisMsg receive(RedisHelper redisHelper, String topic, int waitTimeoutSec, int ackTimeoutSec) {
-        // TODO
-        return null;
+    public static RedisMsg receive(RedisHelper redisHelper, String topic, int waitTimeoutSec, Integer ackTimeoutSec) {
+
+        String listKey = getPendingKey(topic);
+        String doingKey = getDoingKey(topic);
+        String mapKey = getMapKey(topic);
+
+        RedisMsg redisMsg = redisHelper.execute(jedis -> {
+            String uuid = null;
+            if(waitTimeoutSec == 0) {
+                uuid = jedis.rpoplpush(listKey, doingKey);
+            } else {
+                uuid = jedis.brpoplpush(listKey, doingKey, waitTimeoutSec < 0 ? 0 : waitTimeoutSec);
+            }
+
+            if(StringTools.isEmpty(uuid)) {
+                return null;
+            }
+
+            String msgJson = jedis.hget(mapKey, uuid);
+            if(StringTools.isEmpty(msgJson)) {
+                return null;
+            }
+
+            RedisMsg _redisMsg = JSON.parse(msgJson, RedisMsg.class);
+            _redisMsg.setRecvTime(System.currentTimeMillis());
+            if(ackTimeoutSec != null) {
+                _redisMsg.setAckTimeout(ackTimeoutSec);
+            }
+            jedis.hset(mapKey, uuid, JSON.toJson(_redisMsg));
+
+            return _redisMsg;
+        });
+
+        return redisMsg;
     }
 
     /**
