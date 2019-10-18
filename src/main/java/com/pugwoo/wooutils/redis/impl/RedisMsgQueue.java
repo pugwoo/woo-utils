@@ -1,5 +1,6 @@
 package com.pugwoo.wooutils.redis.impl;
 
+import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.json.JSON;
 import com.pugwoo.wooutils.redis.RedisHelper;
 import com.pugwoo.wooutils.redis.RedisMsg;
@@ -8,6 +9,7 @@ import com.pugwoo.wooutils.string.StringTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -161,6 +163,36 @@ public class RedisMsgQueue {
     }
 
 
-    // TODO 还有2个定时任务任务，在Redishelperimpl中做成线程，再过来调这里
+    ////////////// 以下是清理任务相关的
+
+    /**查询超时的消息，里面包含了消费时间为null的消息，外层清理时需要延迟清理*/
+    public static List<RedisMsg> getExpireDoingMsg(RedisHelper redisHelper, String topic) {
+        String doingKey = getDoingKey(topic);
+
+        List<String> uuidList = redisHelper.execute(jedis -> jedis.lrange(doingKey, 0, -1));
+
+        List<RedisMsg> expireMsg = new ArrayList<>();
+
+        // TODO 过滤一下过期的消息
+
+        return expireMsg;
+    }
+
+    /**复原消费超时的消息*/
+    public static void recoverMsg(RedisHelper redisHelper, String topic, String uuid) {
+
+        String listKey = getPendingKey(topic);
+        String doingKey = getDoingKey(topic);
+
+        redisHelper.execute(jedis -> {
+            return jedis.eval("redis.call('LREM', KEYS[1], 0, ARGV[1]); redis.call('LPUSH', KEYS[2], ARGV[1])",
+                    ListUtils.newArrayList(doingKey, listKey), ListUtils.newArrayList(uuid));
+        });
+    }
+
+
+    // TODO 清理消息内容map，每天清理一次即可，这里要做延迟30秒清理或者根据发送时间延迟清理
+
+
 
 }
