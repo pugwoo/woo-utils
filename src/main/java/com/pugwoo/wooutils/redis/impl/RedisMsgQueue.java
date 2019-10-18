@@ -121,12 +121,13 @@ public class RedisMsgQueue {
                 uuid = jedis.brpoplpush(listKey, doingKey, waitTimeoutSec < 0 ? 0 : waitTimeoutSec);
             }
 
-            if(StringTools.isEmpty(uuid)) {
+            if(uuid == null) { // 没有收到消息，属于正常情况
                 return null;
             }
 
             String msgJson = jedis.hget(mapKey, uuid);
             if(StringTools.isEmpty(msgJson)) {
+                LOGGER.error("get uuid:{} msg fail, msg is empty", uuid);
                 return null;
             }
 
@@ -165,15 +166,31 @@ public class RedisMsgQueue {
 
     ////////////// 以下是清理任务相关的
 
-    /**查询超时的消息，里面包含了消费时间为null的消息，外层清理时需要延迟清理*/
+    /**查询超时的消息，里面包含了消费时间为null的消息，外层清理时需要延迟30秒清理*/
     public static List<RedisMsg> getExpireDoingMsg(RedisHelper redisHelper, String topic) {
+
         String doingKey = getDoingKey(topic);
+        String mapKey = getMapKey(topic);
 
-        List<String> uuidList = redisHelper.execute(jedis -> jedis.lrange(doingKey, 0, -1));
+        List<RedisMsg> expireMsg  = redisHelper.execute(jedis -> {
+            List<String> uuidList = jedis.lrange(doingKey, 0, -1);
 
-        List<RedisMsg> expireMsg = new ArrayList<>();
+            List<RedisMsg> _expireMsg = new ArrayList<>();
 
-        // TODO 过滤一下过期的消息
+            for(String uuid : uuidList) {
+                String json = jedis.hget(mapKey, uuid);
+                if(StringTools.isEmpty(json)) {
+                    continue;
+                }
+                RedisMsg redisMsg = JSON.parse(json, RedisMsg.class);
+                long now = System.currentTimeMillis();
+                if(redisMsg.getRecvTime() == null || redisMsg.getRecvTime() + redisMsg.getAckTimeout() * 1000 > now) {
+                    _expireMsg.add(redisMsg);
+                }
+            }
+
+            return _expireMsg;
+        });
 
         return expireMsg;
     }
