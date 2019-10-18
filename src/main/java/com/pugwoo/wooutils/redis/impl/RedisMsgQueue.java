@@ -185,6 +185,8 @@ public class RedisMsgQueue {
         String doingKey = getDoingKey(topic);
 
         redisHelper.execute(jedis -> {
+            // 这里如果是先加后删，则比较大概率被等待receive的客户端拿到之后pop push回doing列表，此动作如果在删除之前进行，就会出现误删情况
+            // 如果是先删后加，理论上不会有问题，除了极端情况下，redis执行了第一条命令之后挂了才可能导致丢失数据，但这种可能性已经远远比第一种低
             return jedis.eval("redis.call('LREM', KEYS[1], 0, ARGV[1]); redis.call('LPUSH', KEYS[2], ARGV[1])",
                     ListUtils.newArrayList(doingKey, listKey), ListUtils.newArrayList(uuid));
         });
