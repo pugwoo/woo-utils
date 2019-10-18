@@ -166,7 +166,7 @@ public class RedisMsgQueue {
 
     ////////////// 以下是清理任务相关的
 
-    /**查询超时的消息，里面包含了消费时间为null的消息，外层清理时需要延迟30秒清理*/
+    /**查询超时的消息，里面包含了消费时间为null的消息，外层清理时需要30秒延迟清理*/
     public static List<RedisMsg> getExpireDoingMsg(RedisHelper redisHelper, String topic) {
 
         String doingKey = getDoingKey(topic);
@@ -209,9 +209,9 @@ public class RedisMsgQueue {
         });
     }
 
-
-    // TODO 清理消息内容map，每天清理一次即可，这里要做延迟30秒清理或者根据发送时间延迟清理
-
-
+    /**清理消息队列中，uuid已经不存在了，但是map中还在的消息，每天清理一次即可（这类消息是低概率且只有可能在发送环节出现），要根据发送时间延迟清理*/
+    // public static void clearMap(RedisHelper redisHelper, String topic) {
+    // 暂不实现该方法
+    //}
 
 }
