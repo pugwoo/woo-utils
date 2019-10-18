@@ -9,9 +9,8 @@ import com.pugwoo.wooutils.string.StringTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 基于redis实现的带ack机制的消息队列
@@ -163,10 +162,9 @@ public class RedisMsgQueue {
         return true;
     }
 
-
     ////////////// 以下是清理任务相关的
 
-    /**查询超时的消息，里面包含了消费时间为null的消息，外层清理时需要30秒延迟清理*/
+    /**查询超时的消息，里面包含了消费时间为null的消息，外层清理时需要10秒延迟清理*/
     public static List<RedisMsg> getExpireDoingMsg(RedisHelper redisHelper, String topic) {
 
         String doingKey = getDoingKey(topic);
@@ -213,5 +211,68 @@ public class RedisMsgQueue {
     // public static void clearMap(RedisHelper redisHelper, String topic) {
     // 暂不实现该方法
     //}
+
+    // 恢复超时消息，每10秒跑一次
+    public static class RecoverMsgTask extends Thread {
+
+        private RedisHelper redisHelper;
+        private Map<String, String> topics = new ConcurrentHashMap<>(); // 存放需要更新的主题
+
+        public RecoverMsgTask(RedisHelper redisHelper) {
+            this.redisHelper = redisHelper;
+        }
+
+        public void addTopic(String topic) {
+            if(topics.containsKey(topic)) {
+                return;
+            }
+            topics.put(topic, "");
+        }
+
+        @Override
+        public void run() {
+            Map<String, List<String>> waitToClear = new HashMap<>(); // 等待清理的topic -> 消息uuid列表
+            while (true) { // 一直循环，不会退出
+
+                if(!waitToClear.isEmpty()) { // 清理
+                    for(Map.Entry<String, List<String>> entry : waitToClear.entrySet()) {
+                        for(String uuid : entry.getValue()) {
+                            recoverMsg(redisHelper, entry.getKey(), uuid);
+                        }
+                    }
+                    waitToClear.clear();
+                }
+
+                for(String topic : topics.keySet()) {
+                    List<RedisMsg> expires = getExpireDoingMsg(redisHelper, topic);
+                    if(expires.isEmpty()) {
+                        continue; // 不需要处理
+                    }
+
+                    LOGGER.warn("expire topic:{} msg count:{}", topic, expires.size());
+                    List<String> nullRecvTimeList = new ArrayList<>();
+
+                    for(RedisMsg redisMsg : expires) {
+                        if(redisMsg.getRecvTime() == null) {
+                            nullRecvTimeList.add(redisMsg.getUuid());
+                        } else {
+                            recoverMsg(redisHelper, topic, redisMsg.getUuid());
+                        }
+                    }
+
+                    if(!nullRecvTimeList.isEmpty()) {
+                        LOGGER.warn("expire topic:{} msg with null recvTime count:{}, msg uuids:{}",
+                                topic, nullRecvTimeList.size(), JSON.toJson(nullRecvTimeList));
+                        waitToClear.put(topic, nullRecvTimeList);
+                    }
+                }
+
+                try {
+                    Thread.sleep(10000); // 这个10秒钟还关乎消费时间为null的消息的延迟处理
+                } catch (InterruptedException e) { // ignore
+                }
+            }
+        }
+    }
 
 }
