@@ -149,8 +149,15 @@ public class RedisMsgQueue {
      * @return
      */
     public static boolean ack(RedisHelper redisHelper, String topic, String msgUuid) {
-        // TODO
-        return false;
+        String doingKey = getDoingKey(topic);
+        String mapKey = getMapKey(topic);
+
+        redisHelper.executePipeline(pipeline -> {
+            pipeline.lrem(doingKey, 0, msgUuid);
+            pipeline.hdel(mapKey, msgUuid);
+        });
+
+        return true;
     }
 
 
