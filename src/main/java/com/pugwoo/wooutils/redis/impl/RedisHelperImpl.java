@@ -4,6 +4,7 @@ import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.redis.IRedisObjectConverter;
 import com.pugwoo.wooutils.redis.RedisHelper;
 import com.pugwoo.wooutils.redis.RedisLimitParam;
+import com.pugwoo.wooutils.redis.RedisMsg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.*;
@@ -44,6 +45,9 @@ public class RedisHelperImpl implements RedisHelper {
 	 * 单例的JedisPool，懒加载初始化
 	 */
 	private volatile JedisPool pool;
+
+    /**清理消息队列数据的现场，懒加载初始化*/
+	private volatile RedisMsgQueue.RecoverMsgTask recoverMsgTask;
 	
 	private Jedis getJedisConnection() {
 		if(pool == null) {
@@ -511,7 +515,48 @@ public class RedisHelperImpl implements RedisHelper {
 	public Long getAutoIncrementId(String namespace) {
 		return RedisAutoIncrementId.getAutoIncrementId(this, namespace);
 	}
-	
+
+	private void addTopicToTask(String topic) {
+		if(recoverMsgTask == null) {
+			synchronized (RedisMsgQueue.RecoverMsgTask.class) {
+				if(recoverMsgTask == null) {
+					recoverMsgTask = new RedisMsgQueue.RecoverMsgTask(this);
+					recoverMsgTask.setName("RedisMsgQueue.RecoverMsgTask");
+					recoverMsgTask.start();
+				}
+			}
+		}
+
+		recoverMsgTask.addTopic(topic);
+	}
+
+	@Override
+	public String send(String topic, String msg) {
+		addTopicToTask(topic);
+		return RedisMsgQueue.send(this, topic, msg);
+	}
+
+	@Override
+	public String send(String topic, String msg, int defaultAckTimeoutSec) {
+		addTopicToTask(topic);
+		return RedisMsgQueue.send(this, topic, msg, defaultAckTimeoutSec);
+	}
+
+	@Override
+	public RedisMsg receive(String topic) {
+		return RedisMsgQueue.receive(this, topic);
+	}
+
+	@Override
+	public RedisMsg receive(String topic, int waitTimeoutSec, Integer ackTimeoutSec) {
+		return RedisMsgQueue.receive(this, topic, waitTimeoutSec, ackTimeoutSec);
+	}
+
+	@Override
+	public boolean ack(String topic, String msgUuid) {
+		return RedisMsgQueue.ack(this, topic, msgUuid);
+	}
+
 	public String getHost() {
 		return host;
 	}

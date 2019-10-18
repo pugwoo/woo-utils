@@ -165,7 +165,7 @@ public class RedisMsgQueue {
     ////////////// 以下是清理任务相关的
 
     /**查询超时的消息，里面包含了消费时间为null的消息，外层清理时需要10秒延迟清理*/
-    public static List<RedisMsg> getExpireDoingMsg(RedisHelper redisHelper, String topic) {
+    private static List<RedisMsg> getExpireDoingMsg(RedisHelper redisHelper, String topic) {
 
         String doingKey = getDoingKey(topic);
         String mapKey = getMapKey(topic);
@@ -194,7 +194,7 @@ public class RedisMsgQueue {
     }
 
     /**复原消费超时的消息*/
-    public static void recoverMsg(RedisHelper redisHelper, String topic, String uuid) {
+    private static void recoverMsg(RedisHelper redisHelper, String topic, String uuid) {
 
         String listKey = getPendingKey(topic);
         String doingKey = getDoingKey(topic);

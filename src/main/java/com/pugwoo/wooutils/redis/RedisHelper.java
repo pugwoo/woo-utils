@@ -285,4 +285,48 @@ public interface RedisHelper {
 	 * @return 没有重试，获取失败返回null，注意判断和重试
 	 */
 	Long getAutoIncrementId(String namespace);
+
+	/////////////////// Redis 带 ACK 机制的消息队列 ///////////////////////////////
+
+	/**
+	 * 发送消息，返回消息的uuid。默认的超时时间是30秒
+	 * @param topic topic将是redis的key
+	 * @param msg
+	 * @return
+	 */
+	String send(String topic, String msg);
+
+	/**
+	 * 发送消息，返回消息的uuid
+	 * @param topic 即redis的key
+	 * @param msg
+	 * @param defaultAckTimeoutSec 默认ack超时时间：当消费者消费了消息却没来得及设置ack超时时间时的默认超时秒数。建议处理时间默认比较长的应用，可以将该值设置较大，例如60秒或120秒
+	 * @return 消息的uuid，发送失败返回null
+	 */
+	String send(String topic, String msg, int defaultAckTimeoutSec);
+
+	/**
+	 * 接收消息，永久阻塞式，使用默认的actTimeout值
+	 * @param topic 即redis的key
+	 * @return
+	 */
+	RedisMsg receive(String topic);
+
+	/**
+	 * 接收消息
+	 * @param topic 即redis的key
+	 * @param waitTimeoutSec 指定接口阻塞等待时间，0表示不阻塞，-1表示永久等待，大于0为等待的秒数
+	 * @param ackTimeoutSec ack确认超时的秒数，设置为null则表示不修改，使用发送方设置的默认超时值
+	 * @return 如果没有接收到消息，返回null
+	 */
+	RedisMsg receive(String topic, int waitTimeoutSec, Integer ackTimeoutSec);
+
+	/**
+	 * 确认消费消息
+	 * @param topic 即redis的key
+	 * @param msgUuid
+	 * @return
+	 */
+	boolean ack(String topic, String msgUuid);
+
 }
