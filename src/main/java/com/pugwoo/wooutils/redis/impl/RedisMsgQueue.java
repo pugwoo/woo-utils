@@ -182,7 +182,7 @@ public class RedisMsgQueue {
                 }
                 RedisMsg redisMsg = JSON.parse(json, RedisMsg.class);
                 long now = System.currentTimeMillis();
-                if(redisMsg.getRecvTime() == null || redisMsg.getRecvTime() + redisMsg.getAckTimeout() * 1000 > now) {
+                if(redisMsg.getRecvTime() == null || redisMsg.getRecvTime() + redisMsg.getAckTimeout() * 1000 < now) {
                     _expireMsg.add(redisMsg);
                 }
             }
