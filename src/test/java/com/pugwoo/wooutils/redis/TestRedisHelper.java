@@ -15,9 +15,9 @@ public class TestRedisHelper {
 	
 	public static RedisHelper getRedisHelper() {
 		RedisHelperImpl redisHelper = new RedisHelperImpl();
-		redisHelper.setHost("192.168.0.101");
+		redisHelper.setHost("192.168.0.112");
 		redisHelper.setPort(6379);
-		redisHelper.setPassword("123456789");
+		redisHelper.setPassword("devdev");
 		redisHelper.setDatabase(0);
 
 		IRedisObjectConverter redisObjectConverter = new JsonRedisObjectConverter();
