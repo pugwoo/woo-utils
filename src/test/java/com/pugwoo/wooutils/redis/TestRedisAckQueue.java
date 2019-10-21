@@ -1,15 +1,16 @@
 package com.pugwoo.wooutils.redis;
 
 
+import com.pugwoo.wooutils.json.JSON;
+import com.pugwoo.wooutils.task.ExecuteThem;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @ContextConfiguration(locations = {"classpath:applicationContext-context.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -54,16 +55,16 @@ public class TestRedisAckQueue {
 
         while(true) {
             String uuid = redisHelper.send("mytopic1", "msgconent" + UUID.randomUUID().toString());
-            //System.out.println("send msg:" + uuid);
+            System.out.println("send msg:" + uuid);
 
-            if(uuid == null) {
-                System.out.println("uuid is null");
-            }
-
-            //try {
-            //    Thread.sleep(new Random().nextInt(1000));
-            //} catch (Exception e) {
+            //if(uuid == null) {
+            //    System.out.println("uuid is null");
             //}
+
+            try {
+                Thread.sleep(new Random().nextInt(1000));
+            } catch (Exception e) {
+            }
         }
 
     }
@@ -85,6 +86,56 @@ public class TestRedisAckQueue {
 
             redisHelper.ack("mytopic1", msg.getUuid());
         }
+    }
+
+
+    @Test
+    public void benchCheck() {
+
+        final String topic = "aaa";
+
+        Map<String, String> map = new ConcurrentHashMap<>();
+
+        ExecuteThem executeThem = new ExecuteThem(10);
+
+        // 模拟5个发送者，每个发送10000条
+        for(int i = 0; i < 5; i++) {
+            executeThem.add(new Runnable() {
+                @Override
+                public void run() {
+                    for(int j = 0; j < 10000; j++) {
+                        String uuid = redisHelper.send(topic, "aaaaaa");
+                        if(uuid ==null) {
+                            System.err.println("发送消息失败");
+                        } else {
+                            map.put(uuid, "");
+                        }
+                    }
+                }
+            });
+        }
+
+        // 模拟5个接收者
+        for(int i = 0; i < 5; i++) {
+            executeThem.add(new Runnable() {
+                @Override
+                public void run() {
+                    while(true) {
+                        RedisMsg msg = redisHelper.receive(topic, 10, null);
+                        if(msg == null) {
+                            break;
+                        }
+                        //System.out.println("recv:" + msg.getUuid());
+                        map.remove(msg.getUuid());
+                        redisHelper.ack(topic, msg.getUuid());
+                    }
+                }
+            });
+        }
+
+        executeThem.waitAllTerminate();
+
+        System.out.println("结果:" + JSON.toJson(map.keySet()));
     }
 
 
