@@ -544,11 +544,13 @@ public class RedisHelperImpl implements RedisHelper {
 
 	@Override
 	public RedisMsg receive(String topic) {
+		addTopicToTask(topic);
 		return RedisMsgQueue.receive(this, topic);
 	}
 
 	@Override
 	public RedisMsg receive(String topic, int waitTimeoutSec, Integer ackTimeoutSec) {
+		addTopicToTask(topic);
 		return RedisMsgQueue.receive(this, topic, waitTimeoutSec, ackTimeoutSec);
 	}
 
