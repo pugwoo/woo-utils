@@ -164,6 +164,18 @@ public class RedisMsgQueue {
 
     ////////////// 以下是清理任务相关的
 
+    /**获得消息体，如果不存在返回null*/
+    private static RedisMsg getMsg(RedisHelper redisHelper, String topic, String uuid) {
+        String mapKey = getMapKey(topic);
+
+        String json = redisHelper.execute(jedis -> jedis.hget(mapKey, uuid));
+        if(StringTools.isEmpty(json)) {
+            return null;
+        }
+        RedisMsg redisMsg = JSON.parse(json, RedisMsg.class);
+        return redisMsg;
+    }
+
     /**查询超时的消息，里面包含了消费时间为null的消息，外层清理时需要10秒延迟清理*/
     private static List<RedisMsg> getExpireDoingMsg(RedisHelper redisHelper, String topic) {
 
@@ -234,10 +246,13 @@ public class RedisMsgQueue {
             Map<String, List<String>> waitToClear = new HashMap<>(); // 等待清理的topic -> 消息uuid列表
             while (true) { // 一直循环，不会退出
 
-                if(!waitToClear.isEmpty()) { // 清理
+                if(!waitToClear.isEmpty()) { // 清理，需要再检查一遍是否消费时间确实为null
                     for(Map.Entry<String, List<String>> entry : waitToClear.entrySet()) {
                         for(String uuid : entry.getValue()) {
-                            recoverMsg(redisHelper, entry.getKey(), uuid);
+                            RedisMsg msg = getMsg(redisHelper, entry.getKey(), uuid);
+                            if(msg != null && msg.getRecvTime() == null) {
+                                recoverMsg(redisHelper, entry.getKey(), uuid);
+                            }
                         }
                     }
                     waitToClear.clear();
