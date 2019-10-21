@@ -96,14 +96,14 @@ public class TestRedisAckQueue {
 
         Map<String, String> map = new ConcurrentHashMap<>();
 
-        ExecuteThem executeThem = new ExecuteThem(10);
+        ExecuteThem executeThem = new ExecuteThem(20);
 
-        // 模拟5个发送者，每个发送10000条
-        for(int i = 0; i < 5; i++) {
+        // 模拟10个发送者，每个发送100000条
+        for(int i = 0; i < 10; i++) {
             executeThem.add(new Runnable() {
                 @Override
                 public void run() {
-                    for(int j = 0; j < 10000; j++) {
+                    for(int j = 0; j < 100000; j++) {
                         String uuid = redisHelper.send(topic, "aaaaaa");
                         if(uuid ==null) {
                             System.err.println("发送消息失败");
@@ -115,8 +115,8 @@ public class TestRedisAckQueue {
             });
         }
 
-        // 模拟5个接收者
-        for(int i = 0; i < 5; i++) {
+        // 模拟10个接收者
+        for(int i = 0; i < 10; i++) {
             executeThem.add(new Runnable() {
                 @Override
                 public void run() {
