@@ -1,10 +1,7 @@
 package com.pugwoo.wooutils.redis.impl;
 
 import com.pugwoo.wooutils.collect.ListUtils;
-import com.pugwoo.wooutils.redis.IRedisObjectConverter;
-import com.pugwoo.wooutils.redis.RedisHelper;
-import com.pugwoo.wooutils.redis.RedisLimitParam;
-import com.pugwoo.wooutils.redis.RedisMsg;
+import com.pugwoo.wooutils.redis.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.*;
@@ -73,6 +70,7 @@ public class RedisHelperImpl implements RedisHelper {
 		Jedis jedis = null;
 		try {
 			jedis = pool.getResource();
+			return jedis;
 		} catch (Exception e) {
 			LOGGER.error("redis get jedis fail", e);
 			if(jedis != null) {
@@ -81,10 +79,9 @@ public class RedisHelperImpl implements RedisHelper {
 				} catch (Exception ex) {
 					LOGGER.error("close jedis fail", ex);
 				}
-				jedis = null;
 			}
+			throw new NoJedisConnectionException(e);
 		}
-		return jedis;
 	}
 
 	@Override
