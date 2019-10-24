@@ -32,6 +32,7 @@ public class RedisSyncAspect {
 		public Integer heartbeatExpireSecond;
 		public String namespace;
 		public String key;
+		public String lockUuid;
 	}
 
 	private static final Map<String, HeartBeatInfo> heartBeatKeys = new ConcurrentHashMap<>(); // 心跳超时秒数
@@ -112,6 +113,7 @@ public class RedisSyncAspect {
 						heartBeatInfo.namespace = namespace;
 						heartBeatInfo.key = key;
 						heartBeatInfo.heartbeatExpireSecond = heartbeatExpireSecond;
+						heartBeatInfo.lockUuid = lockUuid;
 						heartBeatKeys.put(uuid, heartBeatInfo);
 					}
 
@@ -182,8 +184,10 @@ public class RedisSyncAspect {
 
 			while (true) { // 一直循环，不会退出
 				for(Map.Entry<String, HeartBeatInfo> key : heartBeatKeys.entrySet()) {
-					redisHelper.renewalLock(key.getValue().namespace, key.getValue().key,
-							key.getValue().heartbeatExpireSecond);
+					HeartBeatInfo heartBeatInfo = key.getValue();
+					redisHelper.renewalLock(heartBeatInfo.namespace, heartBeatInfo.key,
+							heartBeatInfo.lockUuid,
+							heartBeatInfo.heartbeatExpireSecond);
 				}
 
 				try {

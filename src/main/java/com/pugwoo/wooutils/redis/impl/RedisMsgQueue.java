@@ -241,50 +241,99 @@ public class RedisMsgQueue {
             topics.put(topic, "");
         }
 
-        @Override
-        public void run() {
+        /**清理过期消息，返回true表示有消费时间为null的情况，已经睡眠了10秒去清理了；返回false则表示没有*/
+        private boolean doClean() {
             Map<String, List<String>> waitToClear = new HashMap<>(); // 等待清理的topic -> 消息uuid列表
-            while (true) { // 一直循环，不会退出
 
-                if(!waitToClear.isEmpty()) { // 清理，需要再检查一遍是否消费时间确实为null
-                    for(Map.Entry<String, List<String>> entry : waitToClear.entrySet()) {
-                        for(String uuid : entry.getValue()) {
-                            RedisMsg msg = getMsg(redisHelper, entry.getKey(), uuid);
-                            if(msg != null && msg.getRecvTime() == null) {
-                                recoverMsg(redisHelper, entry.getKey(), uuid);
-                            }
-                        }
-                    }
-                    waitToClear.clear();
+            for(String topic : topics.keySet()) {
+                List<RedisMsg> expires = getExpireDoingMsg(redisHelper, topic);
+                if(expires.isEmpty()) {
+                    continue; // 不需要处理
                 }
 
-                for(String topic : topics.keySet()) {
-                    List<RedisMsg> expires = getExpireDoingMsg(redisHelper, topic);
-                    if(expires.isEmpty()) {
-                        continue; // 不需要处理
-                    }
+                LOGGER.warn("expire topic:{} msg count:{}", topic, expires.size());
+                List<String> nullRecvTimeList = new ArrayList<>();
 
-                    LOGGER.warn("expire topic:{} msg count:{}", topic, expires.size());
-                    List<String> nullRecvTimeList = new ArrayList<>();
-
-                    for(RedisMsg redisMsg : expires) {
-                        if(redisMsg.getRecvTime() == null) {
-                            nullRecvTimeList.add(redisMsg.getUuid());
-                        } else {
-                            recoverMsg(redisHelper, topic, redisMsg.getUuid());
-                        }
-                    }
-
-                    if(!nullRecvTimeList.isEmpty()) {
-                        LOGGER.warn("expire topic:{} msg with null recvTime count:{}, msg uuids:{}",
-                                topic, nullRecvTimeList.size(), JSON.toJson(nullRecvTimeList));
-                        waitToClear.put(topic, nullRecvTimeList);
+                for(RedisMsg redisMsg : expires) {
+                    if(redisMsg.getRecvTime() == null) {
+                        nullRecvTimeList.add(redisMsg.getUuid());
+                    } else {
+                        recoverMsg(redisHelper, topic, redisMsg.getUuid());
                     }
                 }
 
+                if(!nullRecvTimeList.isEmpty()) {
+                    LOGGER.warn("expire topic:{} msg with null recvTime count:{}, msg uuids:{}",
+                            topic, nullRecvTimeList.size(), JSON.toJson(nullRecvTimeList));
+                    waitToClear.put(topic, nullRecvTimeList);
+                }
+            }
+
+            if(!waitToClear.isEmpty()) { // 清理，需要再检查一遍是否消费时间确实为null
                 try {
                     Thread.sleep(10000); // 这个10秒钟还关乎消费时间为null的消息的延迟处理
                 } catch (InterruptedException e) { // ignore
+                }
+
+                for(Map.Entry<String, List<String>> entry : waitToClear.entrySet()) {
+                    for(String uuid : entry.getValue()) {
+                        RedisMsg msg = getMsg(redisHelper, entry.getKey(), uuid);
+                        if(msg != null && msg.getRecvTime() == null) {
+                            recoverMsg(redisHelper, entry.getKey(), uuid);
+                        }
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        private static final String LOCK_KEY = "_RedisMsgQueueRecoverMsgTaskLock_";
+
+        @Override
+        public void run() {
+
+            // 一直尝试拿锁
+            String lockUuid;
+            while(true) {
+                lockUuid = redisHelper.requireLock(LOCK_KEY, "-", 30);
+                if(lockUuid == null) { // 没有拿到锁，等待30秒重试
+                    try {
+                        Thread.sleep(30000);
+                    } catch (InterruptedException e) { // ignore
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            // 起一条心跳线程一直延期,只要拿到锁，就一直用不释放
+            final String _lockUuid = lockUuid;
+            Thread thread = new Thread(() -> {
+                while(true) { // 一直循环不会退出，每9秒续30秒，也即一共有3次续期机会
+                    redisHelper.renewalLock(LOCK_KEY, "-", _lockUuid,30);
+
+                    try {
+                        Thread.sleep(9000);
+                    } catch (InterruptedException e) { // ignore
+                    }
+                }
+            });
+            thread.setName("RedisMsgQueue.RecoverMsgRenewalLockTask");
+            thread.start();
+
+            while(true) { // 一直循环不会退出
+                try {
+                    boolean hasSleep = doClean();
+                    if(!hasSleep) { // 如果刚清理完，还没睡眠，则
+                        try {
+                            Thread.sleep(10000);
+                        } catch (InterruptedException e) { // ignore
+                        }
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("do clean task fail", e);
                 }
             }
         }

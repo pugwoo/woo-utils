@@ -266,9 +266,10 @@ public interface RedisHelper {
 	 * @param namespace 命名空间，每个应用独立的空间
 	 * @param key 业务key，redis将保证同一个namespace同一个key只有一个client可以拿到锁
 	 * @param maxTransactionSeconds 单位秒，必须大于0，锁的有效期
+	 * @param lockUuid 锁的uuid，提供对的uuid才进行续期
 	 * @return 续期成功返回true，否则返回false
 	 */
-	boolean renewalLock(String namespace, String key, int maxTransactionSeconds);
+	boolean renewalLock(String namespace, String key, String lockUuid, int maxTransactionSeconds);
 
 	/**
 	 * 如果事务已经完成，则归还锁。

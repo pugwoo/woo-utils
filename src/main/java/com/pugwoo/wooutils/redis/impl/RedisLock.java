@@ -59,15 +59,17 @@ public class RedisLock {
 	}
 
     /**
-     * 续期锁，也即延长锁的过时时间，延长锁不需要提供lockUuid，也即延长锁不一定需要加锁者来完成
+     * 续期锁，也即延长锁的过时时间，需要提供锁的uuid，
+	 * 但是这里并不需要保持原子操作，也即可能存在极低概率的误续了别人的锁，但是没有关系，它不会一直续下去
      * @param redisHelper
      * @param namespace
      * @param key
+	 * @param lockUuid
      * @param maxTransactionSeconds
      * @return
      */
 	public static boolean renewalLock(RedisHelper redisHelper, String namespace, String key,
-                                      int maxTransactionSeconds) {
+									  String lockUuid, int maxTransactionSeconds) {
         if(namespace == null || key == null || key.isEmpty() || maxTransactionSeconds <= 0) {
             LOGGER.error("renewalLock with error params: namespace:{},key:{},maxTransactionSeconds:{}",
                     namespace, key, maxTransactionSeconds, new Exception());
@@ -76,7 +78,18 @@ public class RedisLock {
 
         try {
             String newKey = getKey(namespace, key);
-            return redisHelper.setExpire(newKey, maxTransactionSeconds);
+			String value = redisHelper.getString(newKey);
+			if(value == null) {
+				LOGGER.error("renewalLock namespace:{}, key:{}, lock not exist", namespace, key);
+				return false;
+			} else if (!value.equals(lockUuid)) {
+				LOGGER.error("renewalLock namespace:{}, key:{}, lockUuid not match, given:{}, in redis:{}",
+						namespace, key, lockUuid, value);
+				return false;
+			} else {
+				// 虽然从查询uuid到实际去续期，中间可能发生了锁的变化，但是这个情况出现概率极低，而且出现了也没有明细问题，只是帮另外一个锁续期了一次，后续也不会一直续期
+				return redisHelper.setExpire(newKey, maxTransactionSeconds);
+			}
         } catch (Exception e) {
             LOGGER.error("renewalLock error, namespace:{}, key:{}", namespace, key, e);
             return false;
@@ -104,7 +117,7 @@ public class RedisLock {
 				LOGGER.warn("releaseLock namespace:{}, key:{}, lock not exist", namespace, key);
 				return true;
 			} else if (value.equals(lockUuid)) {
-				redisHelper.remove(newKey, lockUuid);
+				redisHelper.remove(newKey, lockUuid); // 这个是原子操作
 				return true;
 			} else {
 				LOGGER.error("releaseLock namespace:{}, key:{} fail, uuid not match, redis:{}, given:{}",

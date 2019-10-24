@@ -502,8 +502,8 @@ public class RedisHelperImpl implements RedisHelper {
 	}
 
 	@Override
-	public boolean renewalLock(String namespace, String key, int maxTransactionSeconds) {
-		return RedisLock.renewalLock(this, namespace, key, maxTransactionSeconds);
+	public boolean renewalLock(String namespace, String key, String lockUuid, int maxTransactionSeconds) {
+		return RedisLock.renewalLock(this, namespace, key, lockUuid, maxTransactionSeconds);
 	}
 
 	@Override
