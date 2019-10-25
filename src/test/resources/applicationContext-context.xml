@@ -16,6 +16,7 @@
 	    <property name="port" value="6379"/>
 	    <property name="password" value="devdev"/>
 	    <property name="database" value="0" />
+		<property name="maxConnection" value="1000" />
         <property name="redisObjectConverter" ref="jsonRedisObjectConverter"/>
 	</bean>
 

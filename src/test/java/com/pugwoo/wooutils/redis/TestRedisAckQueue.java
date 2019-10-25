@@ -11,6 +11,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 @ContextConfiguration(locations = {"classpath:applicationContext-context.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -95,11 +96,15 @@ public class TestRedisAckQueue {
         final String topic = "aaa";
 
         Map<String, String> map = new ConcurrentHashMap<>();
+        ExecuteThem executeThem = new ExecuteThem(400);
 
-        ExecuteThem executeThem = new ExecuteThem(20);
+        AtomicLong totalSend = new AtomicLong();
+        AtomicLong lastSend = new AtomicLong();
+        AtomicLong totalRecv = new AtomicLong();
+        AtomicLong lastRecv = new AtomicLong();
 
-        // 模拟10个发送者，每个发送100000条
-        for(int i = 0; i < 10; i++) {
+        // 模拟2个发送者，每个发送100000条
+        for(int i = 0; i < 100; i++) {
             executeThem.add(new Runnable() {
                 @Override
                 public void run() {
@@ -108,6 +113,7 @@ public class TestRedisAckQueue {
                         if(uuid ==null) {
                             System.err.println("发送消息失败");
                         } else {
+                            totalSend.incrementAndGet();
                             map.put(uuid, "");
                         }
                     }
@@ -116,7 +122,7 @@ public class TestRedisAckQueue {
         }
 
         // 模拟10个接收者
-        for(int i = 0; i < 10; i++) {
+        for(int i = 0; i < 300; i++) {
             executeThem.add(new Runnable() {
                 @Override
                 public void run() {
@@ -125,13 +131,48 @@ public class TestRedisAckQueue {
                         if(msg == null) {
                             break;
                         }
-                        //System.out.println("recv:" + msg.getUuid());
+                        // System.out.println("recv:" + msg.getUuid());
+                        if(!map.containsKey(msg.getUuid())) {
+                            // 因为发送方发送完消息后，可能还没来得及放到map，就被消费了，所以这里等一等
+                            try {
+                                Thread.sleep(1000);
+                            } catch (Exception e) {
+                            }
+                        }
+                        if(!map.containsKey(msg.getUuid())) {
+                            System.err.println("map not contain key:" + msg.getUuid());
+                        }
                         map.remove(msg.getUuid());
                         redisHelper.ack(topic, msg.getUuid());
+                        totalRecv.incrementAndGet();
                     }
                 }
             });
         }
+
+        Thread status = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true) {
+                    long sendRate = totalSend.get() - lastSend.get();
+                    lastSend.set(totalSend.get());
+                    long recvRate = totalRecv.get() - lastRecv.get();
+                    lastRecv.set(totalRecv.get());
+
+                    System.out.println("send total:" + totalSend.get()
+                            + ",send rate:" + sendRate + "/s, recv total:" + totalRecv.get()
+                            + ",recv rate:" + recvRate + "/s");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        });
+        status.setDaemon(true);
+        status.start();
 
         executeThem.waitAllTerminate();
 
