@@ -136,5 +136,20 @@ public class JSON {
 		}
 		return (T) parse(toJson(t), t.getClass());
 	}
-	
+
+	/**
+	 * 允许拿到ObjectMapper进行修改
+	 * @return
+	 */
+	public static ObjectMapper getObjectMapper() {
+		return objectMapper;
+	}
+
+	/**
+	 * 允许重新设置objectMapper
+	 * @param objectMapper
+	 */
+	public static void setObjectMapper(ObjectMapper objectMapper) {
+		JSON.objectMapper = objectMapper;
+	}
 }
