@@ -1,6 +1,7 @@
 v0.8.1 - [add] 增加基于redis实现的带ack机制的消息队列
        - [improve] 当redis拿不到jedis连接时，抛出连接异常，代替原来的空指针异常
        - [improve] 分布式锁续期增加必须提供锁的uuid
+       - [improve] JSON解析: 允许字符串值出现反斜杠\
 
 2019年10月10日
 v0.8.0 - [add] 增加分布式锁@Synchronized心跳机制，支持分布式锁续期
