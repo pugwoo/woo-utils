@@ -89,6 +89,11 @@ public class TestRedisAckQueue {
         }
     }
 
+    @Test
+    public void benchCheck2() {
+        benchCheck();
+    }
+
 
     @Test
     public void benchCheck() {
@@ -108,7 +113,7 @@ public class TestRedisAckQueue {
             executeThem.add(new Runnable() {
                 @Override
                 public void run() {
-                    for(int j = 0; j < 100000; j++) {
+                    for(int j = 0; j < 10000; j++) {
                         String uuid = redisHelper.send(topic, "aaaaaa");
                         if(uuid ==null) {
                             System.err.println("发送消息失败");
@@ -132,16 +137,16 @@ public class TestRedisAckQueue {
                             break;
                         }
                         // System.out.println("recv:" + msg.getUuid());
-                        if(!map.containsKey(msg.getUuid())) {
-                            // 因为发送方发送完消息后，可能还没来得及放到map，就被消费了，所以这里等一等
-                            try {
-                                Thread.sleep(1000);
-                            } catch (Exception e) {
-                            }
-                        }
-                        if(!map.containsKey(msg.getUuid())) {
-                            System.err.println("map not contain key:" + msg.getUuid());
-                        }
+                       // if(!map.containsKey(msg.getUuid())) {
+                       //     // 因为发送方发送完消息后，可能还没来得及放到map，就被消费了，所以这里等一等
+                       //     try {
+                       //         Thread.sleep(1000);
+                        //    } catch (Exception e) {
+                        //    }
+                        //}
+                       // if(!map.containsKey(msg.getUuid())) {
+                       //     System.err.println("map not contain key:" + msg.getUuid());
+                       // }
                         map.remove(msg.getUuid());
                         redisHelper.ack(topic, msg.getUuid());
                         totalRecv.incrementAndGet();
