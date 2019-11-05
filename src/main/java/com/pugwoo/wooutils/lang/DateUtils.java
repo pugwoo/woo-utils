@@ -5,6 +5,11 @@ import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -66,10 +71,14 @@ public class DateUtils {
 	/**
 	 * 自动解析，不会抛出异常
 	 * @param date
-	 * @return
+	 * @return 解析失败返回null，同时log error
 	 */
 	public static Date parse(String date) {
-		if(date == null || date.trim().isEmpty()) {
+		if(date == null) {
+			return null;
+		}
+		date = date.trim();
+		if(date.isEmpty()) {
 			return null;
 		}
 		String pattern = determineDateFormat(date);
@@ -84,7 +93,37 @@ public class DateUtils {
 			return null;
 		}
 	}
-	
+
+	/**失败返回null，不会抛异常*/
+	public static LocalDateTime parseLocalDateTime(String date) {
+		return toLocalDateTime(parse(date));
+	}
+
+	public static LocalDateTime toLocalDateTime(Date date) {
+		if(date == null) {return null;}
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+	}
+
+	/**失败返回null，不会抛异常*/
+	public static LocalDate parseLocalDate(String date) {
+		return toLocalDate(parse(date));
+	}
+
+	public static LocalDate toLocalDate(Date date) {
+		if(date == null) {return null;}
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+	}
+
+	/**失败返回null，不会抛异常*/
+	public static LocalTime parseLocalTime(String date) {
+		return toLocalTime(parse(date));
+	}
+
+	public static LocalTime toLocalTime(Date date) {
+		if(date == null) {return null;}
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
+	}
+
 	/**
 	 * 解析日期，不会抛出异常，如果解析失败，打log并返回null
 	 * @param date
@@ -108,9 +147,14 @@ public class DateUtils {
 	 * @return
 	 */
 	public static Date parseThrowException(String date) throws ParseException {
-		if(date == null || date.trim().isEmpty()) {
+		if(date == null) {
 			return null;
 		}
+		date = date.trim();
+		if(date.isEmpty()) {
+			return null;
+		}
+
 		String pattern = determineDateFormat(date);
 		if(pattern == null) {
 			throw new ParseException("Unparseable date: \"" + date +
@@ -140,6 +184,26 @@ public class DateUtils {
 		}
 		return new SimpleDateFormat(FORMAT_STANDARD).format(date);
 	}
+
+	/**
+	 * 转换成标准的格式 yyyy-MM-dd HH:mm:ss
+	 */
+	public static String format(LocalDateTime localDateTime) {
+		if(localDateTime == null) {
+			return "";
+		}
+		return localDateTime.format(DateTimeFormatter.ofPattern(DateUtils.FORMAT_STANDARD));
+	}
+
+	/**
+	 * 转换成标准的格式 yyyy-MM-dd HH:mm:ss
+	 */
+	public static String format(LocalDate localDate) {
+		if(localDate == null) {
+			return "";
+		}
+		return localDate.format(DateTimeFormatter.ofPattern(DateUtils.FORMAT_STANDARD));
+	}
 	
 	/**
 	 * 转换成标准的格式 yyyy-MM-dd
@@ -150,12 +214,53 @@ public class DateUtils {
 		}
 		return new SimpleDateFormat(FORMAT_DATE).format(date);
 	}
+
+	/**
+	 * 转换成标准的格式 yyyy-MM-dd
+	 */
+	public static String formatDate(LocalDateTime localDateTime) {
+		if(localDateTime == null) {
+			return "";
+		}
+		return localDateTime.format(DateTimeFormatter.ofPattern(DateUtils.FORMAT_DATE));
+	}
+
+	/**
+	 * 转换成标准的格式 yyyy-MM-dd
+	 */
+	public static String formatDate(LocalDate localDate) {
+		if(localDate == null) {
+			return "";
+		}
+		return localDate.format(DateTimeFormatter.ofPattern(DateUtils.FORMAT_DATE));
+	}
 	
 	public static String format(Date date, String pattern) {
 		if(date == null) {
 			return "";
 		}
 		return new SimpleDateFormat(pattern).format(date);
+	}
+
+	public static String format(LocalDateTime date, String pattern) {
+		if(date == null) {
+			return "";
+		}
+		return date.format(DateTimeFormatter.ofPattern(pattern));
+	}
+
+	public static String format(LocalDate date, String pattern) {
+		if(date == null) {
+			return "";
+		}
+		return date.format(DateTimeFormatter.ofPattern(pattern));
+	}
+
+	public static String format(LocalTime date, String pattern) {
+		if(date == null) {
+			return "";
+		}
+		return date.format(DateTimeFormatter.ofPattern(pattern));
 	}
 	
 	private static String determineDateFormat(String dateString) {

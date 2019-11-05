@@ -1,3 +1,5 @@
+v0.8.2 - [add] 增加LocalDate LocalTime LocalDateTime的封装
+
 2019年10月26日
 v0.8.1 - [add] 增加基于redis实现的带ack机制的消息队列
        - [improve] 当redis拿不到jedis连接时，抛出连接异常，代替原来的空指针异常
