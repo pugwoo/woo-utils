@@ -30,6 +30,14 @@ public class TestRedisHelper {
 	public void test0() {
 		RedisHelper redisHelper = getRedisHelper();
 		System.out.println(redisHelper.isOk());
+
+		//long start = System.currentTimeMillis();
+		//for(int i = 0; i < 10000; i++) {
+			boolean result = redisHelper.setStringIfNotExist("hello11", 3, "112233");
+		System.out.println(result);
+		//}
+		//long end = System.currentTimeMillis();
+		//System.out.println((end - start) + "ms");
 	}
 
 	@Test
@@ -104,7 +112,7 @@ public class TestRedisHelper {
 
         System.out.println("===================");
 
-        keys = redisHelper.getKeys(keys.getStringCursor(), "*", 1);
+        keys = redisHelper.getKeys(keys.getCursor(), "*", 1);
         for(String key : keys.getResult()) {
             System.out.println(key);
         }

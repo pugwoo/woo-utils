@@ -1,11 +1,11 @@
 # woo-utils
-我自己的常用工具包。使用jdk1.8。所有第三方依赖，都需要使用者自行引入对应依赖，详见文档或pom.xml文件中scope为provided的依赖。
+我自己的常用工具包。使用jdk1.8。除默认依赖外，所有第三方依赖，都需要使用者自行引入对应依赖，详见文档或pom.xml文件中scope为provided的依赖。
 
 ```xml
 <dependency>
     <groupId>com.pugwoo</groupId>
     <artifactId>woo-utils</artifactId>
-    <version>0.8.1</version>
+    <version>0.8.2</version>
 </dependency>
 ```
 
@@ -17,7 +17,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.9.3</version>
         </dependency>
 ```
 
@@ -26,7 +25,6 @@
         <dependency>
             <groupId>org.mvel</groupId>
             <artifactId>mvel2</artifactId>
-            <version>2.4.4.Final</version>
         </dependency>
 ```
 
@@ -36,7 +34,6 @@
 	    <dependency>
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
-			<version>2.10.2</version>
 		</dependency>
 ```
 

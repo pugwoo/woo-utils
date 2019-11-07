@@ -1,5 +1,6 @@
 v0.8.2 - [add] 增加LocalDate LocalTime LocalDateTime的封装
        - [improve] Browser默认POST方法不重试，默认GET方法重试1次，支持分别配置GET和POST的重试次数
+       - [IMPORTANT update] 更新pom依赖：主要更新jedis到3.1.0跨大版本，支持spring boot 2.2.x版本
 
 2019年10月26日
 v0.8.1 - [add] 增加基于redis实现的带ack机制的消息队列

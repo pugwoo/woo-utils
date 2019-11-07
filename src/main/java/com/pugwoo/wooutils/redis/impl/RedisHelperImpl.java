@@ -2,9 +2,12 @@ package com.pugwoo.wooutils.redis.impl;
 
 import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.redis.*;
+import org.mvel2.MVEL;
+import org.mvel2.compiler.ExecutableAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.*;
+import redis.clients.jedis.params.SetParams;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -216,7 +219,10 @@ public class RedisHelperImpl implements RedisHelper {
 		String v = redisObjectConverter.convertToString(value);
 		return setString(key, expireSecond, v);
 	}
-	
+
+	private ExecutableAccessor compiled = (ExecutableAccessor) MVEL.compileExpression(
+			"jedis.set(key, value, \"NX\", \"EX\", expireSecond)");
+
 	@Override
 	public boolean setStringIfNotExist(String key, int expireSecond, String value) {
 		if(value == null) { // null值不需要设置
@@ -224,8 +230,24 @@ public class RedisHelperImpl implements RedisHelper {
 		}
 		return execute(jedis -> {
 			try {
-				String result = jedis.set(key, value, "NX", "EX", expireSecond);
-				return result != null;
+
+				try {
+					SetParams setParams = new SetParams();
+					setParams.nx();
+					setParams.ex(expireSecond);
+					String result = jedis.set(key, value, setParams);
+					return result != null;
+				} catch (NoSuchMethodError e) { // 同时兼容2.x和3.x的写法
+					Map<String, Object> params = new HashMap<>();
+					params.put("key", key);
+					params.put("value", value);
+					params.put("expireSecond", expireSecond);
+					params.put("jedis", jedis);
+
+					//String result = jedis.set(key, value, "NX", "EX", expireSecond);
+					Object result = MVEL.executeExpression(compiled, params); // 该方式对性能几乎没有影响
+					return result != null;
+				}
 			} catch (Exception e) {
 				LOGGER.error("operate jedis error, key:{}, value:{}", key, value, e);
 				return false;
