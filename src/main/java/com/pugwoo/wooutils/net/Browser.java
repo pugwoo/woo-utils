@@ -55,7 +55,7 @@ public class Browser {
 
 	/**
 	 * 设置整个Browser实例全局的字符编码，默认utf8
-	 * @param charset
+	 * @param charset 字符编码，默认utf8
 	 */
 	public void setCharset(String charset) {
 		this.charset = charset;
@@ -65,8 +65,11 @@ public class Browser {
 	private int connectTimeoutSeconds = 10;
     /**读取超时时间，秒*/
 	private int readTimeoutSeconds = 60;
-	/**重试次数*/
-	private int retryTimes = 10;
+
+	/**GET默认重试1次*/
+	private int getRetryTimes = 1;
+	/**POST默认不重试*/
+	private int postRetryTimes = 0;
 
 	/**设置连接超时时间，默认10秒*/
 	public void setConnectTimeoutSeconds(int connectTimeoutSeconds) {
@@ -78,9 +81,20 @@ public class Browser {
 		this.readTimeoutSeconds = readTimeoutSeconds;
 	}
 
-	/**设置重试次数，默认10次*/
+	/**设置重试次数，GET和POST都设置，设置为0表示不重试*/
 	public void setRetryTimes(int retryTimes) {
-		this.retryTimes = retryTimes;
+		this.getRetryTimes = retryTimes;
+		this.postRetryTimes = retryTimes;
+	}
+
+    /**设置GET的重试次数，默认1次*/
+	public void setGetRetryTimes(int getRetryTimes) {
+		this.getRetryTimes = getRetryTimes;
+	}
+
+	/**设置POST的重试次数，默认不重试，即为0次*/
+	public void setPostRetryTimes(int postRetryTimes) {
+		this.postRetryTimes = postRetryTimes;
 	}
 	
 	/**代理*/
@@ -313,11 +327,11 @@ public class Browser {
 	
 	/**
 	 * post方式请求HTTP，异步方式
-	 * @param httpUrl
-	 * @param inputStream
+	 * @param httpUrl 请求的url
+	 * @param inputStream post内容输入流
 	 * @param outputStream 如果指定了输出流，则输出到指定的输出流，此时返回的值没有html正文bytes; outputStream会自动close掉
-	 * @return
-	 * @throws IOException
+	 * @return HttpResponse
+	 * @throws IOException IOException
 	 */
 	public HttpResponse postAsync(String httpUrl, InputStream inputStream, OutputStream outputStream)
 	        throws IOException {
@@ -327,7 +341,7 @@ public class Browser {
 	private HttpResponse _post(String httpUrl, InputStream inputStream, OutputStream outputStream,
 			boolean isAsync, Map<String, String> requestHeader) throws IOException {
 		IOException ie = null;
-		for(int i = 0; i < retryTimes; i++) {
+		for(int i = -1; i < postRetryTimes; i++) { // 0表示不重试，即只请求1次
 			try {
 				HttpURLConnection urlConnection = getUrlConnection(httpUrl, "POST");
 				if(requestHeader != null) {
@@ -452,7 +466,7 @@ public class Browser {
 			boolean isAsync) throws IOException {
 		httpUrl = appendParamToUrl(httpUrl, params);
 		IOException ie = null;
-		for(int i = 0; i < retryTimes; i++) {
+		for(int i = -1; i < getRetryTimes; i++) { // 0表示不重试，即只请求1次
 			try {
 				HttpURLConnection urlConnection = getUrlConnection(httpUrl, "GET");
 				
