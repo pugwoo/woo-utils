@@ -37,7 +37,7 @@ public class RedisLimitBenchmark {
 		redisLimitParam.setLimitPeroid(RedisLimitPeroidEnum.DAY); // 设置长一点，方便benchmark
 		redisLimitParam.setLimitCount(100000000); // 设置足够大，抢不完
 
-		int concurrents = 1; // 并发数
+		int concurrents = 100; // 并发数
 
 		long start = System.currentTimeMillis();
 		final Vector<Long> vector = new Vector<Long>();

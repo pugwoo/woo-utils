@@ -21,37 +21,6 @@ public class TestRedisAckQueue {
     private RedisHelper redisHelper;
 
     @Test
-    public void test() {
-        redisHelper.execute(jedis -> {
-            Set<String> hkeys = jedis.hkeys("mytopic1:MQMSG");
-
-            List<String> doing = jedis.lrange("mytopic1:MQDOING", 0, -1);
-
-            List<String> list = jedis.lrange("mytopic1:MQLIST", 0, -1);
-
-            for(String d : doing) {
-                if(!hkeys.contains(d)) {
-                    System.out.println("doing not exist:" + d);
-                }
-            }
-            for(String d : list) {
-                if(!hkeys.contains(d)) {
-                    System.out.println("list not exist:" + d);
-                }
-            }
-
-            for(String key : hkeys) {
-                if(!key.startsWith("rmq")) {
-                    System.out.println(key);
-                }
-                //System.out.println(key);
-            }
-            //System.out.println("hkeys:" + JSON.toJson(hkeys));
-            return null;
-        });
-    }
-
-    @Test
     public void testSend() {
 
         while(true) {
