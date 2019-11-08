@@ -11,6 +11,7 @@ import redis.clients.jedis.params.SetParams;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -223,6 +224,29 @@ public class RedisHelperImpl implements RedisHelper {
 	private ExecutableAccessor compiled = (ExecutableAccessor) MVEL.compileExpression(
 			"jedis.set(key, value, \"NX\", \"EX\", expireSecond)");
 
+	// 标识现在是哪个jedis版本, 2.x == 1, 3.x == 2
+	private AtomicInteger jedisVer = new AtomicInteger(0);
+
+	private boolean v2_setStringIfNotExist(Jedis jedis, String key, int expireSecond, String value) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("key", key);
+		params.put("value", value);
+		params.put("expireSecond", expireSecond);
+		params.put("jedis", jedis);
+
+		//String result = jedis.set(key, value, "NX", "EX", expireSecond);
+		Object result = MVEL.executeExpression(compiled, params); // 该方式对性能几乎没有影响
+		return result != null;
+	}
+
+	private boolean v3_setStringIfNotExist(Jedis jedis, String key, int expireSecond, String value) {
+		SetParams setParams = new SetParams();
+		setParams.nx();
+		setParams.ex(expireSecond);
+		String result = jedis.set(key, value, setParams);
+		return result != null;
+	}
+
 	@Override
 	public boolean setStringIfNotExist(String key, int expireSecond, String value) {
 		if(value == null) { // null值不需要设置
@@ -230,23 +254,21 @@ public class RedisHelperImpl implements RedisHelper {
 		}
 		return execute(jedis -> {
 			try {
-
-				try {
-					SetParams setParams = new SetParams();
-					setParams.nx();
-					setParams.ex(expireSecond);
-					String result = jedis.set(key, value, setParams);
-					return result != null;
-				} catch (NoSuchMethodError e) { // 同时兼容2.x和3.x的写法
-					Map<String, Object> params = new HashMap<>();
-					params.put("key", key);
-					params.put("value", value);
-					params.put("expireSecond", expireSecond);
-					params.put("jedis", jedis);
-
-					//String result = jedis.set(key, value, "NX", "EX", expireSecond);
-					Object result = MVEL.executeExpression(compiled, params); // 该方式对性能几乎没有影响
-					return result != null;
+				int _jedisVer = jedisVer.get();
+				if (_jedisVer == 2) {
+					return v3_setStringIfNotExist(jedis, key, expireSecond, value);
+				} else if (_jedisVer == 1) {
+					return v2_setStringIfNotExist(jedis, key, expireSecond, value);
+				} else {
+					try {
+						boolean result = v3_setStringIfNotExist(jedis, key, expireSecond, value);
+						jedisVer.set(2);
+						return result;
+					} catch (NoSuchMethodError e) { // 同时兼容2.x和3.x的写法
+						boolean result = v2_setStringIfNotExist(jedis, key, expireSecond, value);
+						jedisVer.set(1);
+						return result;
+					}
 				}
 			} catch (Exception e) {
 				LOGGER.error("operate jedis error, key:{}, value:{}", key, value, e);
