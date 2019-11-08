@@ -1,6 +1,7 @@
 package com.pugwoo.wooutils.redis;
 
 import com.pugwoo.wooutils.collect.ListUtils;
+import com.pugwoo.wooutils.lang.EqualUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,16 +22,7 @@ public class TestRedisHelper {
 
 	@Test
 	public void test0() {
-
-		System.out.println(redisHelper.isOk());
-
-		//long start = System.currentTimeMillis();
-		//for(int i = 0; i < 10000; i++) {
-			boolean result = redisHelper.setStringIfNotExist("hello11", 3, "112233");
-		System.out.println(result);
-		//}
-		//long end = System.currentTimeMillis();
-		//System.out.println((end - start) + "ms");
+		assert redisHelper.isOk();
 	}
 
 	@Test
@@ -38,7 +30,7 @@ public class TestRedisHelper {
 		String oldKey = UUID.randomUUID().toString();
 		String newKey = UUID.randomUUID().toString();
 		String value = UUID.randomUUID().toString();
-		redisHelper.setString(oldKey, 1000, value);
+		redisHelper.setString(oldKey, 10, value);
 		assert redisHelper.getString(oldKey).equals(value);
 
 		redisHelper.rename(oldKey, newKey);
@@ -47,23 +39,86 @@ public class TestRedisHelper {
 	}
 	
 	@Test
-	public void test1() {
+	public void testBasicGetSet() {
 		String key = "mytest" + UUID.randomUUID().toString();
 		String value = UUID.randomUUID().toString();
-		redisHelper.setString(key, 1000, value);
+		redisHelper.setString(key, 10, value);
 		String value2 = redisHelper.getString(key);
-	    Assert.assertTrue(value.equals(value2));
+	    assert value.equals(value2);
+
+		long expireSecond = redisHelper.getExpireSecond(key);
+		assert expireSecond > 5 && expireSecond <= 10;
+
+		redisHelper.setExpire(key, 20);
+		expireSecond = redisHelper.getExpireSecond(key);
+		assert expireSecond > 15 && expireSecond <= 20;
+	}
+
+	@Test
+	public void testGetSetObject() {
+		Student student = new Student();
+		student.setId(3L);
+		student.setName("nick");
+		student.setBirth(new Date());
+		student.setScore(ListUtils.newArrayList(BigDecimal.ONE,
+				new BigDecimal(99), new BigDecimal("33.333")));
+
+		redisHelper.setObject("just-test000", 10, student);
+		Student student2 = redisHelper.getObject("just-test000", Student.class);
+
+		assert new EqualUtils().isEqual(student, student2);
+
+		List<Student> list = new ArrayList<>();
+		list.add(student);
+		redisHelper.setObject("just-test111", 10, list);
+		List<Student> list2 = redisHelper.getObject("just-test111", List.class, Student.class);
+
+		assert new EqualUtils().isEqual(list, list2);
+
+		Map<Integer, Student> map = new HashMap<>();
+		map.put(1, student);
+		redisHelper.setObject("just-test333", 10, map);
+		Map<Integer, Student> map2 = redisHelper.getObject("just-test333", Map.class, Integer.class, Student.class);
+
+		assert new EqualUtils().isEqual(map, map2);
 	}
 	
 	@Test
-	public void test2() {
+	public void testSetIfNotExist() {
 		String key = "mytest" + UUID.randomUUID().toString();
-		boolean result1 = redisHelper.setStringIfNotExist(key, 60, "you");
-		boolean result2 = redisHelper.setStringIfNotExist(key, 60, "you");
-		boolean result3 = redisHelper.setStringIfNotExist(key, 60, "you");
+		boolean result1 = redisHelper.setStringIfNotExist(key, 60, "you1");
+		boolean result2 = redisHelper.setStringIfNotExist(key, 60, "you2");
+		boolean result3 = redisHelper.setStringIfNotExist(key, 60, "you3");
 		Assert.assertTrue(result1);
 		Assert.assertFalse(result2);
 		Assert.assertFalse(result3);
+
+		assert redisHelper.getString(key).equals("you1");
+	}
+
+	@Test
+	public void testScan() {
+		String prefix = UUID.randomUUID().toString();
+
+		List<String> originKeys = new ArrayList<>();
+		for(int i = 1; i <= 100; i++) {
+			originKeys.add(prefix + "-" + i);
+			redisHelper.setString(prefix + "-" + i, 60, i + "");
+		}
+
+		List<String> redisKeys = new ArrayList<>();
+
+		String lastCursor = null;
+		while(true) {
+			ScanResult<String> keys = redisHelper.getKeys(lastCursor, prefix + "*", 1);
+			redisKeys.addAll(keys.getResult());
+			if(keys.isCompleteIteration()) {
+				break;
+			}
+			lastCursor = keys.getCursor();
+		}
+
+		assert new EqualUtils().ignoreListOrder(true).isEqual(originKeys, redisKeys);
 	}
 	
 	@Test
@@ -73,75 +128,23 @@ public class TestRedisHelper {
 			pipeline.get("hello");
 
 		});
-		for(Object obj : objs) {
-			System.out.println(obj);
-		}
+
+		assert objs.size() == 2;
+		assert objs.get(0).equals("OK");
+		assert objs.get(1).equals("world");
 	}
 	
 	@Test
-	public void test4() {
+	public void testTransaction() {
 		String key = UUID.randomUUID().toString();
 		List<Object> objs = redisHelper.executeTransaction(transaction -> {
 			transaction.set(key, "hello");
 			transaction.get(key);
 		}, key);
-		for(Object obj : objs) {
-			System.out.println(obj);
-		}
+
+		assert objs.size() == 2;
+		assert objs.get(0).equals("OK");
+		assert objs.get(1).equals("hello");
 	}
 
-	@Test
-	public void testScan() {
-        ScanResult<String> keys = redisHelper.getKeys(null, "*", 1);
-        for(String key : keys.getResult()) {
-            System.out.println(key);
-        }
-
-        System.out.println("===================");
-
-        keys = redisHelper.getKeys(keys.getCursor(), "*", 1);
-        for(String key : keys.getResult()) {
-            System.out.println(key);
-        }
-
-    }
-
-    @Test
-    public void test3() {
-        Student student = new Student();
-        student.setId(3L);
-        student.setName("nick");
-        student.setBirth(new Date());
-        student.setScore(ListUtils.newArrayList(BigDecimal.ONE,
-                new BigDecimal(99), new BigDecimal("33.333")));
-        List<Student> list = new ArrayList<>();
-        list.add(student);
-        redisHelper.setObject("just-test111", 1000, list);
-        List<Student> list2 = redisHelper.getObject("just-test111", List.class, Student.class);
-        System.out.println(list2.get(0).getName());
-
-        Map<Integer, Student> map = new HashMap<>();
-        map.put(1, student);
-        redisHelper.setObject("just-test333", 1000, map);
-        Map<Integer, Student> map2 = redisHelper.getObject("just-test333", Map.class, Integer.class, Student.class);
-        System.out.println(map2.get(1).getId());
-    }
-
-
-	public static void main(String[] args) {
-		/*System.out.println(redisHelper.setStringIfNotExist("hi", 60, "you"));
-		System.out.println(redisHelper.setStringIfNotExist("hi", 60, "you"));
-		System.out.println(redisHelper.setStringIfNotExist("hi", 60, "you"));
-		
-		Student student = new Student();
-		student.setId(3L);
-		student.setName("nick");
-		student.setBirth(new Date());
-		student.setScore(ListUtils.newArrayList(BigDecimal.ONE,
-				new BigDecimal(99), new BigDecimal("33.333")));
-		
-		redisHelper.setObject("student", 3600, student);
-		Student fromRedis = redisHelper.getObject("student", Student.class);
-		System.out.println(JSON.toJson(fromRedis));*/
-	}
 }
