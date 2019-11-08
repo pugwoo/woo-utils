@@ -264,7 +264,7 @@ public class RedisHelperImpl implements RedisHelper {
 						boolean result = v3_setStringIfNotExist(jedis, key, expireSecond, value);
 						jedisVer.set(2);
 						return result;
-					} catch (NoSuchMethodError e) { // 同时兼容2.x和3.x的写法
+					} catch (NoSuchMethodError | NoClassDefFoundError e) { // 同时兼容2.x和3.x的写法
 						boolean result = v2_setStringIfNotExist(jedis, key, expireSecond, value);
 						jedisVer.set(1);
 						return result;
