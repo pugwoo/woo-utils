@@ -52,6 +52,16 @@ public class TestRedisHelper {
 		redisHelper.setExpire(key, 20);
 		expireSecond = redisHelper.getExpireSecond(key);
 		assert expireSecond > 15 && expireSecond <= 20;
+
+		List<String> keys = new ArrayList<>();
+		for(int i = 0; i < 10; i++) {
+			String k = UUID.randomUUID().toString();
+			keys.add(k);
+			redisHelper.setString(k, 60, k);
+		}
+
+		List<String> strings = redisHelper.getStrings(keys);
+		assert new EqualUtils().isEqual(keys, strings); // 有顺序的
 	}
 
 	@Test
@@ -81,6 +91,28 @@ public class TestRedisHelper {
 		Map<Integer, Student> map2 = redisHelper.getObject("just-test333", Map.class, Integer.class, Student.class);
 
 		assert new EqualUtils().isEqual(map, map2);
+
+	}
+
+    @Test
+	public void testDelete() {
+		String key = UUID.randomUUID().toString();
+		String value = UUID.randomUUID().toString();
+
+		redisHelper.setString(key, 60, value);
+		assert redisHelper.getString(key).equals(value);
+
+		redisHelper.remove(key);
+		assert redisHelper.getString(key) == null;
+
+		redisHelper.setString(key, 60, value);
+		assert redisHelper.getString(key).equals(value);
+
+		redisHelper.remove(key, "11111"); // 应该删除不掉
+		assert redisHelper.getString(key).equals(value);
+
+		redisHelper.remove(key, value); // 应该删除掉
+		assert redisHelper.getString(key) == null;
 	}
 	
 	@Test
@@ -94,6 +126,21 @@ public class TestRedisHelper {
 		Assert.assertFalse(result3);
 
 		assert redisHelper.getString(key).equals("you1");
+	}
+
+    @Test
+	public void testCAS() {
+		String key = UUID.randomUUID().toString();
+		String value = UUID.randomUUID().toString();
+
+		redisHelper.setString(key, 60, value);
+
+		redisHelper.compareAndSet(key, "111", value, 30);
+
+		assert redisHelper.getString(key).equals("111");
+		assert redisHelper.getExpireSecond(key) > 25 && redisHelper.getExpireSecond(key) <= 30;
+
+		redisHelper.compareAndSet(key, "111", value, null);
 	}
 
 	@Test
