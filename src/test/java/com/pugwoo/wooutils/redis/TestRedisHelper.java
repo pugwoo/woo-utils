@@ -1,34 +1,27 @@
 package com.pugwoo.wooutils.redis;
 
 import com.pugwoo.wooutils.collect.ListUtils;
-import com.pugwoo.wooutils.json.JSON;
-import com.pugwoo.wooutils.redis.impl.JsonRedisObjectConverter;
-import com.pugwoo.wooutils.redis.impl.RedisHelperImpl;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import redis.clients.jedis.ScanResult;
 
 import java.math.BigDecimal;
 import java.util.*;
 
+@ContextConfiguration(locations = {"classpath:applicationContext-context.xml"})
+@RunWith(SpringJUnit4ClassRunner.class)
 public class TestRedisHelper {
 	
-	public static RedisHelper getRedisHelper() {
-		RedisHelperImpl redisHelper = new RedisHelperImpl();
-		redisHelper.setHost("192.168.0.112");
-		redisHelper.setPort(6379);
-		redisHelper.setPassword("devdev");
-		redisHelper.setDatabase(0);
-
-		IRedisObjectConverter redisObjectConverter = new JsonRedisObjectConverter();
-		redisHelper.setRedisObjectConverter(redisObjectConverter);
-		
-		return redisHelper;
-	}
+    @Autowired
+	private  RedisHelper redisHelper;
 
 	@Test
 	public void test0() {
-		RedisHelper redisHelper = getRedisHelper();
+
 		System.out.println(redisHelper.isOk());
 
 		//long start = System.currentTimeMillis();
@@ -42,7 +35,6 @@ public class TestRedisHelper {
 
 	@Test
 	public void testRename() {
-		RedisHelper redisHelper = getRedisHelper();
 		String oldKey = UUID.randomUUID().toString();
 		String newKey = UUID.randomUUID().toString();
 		String value = UUID.randomUUID().toString();
@@ -56,7 +48,6 @@ public class TestRedisHelper {
 	
 	@Test
 	public void test1() {
-		RedisHelper redisHelper = getRedisHelper();
 		String key = "mytest" + UUID.randomUUID().toString();
 		String value = UUID.randomUUID().toString();
 		redisHelper.setString(key, 1000, value);
@@ -66,7 +57,6 @@ public class TestRedisHelper {
 	
 	@Test
 	public void test2() {
-		RedisHelper redisHelper = getRedisHelper();
 		String key = "mytest" + UUID.randomUUID().toString();
 		boolean result1 = redisHelper.setStringIfNotExist(key, 60, "you");
 		boolean result2 = redisHelper.setStringIfNotExist(key, 60, "you");
@@ -78,7 +68,6 @@ public class TestRedisHelper {
 	
 	@Test
 	public void testPipeline() {
-		RedisHelper redisHelper = getRedisHelper();
 		List<Object> objs = redisHelper.executePipeline(pipeline -> {
 			pipeline.set("hello", "world");
 			pipeline.get("hello");
@@ -91,7 +80,6 @@ public class TestRedisHelper {
 	
 	@Test
 	public void test4() {
-		RedisHelper redisHelper = getRedisHelper();
 		String key = UUID.randomUUID().toString();
 		List<Object> objs = redisHelper.executeTransaction(transaction -> {
 			transaction.set(key, "hello");
@@ -104,7 +92,6 @@ public class TestRedisHelper {
 
 	@Test
 	public void testScan() {
-	    RedisHelper redisHelper = getRedisHelper();
         ScanResult<String> keys = redisHelper.getKeys(null, "*", 1);
         for(String key : keys.getResult()) {
             System.out.println(key);
@@ -121,7 +108,6 @@ public class TestRedisHelper {
 
     @Test
     public void test3() {
-        RedisHelper redisHelper = getRedisHelper();
         Student student = new Student();
         student.setId(3L);
         student.setName("nick");
@@ -143,8 +129,7 @@ public class TestRedisHelper {
 
 
 	public static void main(String[] args) {
-		RedisHelper redisHelper = getRedisHelper();
-		System.out.println(redisHelper.setStringIfNotExist("hi", 60, "you"));
+		/*System.out.println(redisHelper.setStringIfNotExist("hi", 60, "you"));
 		System.out.println(redisHelper.setStringIfNotExist("hi", 60, "you"));
 		System.out.println(redisHelper.setStringIfNotExist("hi", 60, "you"));
 		
@@ -157,6 +142,6 @@ public class TestRedisHelper {
 		
 		redisHelper.setObject("student", 3600, student);
 		Student fromRedis = redisHelper.getObject("student", Student.class);
-		System.out.println(JSON.toJson(fromRedis));
+		System.out.println(JSON.toJson(fromRedis));*/
 	}
 }

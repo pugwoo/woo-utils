@@ -1,5 +1,11 @@
 package com.pugwoo.wooutils.redis;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
 import java.util.List;
 import java.util.Vector;
 
@@ -16,32 +22,37 @@ import java.util.Vector;
  * @author NICK
  *
  */
+@ContextConfiguration(locations = {"classpath:applicationContext-context.xml"})
+@RunWith(SpringJUnit4ClassRunner.class)
 public class AutoIncrementIdBenchmark {
 
-	public static void main(String[] args) throws Exception {
-        final List<Long> ids = new Vector<Long>();
-        long start = System.currentTimeMillis();
-        int concurrents = 1000; // 并发数
-        for(int i = 0; i < concurrents; i++) {
-        	Thread thread = new Thread(new Runnable() {
+	@Autowired
+	private  RedisHelper redisHelper;
+
+	@Test
+	public void test() throws Exception {
+		final List<Long> ids = new Vector<Long>();
+		long start = System.currentTimeMillis();
+		int concurrents = 1000; // 并发数
+		for(int i = 0; i < concurrents; i++) {
+			Thread thread = new Thread(new Runnable() {
 				@Override
-				public void run() {			        
-			        RedisHelper redisHelper = TestRedisHelper.getRedisHelper();
-			        while(true) {
+				public void run() {
+					while(true) {
 						Long id = redisHelper.getAutoIncrementId("ORDER");
 						ids.add(id);
-			        }
+					}
 				}
 			});
-        	thread.setDaemon(true);
-        	thread.start();
-        }
-        
-        Thread.sleep(60000); // 测试将持续60秒
-        long end = System.currentTimeMillis();
-        
-        System.out.println("并发数:" + concurrents +
-        		",QPS:" + (int)((ids.size() * 1000.0 / (end - start))));
+			thread.setDaemon(true);
+			thread.start();
+		}
+
+		Thread.sleep(60000); // 测试将持续60秒
+		long end = System.currentTimeMillis();
+
+		System.out.println("并发数:" + concurrents +
+				",QPS:" + (int)((ids.size() * 1000.0 / (end - start))));
 	}
-	
+
 }
