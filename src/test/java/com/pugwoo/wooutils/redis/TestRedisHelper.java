@@ -2,7 +2,6 @@ package com.pugwoo.wooutils.redis;
 
 import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.lang.EqualUtils;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,9 +120,9 @@ public class TestRedisHelper {
 		boolean result1 = redisHelper.setStringIfNotExist(key, 60, "you1");
 		boolean result2 = redisHelper.setStringIfNotExist(key, 60, "you2");
 		boolean result3 = redisHelper.setStringIfNotExist(key, 60, "you3");
-		Assert.assertTrue(result1);
-		Assert.assertFalse(result2);
-		Assert.assertFalse(result3);
+		assert result1;
+		assert !result2;
+		assert !result3;
 
 		assert redisHelper.getString(key).equals("you1");
 	}
