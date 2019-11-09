@@ -34,6 +34,7 @@
 	    <dependency>
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
+            <!-- 支持2.9.x 2.10.x 3.0.x 3.1.x 及以上版本 -->
 		</dependency>
 ```
 
