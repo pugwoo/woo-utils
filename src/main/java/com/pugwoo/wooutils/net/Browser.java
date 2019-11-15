@@ -39,10 +39,10 @@ public class Browser {
 	}
 		
 	/**cookie, domain(域根目录) -> key/value*/
-	private Map<String, Map<String, String>> cookies = new HashMap<String, Map<String,String>>();
+	private Map<String, Map<String, String>> cookies = new HashMap<>();
 	
 	/**请求时的头部*/
-	private Map<String, String> requestProperty = new HashMap<String, String>();
+	private Map<String, String> requestProperty = new HashMap<>();
 
 	/** 默认浏览器userAgent: Chrome Win10*/
 	private String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.26 Safari/537.36 Core/1.63.6823.400";
@@ -514,24 +514,26 @@ public class Browser {
 		urlConnection.setRequestProperty("Referer", httpUrl);
 		
 		// 设置cookie
-		String host = NetUtils.getUrlHostname(httpUrl);
-		StringBuilder cookieSb = new StringBuilder();
-		boolean needAppendAnd = false;
-		for(Entry<String, Map<String, String>> entry : cookies.entrySet()) {
-			if(host.endsWith(entry.getKey())) {
-				for(Entry<String, String> cookie : entry.getValue().entrySet()) {
-					if(needAppendAnd) {
-						cookieSb.append("; ");
+		if(!cookies.isEmpty()) {
+			String host = NetUtils.getUrlHostname(httpUrl);
+			StringBuilder cookieSb = new StringBuilder();
+			boolean needAppendAnd = false;
+			for(Entry<String, Map<String, String>> entry : cookies.entrySet()) {
+				if(host.endsWith(entry.getKey())) {
+					for(Entry<String, String> cookie : entry.getValue().entrySet()) {
+						if(needAppendAnd) {
+							cookieSb.append("; ");
+						}
+						cookieSb.append(cookie.getKey());
+						cookieSb.append("=");
+						cookieSb.append(cookie.getValue());
+						needAppendAnd = true;
 					}
-					cookieSb.append(cookie.getKey());
-					cookieSb.append("=");
-					cookieSb.append(cookie.getValue());
-					needAppendAnd = true;
 				}
 			}
+			urlConnection.setRequestProperty("Cookie", cookieSb.toString());
 		}
-		urlConnection.setRequestProperty("Cookie", cookieSb.toString());
-		
+
 		// 设置用户自定义RequestProperty
 		for(Entry<String, String> entry : requestProperty.entrySet()) {
 			urlConnection.setRequestProperty(entry.getKey(), entry.getValue());

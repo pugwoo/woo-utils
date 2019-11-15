@@ -1,5 +1,6 @@
 package com.pugwoo.wooutils.net;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pugwoo.wooutils.string.StringTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,16 +28,18 @@ public class HttpResponse {
 	/**
 	 * HTTP头部
 	 */
-	private Map<String, List<String>> headers = new LinkedHashMap<String, List<String>>();
+	private Map<String, List<String>> headers = new LinkedHashMap<>();
 
 	/**
 	 * HTTP正文
 	 */
+	@JsonIgnore
 	private byte[] contentBytes;
 	
 	/**
 	 * 异步下载的future
 	 */
+	@JsonIgnore
 	private Browser.HttpResponseFuture future;
 	
 	/**
@@ -70,6 +73,7 @@ public class HttpResponse {
 	 * 获取下载是否已经完成，针对异步下载而言
 	 * @return
 	 */
+	@JsonIgnore
 	public boolean isDownloadFinished() {
 		if(future == null) {
 			return true;
