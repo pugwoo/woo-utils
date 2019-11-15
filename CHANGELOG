@@ -1,4 +1,4 @@
-v0.8.3 - [improve] jsonIgnore HttpResponseFuture contentBytes, 优化Browser处理cookie性能
+v0.8.3 - [improve] jsonIgnore HttpResponseFuture contentBytes, 优化Browser处理cookie性能，使用线程池代替new Thread
 
 2019年11月9日
 v0.8.2 - [add] 增加LocalDate LocalTime LocalDateTime的封装

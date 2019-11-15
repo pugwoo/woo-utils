@@ -1,6 +1,7 @@
 package com.pugwoo.wooutils.net;
 
 import com.pugwoo.wooutils.json.JSON;
+import com.pugwoo.wooutils.task.ExecuteThem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,8 @@ import java.util.Map.Entry;
 public class Browser {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(Browser.class);
+
+	private static final ExecuteThem EXECUTE_THEM = new ExecuteThem(10); // 异步下载共用线程池
 	
 	public static class HttpResponseFuture {
 		/**已经下载的字节数*/
@@ -592,7 +595,8 @@ public class Browser {
 			if(isAsync) {
 				final HttpResponseFuture future = new HttpResponseFuture();
 				httpResponse.setFuture(future);
-				new Thread(new Runnable() {
+
+				EXECUTE_THEM.add(new Runnable() {
 					@Override
 					public void run() {
 						byte[] buf = new byte[4096];
@@ -613,7 +617,8 @@ public class Browser {
 							}
 						}
 					}
-				}).start();
+				});
+
 			} else {
 				try {
 					while((len = in.read(buf)) != -1) {
