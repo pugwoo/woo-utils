@@ -29,6 +29,9 @@ import java.util.Map.Entry;
  * @author pugwoo@gmail.com
  */
 public class Browser {
+
+	/** mock 浏览器userAgent: Chrome Win10*/
+	public static final String WIN_CHROME_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.1.7845.22 Safari/537.36 Core/1.72.5673.400";
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(Browser.class);
 
@@ -47,8 +50,7 @@ public class Browser {
 	/**请求时的头部*/
 	private Map<String, String> requestProperty = new HashMap<>();
 
-	/** 默认浏览器userAgent: Chrome Win10*/
-	private String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.26 Safari/537.36 Core/1.63.6823.400";
+	private String USER_AGENT = "java";
 
 	public void setUserAgent(String userAgent) {
 		this.USER_AGENT = userAgent;
@@ -514,8 +516,7 @@ public class Browser {
 		urlConnection.setReadTimeout(readTimeoutSeconds * 1000);
 		urlConnection.setRequestMethod(method);
 		urlConnection.setRequestProperty("User-agent", USER_AGENT);
-		urlConnection.setRequestProperty("Referer", httpUrl);
-		
+
 		// 设置cookie
 		if(!cookies.isEmpty()) {
 			String host = NetUtils.getUrlHostname(httpUrl);
