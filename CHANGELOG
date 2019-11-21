@@ -1,3 +1,5 @@
+v0.8.4 - [add] ListUtils增加交、并、差集的扩展功能：可以指定以哪个字段进行判断equals、支持多个list进行交和并集计算
+
 2019年11月21日
 v0.8.3 - [improve] Browser忽略json: HttpResponseFuture/contentBytes, 优化Browser处理cookie性能，使用线程池代替new Thread；默认去掉Referer的header，默认user-agent改成java，提供一个WIN_CHROME_AGENT
        - [add] 增加StringTools的join方法

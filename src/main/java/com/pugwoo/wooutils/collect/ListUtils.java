@@ -231,18 +231,41 @@ public class ListUtils {
 	}
 
 	/**
-	 * list并集，返回List a或List b有的值，去重，不保证顺序。
-	 * 算法时间复杂度:O(n)，空间复杂度O(n)
+	 * list并集，返回lists中有的值，去重，不保证顺序。
+	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
 	 */
-	public static <E> List<E> union(List<E> a, List<E> b) {
+	public static <E> List<E> union(List<E>... lists) {
 		Set<E> result = new HashSet<>();
-		if(a != null) {
-			result.addAll(a);
-		}
-		if(b != null) {
-			result.addAll(b);
+		for(List<E> list : lists) {
+			if(list != null) {
+				result.addAll(list);
+			}
 		}
 		return new ArrayList<>(result);
+	}
+
+	/**
+	 * list并集，返回lists中有的值，去重，不保证顺序。
+	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
+	 * @param mapper 实际上是以lamda表达式返回的值进行去重的
+	 */
+	public static <E, R extends Comparable<?>> List<E> union(
+			Function<? super E, ? extends R> mapper, List<E>... lists) {
+		Set<R> dup = new HashSet<>();
+		List<E> result = new ArrayList<>();
+
+		for(List<E> list : lists) {
+			if(list == null) {continue;}
+			for(E e : list) {
+				R dupId = mapper.apply(e);
+				if(!dup.contains(dupId)) {
+					dup.add(dupId);
+					result.add(e);
+				}
+			}
+		}
+
+		return result;
 	}
 	
 	/**
