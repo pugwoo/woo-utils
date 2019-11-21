@@ -220,9 +220,21 @@ public class ListUtils {
 
 	/**
 	 * list交集，返回List a和List b中都有的值，去重，不保证顺序。
-	 * 算法时间复杂度:O(n)，空间复杂度O(n)
+	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
 	 */
-	public static <E> List<E> intersection(List<E> a, List<E> b) {
+	public static <E> List<E> intersection(List<E>... lists) {
+
+		if(lists == null) {return new ArrayList<>();}
+		if(lists.length == 1) {return lists[0] != null ? lists[0] : new ArrayList<>();}
+
+		List<E> last = _intersection(lists[0], lists[1]);
+		for(int i = 2; i < lists.length; i++) {
+			last = _intersection(last, lists[i]);
+		}
+		return last;
+	}
+
+	private static <E> List<E> _intersection(List<E> a, List<E> b) {
 		if(a == null || b == null || a.isEmpty() || b.isEmpty()) {
 			return new ArrayList<>();
 		}
@@ -231,10 +243,45 @@ public class ListUtils {
 	}
 
 	/**
+	 * list交集，返回List a和List b中都有的值，去重，不保证顺序。
+	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
+	 * @param mapper 实际上是以lamda表达式返回的值进行去重的
+	 */
+	public static <E, R extends Comparable<?>> List<E> intersection(
+			Function<? super E, ? extends R> mapper, List<E>... lists) {
+
+		if(lists == null) {return new ArrayList<>();}
+		if(lists.length == 1) {return lists[0] != null ? lists[0] : new ArrayList<>();}
+
+		List<E> last = _intersection(mapper, lists[0], lists[1]);
+		for(int i = 2; i < lists.length; i++) {
+			last = _intersection(mapper, last, lists[i]);
+		}
+		return last;
+	}
+
+	private static <E, R extends Comparable<?>> List<E> _intersection(
+			Function<? super E, ? extends R> mapper, List<E> a, List<E> b) {
+		if(a == null || b == null || a.isEmpty() || b.isEmpty()) {
+			return new ArrayList<>();
+		}
+
+		Set<R> set = new HashSet<>();
+		for(E e : b) {
+			set.add(mapper.apply(e));
+		}
+		return filter(a, o -> set.contains(mapper.apply(o)));
+	}
+
+	/**
 	 * list并集，返回lists中有的值，去重，不保证顺序。
 	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
 	 */
 	public static <E> List<E> union(List<E>... lists) {
+
+		if(lists == null) {return new ArrayList<>();}
+		if(lists.length == 1) {return lists[0] != null ? lists[0] : new ArrayList<>();}
+
 		Set<E> result = new HashSet<>();
 		for(List<E> list : lists) {
 			if(list != null) {
@@ -251,6 +298,10 @@ public class ListUtils {
 	 */
 	public static <E, R extends Comparable<?>> List<E> union(
 			Function<? super E, ? extends R> mapper, List<E>... lists) {
+
+		if(lists == null) {return new ArrayList<>();}
+		if(lists.length == 1) {return lists[0] != null ? lists[0] : new ArrayList<>();}
+
 		Set<R> dup = new HashSet<>();
 		List<E> result = new ArrayList<>();
 
