@@ -1,5 +1,6 @@
 package com.pugwoo.wooutils.string;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
@@ -99,7 +100,42 @@ public class StringTools {
 		}
 		return sb.toString();
 	}
-	
+
+	/**
+	 * 将list的元素的toString 用分隔符splitLetter连起来。<br>
+	 * 如果list中元素等于null或者toString为null或空字符串，则不加入。<br>
+	 *
+	 * 示例：输入list=[1,2,3],splitLetter=;，则输出1;2;3
+	 *
+	 * @param splitLetter
+	 * @param list
+	 * @return 不会返回null
+	 */
+	public static String join(List<Object> list, String splitLetter) {
+		if (list == null || list.isEmpty()) {
+			return "";
+		}
+		StringBuilder sb = new StringBuilder();
+		boolean isEmpty = true;
+		for(int i = 0; i < list.size(); i++) {
+			Object obj = list.get(i);
+			if(obj == null) {
+				continue;
+			}
+			String objStr = obj.toString();
+			if(isEmpty(objStr)) {
+				continue;
+			}
+
+			if(!isEmpty) {
+				sb.append(splitLetter);
+			}
+			sb.append(objStr);
+			isEmpty = false;
+		}
+		return sb.toString();
+	}
+
 	/**
 	 * 将字符串str拆分成一行一个字符串
 	 * @param str
