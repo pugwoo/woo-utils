@@ -1,3 +1,5 @@
+v0.8.5 - [improve] StringTools的join方法入参由List<Object>改成List<?>
+
 2019年11月21日
 v0.8.4 - [add] ListUtils增加交、并、差集的扩展功能：可以指定以哪个字段进行判断equals、支持多个list进行交和并集计算
 

@@ -111,7 +111,7 @@ public class StringTools {
 	 * @param list
 	 * @return 不会返回null
 	 */
-	public static String join(List<Object> list, String splitLetter) {
+	public static String join(List<?> list, String splitLetter) {
 		if (list == null || list.isEmpty()) {
 			return "";
 		}
