@@ -370,7 +370,7 @@ public class Browser {
 		        
 				return makeHttpResponse(httpUrl, urlConnection, outputStream, isAsync);
 			} catch (IOException e) {
-				LOGGER.error("post url:{} exception", httpUrl, e);
+				LOGGER.error("post url:{} exception msg:{}", httpUrl, e.getMessage());
 				ie = e;
 			}
 		}
@@ -488,7 +488,7 @@ public class Browser {
 
 				return makeHttpResponse(httpUrl, urlConnection, outputStream, isAsync);
 			} catch (IOException e) {
-				LOGGER.error("get url:{} error", httpUrl, e);
+				LOGGER.error("get url:{} error msg:{}", httpUrl, e.getMessage());
 				ie = e;
 			}
 		}
