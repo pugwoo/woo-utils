@@ -3,6 +3,7 @@ package com.pugwoo.wooutils.task;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 2015年7月23日 14:34:51
@@ -31,15 +32,24 @@ public class ExecuteThem {
 	private List<Exception> exceptions = new ArrayList<>();
 
 	public ExecuteThem() {
-		executorService = Executors.newFixedThreadPool(10);
+		executorService = Executors.newFixedThreadPool(10,
+				new MyThreadFactory("exec-them"));
 	}
 
     /**
-     * 指定线程池最大线程数
-     * @param nThreads
+     * @param nThreads 指定线程池最大线程数
      */
 	public ExecuteThem(int nThreads) {
 		executorService = Executors.newFixedThreadPool(nThreads);
+	}
+
+	/**
+	 * @param nThreads 指定线程池最大线程数
+	 * @param threadNamePrefix 线程池的前缀
+	 */
+	public ExecuteThem(int nThreads, String threadNamePrefix) {
+		executorService = Executors.newFixedThreadPool(nThreads,
+				new MyThreadFactory(threadNamePrefix));
 	}
 
 	public void add(Runnable... runnables) {
@@ -91,5 +101,23 @@ public class ExecuteThem {
 		}
 		
 		return results;
+	}
+
+
+	private static class MyThreadFactory implements ThreadFactory {
+
+		private AtomicInteger count = new AtomicInteger(1);
+
+		private String threadNamePrefix;
+
+		public MyThreadFactory(String threadNamePrefix) {
+			this.threadNamePrefix = threadNamePrefix;
+		}
+
+		@Override
+		public Thread newThread(Runnable r) {
+			return new Thread(r, threadNamePrefix + "-" + count.getAndIncrement());
+		}
+
 	}
 }
