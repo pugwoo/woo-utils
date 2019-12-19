@@ -1,3 +1,4 @@
+2019年12月19日
 v0.8.5 - [improve] StringTools的join方法入参由List<Object>改成List<?>
        - [add] ExecuteThem线程池支持设定线程名称
        - [add] DateUtils支持时间戳的解析日期
