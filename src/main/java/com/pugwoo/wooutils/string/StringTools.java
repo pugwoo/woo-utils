@@ -20,14 +20,14 @@ public class StringTools {
 	
 	public static boolean isBlank(String str) {
         if(isEmpty(str)) return true;
-        for (int i = 0; i < str.length(); i++) {
-            if (!Character.isWhitespace(str.charAt(i))) {
-                return false;
-            }
-        }
+        for(char c : str.toCharArray()) {
+			if (!Character.isWhitespace(c)) {
+				return false;
+			}
+		}
         return true;
 	}
-	
+
 	public static boolean isNotBlank(String str) {
 		return !isBlank(str);
 	}
@@ -162,20 +162,34 @@ public class StringTools {
 	
 	/**
 	 * 判定字符串是否只包含英文字母(不区分大小写)或数字
-	 * @param str 不能为null
-	 * @return 空字符串时返回true
+	 * @param str
+	 * @return str为null或空字符串返回false
 	 */
-    public static boolean isEnglishLetterOrNumeric(String str) {
-    	int length = str.length();
-    	for(int i = 0; i < length; i++) {
-    		char c = str.charAt(i);
-    		if(!(c>='a' && c<='z' || c>='A' && c<='Z' || c>='0' && c<='9')) {
-    			return false;
-    		}
-    	}
-    	return true;
+    public static boolean isAlphabeticOrDigit(String str) {
+		if(str == null || str.isEmpty()) {return false;}
+		for(char c : str.toCharArray()) {
+			if(!(Character.isDigit(c) || Character.isAlphabetic(c))) {
+				return false;
+			}
+		}
+		return true;
     }
-	
+
+	/**
+	 * 判断str是否全为数字，不包括+-.
+	 * @param str
+	 * @return str为null或空字符串返回false
+	 */
+	public static boolean isDigit(String str) {
+    	if(str == null || str.isEmpty()) {return false;}
+		for(char c : str.toCharArray()) {
+			if(!Character.isDigit(c)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
     /**
      * 数字转换成中文大写钱币，精确到分，四舍五入；最大9万亿9。
      */

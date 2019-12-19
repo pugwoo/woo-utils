@@ -9,6 +9,23 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ListUtils {
+
+	/**
+	 * 将数组转换成list，不同于Arrays.asList(array)，这个方法返回的数组可以对其进行修改操作
+	 * @param array
+	 * @param <T>
+	 * @return
+	 */
+	public static <T> List<T> toList(T[] array) {
+		if(array == null || array.length == 0) {
+			return new ArrayList<>();
+		}
+		List<T> list = new ArrayList<>(array.length);
+		for(T t : array) {
+			list.add(t);
+		}
+		return list;
+	}
 	
 	/**
 	 * 排序，正序，null值在末尾

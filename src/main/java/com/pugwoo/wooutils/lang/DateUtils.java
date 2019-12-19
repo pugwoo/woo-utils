@@ -1,5 +1,6 @@
 package com.pugwoo.wooutils.lang;
 
+import com.pugwoo.wooutils.string.StringTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,6 +84,13 @@ public class DateUtils {
 		}
 		String pattern = determineDateFormat(date);
 		if(pattern == null) {
+
+			// 检查是否是时间戳
+			Date _date = tryParseTimestamp(date);
+			if(_date != null) {
+				return _date;
+			}
+
 			LOGGER.error("date parse, pattern not support, date:{}", date);
 			return null;
 		}
@@ -91,6 +99,23 @@ public class DateUtils {
 		} catch (ParseException e) {
 			LOGGER.error("parse date error, date:{}", date, e);
 			return null;
+		}
+	}
+
+	private static Date tryParseTimestamp(String date) {
+		if (!StringTools.isDigit(date)) {
+			return null;
+		}
+		Long timestamp = NumberUtils.parseLong(date);
+		if (timestamp == null) {
+			return null;
+		}
+
+		// 时间戳小于42亿则认为是秒，否则是毫秒
+		if(timestamp < 4200000000L) {
+			return new Date(timestamp * 1000L);
+		} else {
+			return new Date(timestamp);
 		}
 	}
 
@@ -157,6 +182,13 @@ public class DateUtils {
 
 		String pattern = determineDateFormat(date);
 		if(pattern == null) {
+
+			// 检查是否是时间戳
+			Date _date = tryParseTimestamp(date);
+			if(_date != null) {
+				return _date;
+			}
+
 			throw new ParseException("Unparseable date: \"" + date +
 					"\". Supported formats: " + DATE_FORMAT_REGEXPS.values(), -1);
 		}
