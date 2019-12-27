@@ -1,5 +1,6 @@
 package com.pugwoo.wooutils.net;
 
+import com.pugwoo.wooutils.io.IOUtils;
 import com.pugwoo.wooutils.json.JSON;
 import com.pugwoo.wooutils.task.ExecuteThem;
 import org.slf4j.Logger;
@@ -347,8 +348,9 @@ public class Browser {
 			boolean isAsync, Map<String, String> requestHeader) throws IOException {
 		IOException ie = null;
 		for(int i = -1; i < postRetryTimes; i++) { // 0表示不重试，即只请求1次
+			HttpURLConnection urlConnection = null;
 			try {
-				HttpURLConnection urlConnection = getUrlConnection(httpUrl, "POST");
+				urlConnection = getUrlConnection(httpUrl, "POST");
 				if(requestHeader != null) {
 					for(Entry<String, String> entry : requestHeader.entrySet()) {
 						urlConnection.setRequestProperty(entry.getKey(), entry.getValue());
@@ -372,6 +374,14 @@ public class Browser {
 			} catch (IOException e) {
 				LOGGER.error("post url:{} exception msg:{}", httpUrl, e.getMessage());
 				ie = e;
+			} finally {
+				try {
+					if (urlConnection != null){
+						urlConnection.disconnect();
+					}
+				} catch (Exception e) {
+					LOGGER.error("disconnect urlConnection fail", e);
+				}
 			}
 		}
 		throw ie;
@@ -472,9 +482,10 @@ public class Browser {
 		httpUrl = appendParamToUrl(httpUrl, params);
 		IOException ie = null;
 		for(int i = -1; i < getRetryTimes; i++) { // 0表示不重试，即只请求1次
+			HttpURLConnection urlConnection = null;
 			try {
-				HttpURLConnection urlConnection = getUrlConnection(httpUrl, "GET");
-				
+				urlConnection = getUrlConnection(httpUrl, "GET");
+
 				// 301 302 跳转处理
 				int responseCode = urlConnection.getResponseCode();
 				if(responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
@@ -490,6 +501,14 @@ public class Browser {
 			} catch (IOException e) {
 				LOGGER.error("get url:{} error msg:{}", httpUrl, e.getMessage());
 				ie = e;
+			} finally {
+				try {
+					if (urlConnection != null){
+						urlConnection.disconnect();
+					}
+				} catch (Exception e) {
+					LOGGER.error("disconnect urlConnection fail", e);
+				}
 			}
 		}
 		throw ie;
@@ -559,10 +578,12 @@ public class Browser {
 		HttpResponse httpResponse = new HttpResponse();
 		httpResponse.setCharset(charset);
 		httpResponse.setResponseCode(urlConnection.getResponseCode());
-		httpResponse.setHeaders(urlConnection.getHeaderFields());
+
+		Map<String, List<String>> headerFields = urlConnection.getHeaderFields();
+		httpResponse.setHeaders(headerFields);
 		
 		// 处理cookie
-		List<String> setCookies = urlConnection.getHeaderFields().get("Set-Cookie");
+		List<String> setCookies = headerFields.get("Set-Cookie");
 		if(setCookies != null && !setCookies.isEmpty()) {
 			for(int i = setCookies.size() - 1; i >=0; i--) {
 				String key = null, value = null, domain = ""; 
@@ -611,11 +632,8 @@ public class Browser {
 						} catch (IOException e) {
 							LOGGER.error("outputStream write error", e);
 						} finally {
-							try {
-								outputStream.close();
-							} catch (IOException e) {
-								LOGGER.error("outputStrema close error", e);
-							}
+							IOUtils.close(outputStream);
+							IOUtils.close(in);
 						}
 					}
 				});
@@ -626,19 +644,20 @@ public class Browser {
 						outputStream.write(buf, 0, len);
 					}
 				} finally {
-					try {
-						outputStream.close();
-					} catch (IOException e) {
-						LOGGER.error("outputStrema close error", e);
-					}
+					IOUtils.close(outputStream);
+					IOUtils.close(in);
 				}
 			}
 		} else {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			while((len = in.read(buf)) != -1) {
-				baos.write(buf, 0, len);
+			try {
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				while((len = in.read(buf)) != -1) {
+					baos.write(buf, 0, len);
+				}
+				httpResponse.setContentBytes(baos.toByteArray());
+			} finally {
+				IOUtils.close(in);
 			}
-			httpResponse.setContentBytes(baos.toByteArray());
 		}
 		
 		return httpResponse;

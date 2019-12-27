@@ -2,6 +2,8 @@ package com.pugwoo.wooutils.io;
 
 import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.string.RegexUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -15,6 +17,8 @@ import java.util.regex.Pattern;
  * @author nick
  */
 public class IOUtils {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(IOUtils.class);
 
 	/**
 	 * 从inputstream读取字节并输出到to中
@@ -120,6 +124,21 @@ public class IOUtils {
 		PipedInputStream inputStream = new PipedInputStream();
 		PipedOutputStream outputStream = new PipedOutputStream(inputStream);
 		return new MyPipe(inputStream, outputStream);
+	}
+
+	/**
+	 * 关闭资源，不会抛出异常
+	 * @param closeable
+	 */
+	public static void close(Closeable closeable) {
+		if(closeable == null) {
+			return;
+		}
+		try {
+			closeable.close();
+		} catch (Exception e) {
+			LOGGER.error("close resource fail", e);
+		}
 	}
 
 
