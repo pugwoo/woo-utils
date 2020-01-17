@@ -388,12 +388,14 @@ public class Browser {
 				LOGGER.error("post url:{} exception msg:{}", httpUrl, e.getMessage());
 				ie = e;
 			} finally {
-				try {
-					if (urlConnection != null){
-						urlConnection.disconnect();
+				if(!isAsync) { // 只有同步才关闭
+					try {
+						if (urlConnection != null){
+							urlConnection.disconnect();
+						}
+					} catch (Exception e) {
+						LOGGER.error("disconnect urlConnection fail", e);
 					}
-				} catch (Exception e) {
-					LOGGER.error("disconnect urlConnection fail", e);
 				}
 			}
 		}
@@ -411,8 +413,8 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse get(String httpUrl) throws IOException {
-		return get(httpUrl, null, null);
+	public HttpResponse _get(String httpUrl) throws IOException {
+		return _get(httpUrl, null, null);
 	}
 
 	/**
@@ -424,8 +426,8 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse get(String httpUrl, OutputStream outputStream) throws IOException {
-		return get(httpUrl, null, outputStream);
+	public HttpResponse _get(String httpUrl, OutputStream outputStream) throws IOException {
+		return _get(httpUrl, null, outputStream);
 	}
 	
 	/**
@@ -449,8 +451,8 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse get(String httpUrl, Map<String, Object> params) throws IOException {
-		return get(httpUrl, params, null, false);
+	public HttpResponse _get(String httpUrl, Map<String, Object> params) throws IOException {
+		return _get(httpUrl, params, null, false);
 	}
 	
 	/**
@@ -462,9 +464,9 @@ public class Browser {
 	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @return
 	 */
-	public HttpResponse get(String httpUrl, Map<String, Object> params, OutputStream outputStream) 
+	public HttpResponse _get(String httpUrl, Map<String, Object> params, OutputStream outputStream)
 	        throws IOException {
-		return get(httpUrl, params, outputStream, false);
+		return _get(httpUrl, params, outputStream, false);
 	}
 	
 	/**
@@ -478,7 +480,7 @@ public class Browser {
 	 */
 	public HttpResponse getAsync(String httpUrl, Map<String, Object> params, OutputStream outputStream) 
 	        throws IOException {
-		return get(httpUrl, params, outputStream, true);
+		return _get(httpUrl, params, outputStream, true);
 	}
 	
 	/**
@@ -490,8 +492,8 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	private HttpResponse get(String httpUrl, Map<String, Object> params, OutputStream outputStream,
-			boolean isAsync) throws IOException {
+	private HttpResponse _get(String httpUrl, Map<String, Object> params, OutputStream outputStream,
+							  boolean isAsync) throws IOException {
 		httpUrl = appendParamToUrl(httpUrl, params);
 		IOException ie = null;
 		for(int i = -1; i < getRetryTimes; i++) { // 0表示不重试，即只请求1次
@@ -511,7 +513,7 @@ public class Browser {
 								// 跳转之前处理cookie
 								handleCookies(urlConnection.getHeaderFields());
 
-								return get(location.get(0), params, outputStream, isAsync);
+								return _get(location.get(0), params, outputStream, isAsync);
 							}
 						}
 					}
@@ -522,12 +524,14 @@ public class Browser {
 				LOGGER.error("get url:{} error msg:{}", httpUrl, e.getMessage());
 				ie = e;
 			} finally {
-				try {
-					if (urlConnection != null){
-						urlConnection.disconnect();
+				if(!isAsync) { // 只有同步才关闭
+					try {
+						if (urlConnection != null){
+							urlConnection.disconnect();
+						}
+					} catch (Exception e) {
+						LOGGER.error("disconnect urlConnection fail", e);
 					}
-				} catch (Exception e) {
-					LOGGER.error("disconnect urlConnection fail", e);
 				}
 			}
 		}
@@ -662,6 +666,11 @@ public class Browser {
 						} finally {
 							IOUtils.close(outputStream);
 							IOUtils.close(in);
+							try {
+								urlConnection.disconnect();
+							} catch (Exception e) {
+								LOGGER.error("disconnect urlConnection fail", e);
+							}
 						}
 					}
 				});
