@@ -48,14 +48,15 @@ public class TestBrowser {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		OutputStream out = new FileOutputStream("d:/a.pdf");
-		HttpResponse resp = new Browser().getAsync("http://mirrors.163.com/centos/7/isos/x86_64/CentOS-7-x86_64-DVD-1611.iso",
+		OutputStream out = new FileOutputStream("g:/a.iso");
+		HttpResponse resp = new Browser().getAsync("http://mirrors.163.com/centos/7/isos/x86_64/CentOS-7-x86_64-NetInstall-1908.iso",
 				out);
 		while(!resp.isDownloadFinished()) {
 			System.out.println(resp.getDownloadedBytes());
 			Thread.sleep(100);
 		}
-		
+
+		if(true) System.exit(0);
 		/////////////////////////// 把远程的下载转输的outputStream出到下载的InputStream，使用pipe的方式
 		
 		final String downUrl = "http://下载链接";

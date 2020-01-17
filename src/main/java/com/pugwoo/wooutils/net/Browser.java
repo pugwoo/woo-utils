@@ -413,8 +413,8 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse _get(String httpUrl) throws IOException {
-		return _get(httpUrl, null, null);
+	public HttpResponse get(String httpUrl) throws IOException {
+		return get(httpUrl, null, null);
 	}
 
 	/**
@@ -426,8 +426,8 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse _get(String httpUrl, OutputStream outputStream) throws IOException {
-		return _get(httpUrl, null, outputStream);
+	public HttpResponse get(String httpUrl, OutputStream outputStream) throws IOException {
+		return get(httpUrl, null, outputStream);
 	}
 	
 	/**
@@ -451,7 +451,7 @@ public class Browser {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse _get(String httpUrl, Map<String, Object> params) throws IOException {
+	public HttpResponse get(String httpUrl, Map<String, Object> params) throws IOException {
 		return _get(httpUrl, params, null, false);
 	}
 	
@@ -464,7 +464,7 @@ public class Browser {
 	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
 	 * @return
 	 */
-	public HttpResponse _get(String httpUrl, Map<String, Object> params, OutputStream outputStream)
+	public HttpResponse get(String httpUrl, Map<String, Object> params, OutputStream outputStream)
 	        throws IOException {
 		return _get(httpUrl, params, outputStream, false);
 	}

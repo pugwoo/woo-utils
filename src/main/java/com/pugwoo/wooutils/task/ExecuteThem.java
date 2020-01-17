@@ -40,7 +40,8 @@ public class ExecuteThem {
      * @param nThreads 指定线程池最大线程数
      */
 	public ExecuteThem(int nThreads) {
-		executorService = Executors.newFixedThreadPool(nThreads);
+		executorService = Executors.newFixedThreadPool(nThreads,
+				new MyThreadFactory("exec-them"));
 	}
 
 	/**
@@ -87,7 +88,7 @@ public class ExecuteThem {
 			executorService.shutdownNow();
 		}
 		
-		List<Object> results = new ArrayList<Object>();
+		List<Object> results = new ArrayList<>();
 		for(Future<?> future : futures) {
 			try {
 				results.add(future.get());
