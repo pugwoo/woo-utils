@@ -59,6 +59,19 @@ public class Browser {
 
 	private String charset = "utf8";
 
+	/**是否开启自动跳转，jdk默认也是开启的*/
+	private boolean enableRedirect = true;
+
+    /**禁用跳转，转为手工处理模式*/
+	public void disableRedirect() {
+		this.enableRedirect = false;
+	}
+
+	/**开启跳转，默认是开启的*/
+	public void enableRedirect() {
+		this.enableRedirect = true;
+	}
+
 	/**
 	 * 设置整个Browser实例全局的字符编码，默认utf8
 	 * @param charset 字符编码，默认utf8
@@ -486,13 +499,20 @@ public class Browser {
 			try {
 				urlConnection = getUrlConnection(httpUrl, "GET");
 
-				// 301 302 跳转处理
-				int responseCode = urlConnection.getResponseCode();
-				if(responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
-					List<String> location = urlConnection.getHeaderFields().get("Location");
-					if(location != null && !location.isEmpty()) {
-						if(!httpUrl.equals(location.get(0))) {
-							return get(location.get(0), params, outputStream, isAsync);
+				if(enableRedirect) {
+					// 301 302 跳转处理
+					int responseCode = urlConnection.getResponseCode();
+					if(responseCode == HttpURLConnection.HTTP_MOVED_PERM
+							|| responseCode == HttpURLConnection.HTTP_MOVED_TEMP
+							|| responseCode == HttpURLConnection.HTTP_SEE_OTHER) {
+						List<String> location = urlConnection.getHeaderFields().get("Location");
+						if(location != null && !location.isEmpty()) {
+							if(!httpUrl.equals(location.get(0))) { // 避免死循环
+								// 跳转之前处理cookie
+								handleCookies(urlConnection.getHeaderFields());
+
+								return get(location.get(0), params, outputStream, isAsync);
+							}
 						}
 					}
 				}
@@ -536,6 +556,10 @@ public class Browser {
 		urlConnection.setRequestMethod(method);
 		urlConnection.setRequestProperty("User-agent", USER_AGENT);
 
+		if(!enableRedirect) {
+			urlConnection.setInstanceFollowRedirects(false);
+		}
+
 		// 设置cookie
 		if(!cookies.isEmpty()) {
 			String host = NetUtils.getUrlHostname(httpUrl);
@@ -564,29 +588,13 @@ public class Browser {
 		
 		return urlConnection;
 	}
-	
-	/**
-	 * 构造httpResponse
-	 * @param urlConnection
-	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
-	 * @param isAsync 是否异步，只有当outputStream!=null时，该值才有效。
-	 *        当isAsync为true时，HttpResponse可以获得已下载的字节数。
-	 * @throws IOException 
-	 */
-	private HttpResponse makeHttpResponse(String httpUrl, HttpURLConnection urlConnection,
-			final OutputStream outputStream, boolean isAsync) throws IOException {
-		HttpResponse httpResponse = new HttpResponse();
-		httpResponse.setCharset(charset);
-		httpResponse.setResponseCode(urlConnection.getResponseCode());
 
-		Map<String, List<String>> headerFields = urlConnection.getHeaderFields();
-		httpResponse.setHeaders(headerFields);
-		
-		// 处理cookie
+	/**处理cookie*/
+	private void handleCookies(Map<String, List<String>> headerFields) {
 		List<String> setCookies = headerFields.get("Set-Cookie");
 		if(setCookies != null && !setCookies.isEmpty()) {
 			for(int i = setCookies.size() - 1; i >=0; i--) {
-				String key = null, value = null, domain = ""; 
+				String key = null, value = null, domain = "";
 				// domain default, hack 因为有些网站Set-Cookie没有指定domain，但是现在domain又不好取root domain，所以只能hack让所有网站生效
 				String strs[] = setCookies.get(i).split(";");
 				boolean isFirst = true;
@@ -609,6 +617,26 @@ public class Browser {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * 构造httpResponse
+	 * @param urlConnection
+	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
+	 * @param isAsync 是否异步，只有当outputStream!=null时，该值才有效。
+	 *        当isAsync为true时，HttpResponse可以获得已下载的字节数。
+	 * @throws IOException 
+	 */
+	private HttpResponse makeHttpResponse(String httpUrl, HttpURLConnection urlConnection,
+			final OutputStream outputStream, boolean isAsync) throws IOException {
+		HttpResponse httpResponse = new HttpResponse();
+		httpResponse.setCharset(charset);
+		httpResponse.setResponseCode(urlConnection.getResponseCode());
+
+		Map<String, List<String>> headerFields = urlConnection.getHeaderFields();
+		httpResponse.setHeaders(headerFields);
+		
+		handleCookies(headerFields);
 		
 		final InputStream in = urlConnection.getInputStream();
 		byte[] buf = new byte[4096];
