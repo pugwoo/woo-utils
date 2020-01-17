@@ -1,3 +1,4 @@
+2020年1月17日
 v0.8.6 - [improve] 处理Browser工具中connection和inputStream的关闭
        - [add] 支持Browser关闭自动跳转
 
