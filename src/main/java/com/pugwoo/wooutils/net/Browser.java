@@ -48,7 +48,7 @@ public class Browser {
 	/**cookie, domain(域根目录) -> key/value*/
 	private Map<String, Map<String, String>> cookies = new HashMap<>();
 	
-	/**请求时的头部*/
+	/**全局的请求时的头部*/
 	private Map<String, String> requestProperty = new HashMap<>();
 
 	private String USER_AGENT = "java";
@@ -156,6 +156,10 @@ public class Browser {
 		requestProperty.put(key, value);
 	}
 
+	public void delRequestHeader(String key) {
+		requestProperty.remove(key);
+	}
+
 	/**设置请求时的头部，该设置是Browser实例全局的。<br>
 	 * 设置HttpServletRequest的所有头部信息
 	 * @param request HttpServletRequest
@@ -229,7 +233,10 @@ public class Browser {
 			return _post(httpUrl, new ByteArrayInputStream(buildPostString(params, boundary)),
 					outputStream, false, header);
 		} else {
-			return post(httpUrl, buildPostString(params), outputStream);
+			Map<String, String> header = new HashMap<>();
+			header.put("Content-Type", "application/x-www-form-urlencoded");
+			return _post(httpUrl, new ByteArrayInputStream(buildPostString(params)),
+					outputStream, false, header);
 		}
 	}
 
@@ -240,7 +247,10 @@ public class Browser {
      * @return
      */
     public HttpResponse postJson(String httpUrl, Object toJson) throws IOException {
-        return postJson(httpUrl, toJson, null);
+		Map<String, String> header = new HashMap<>();
+		header.put("Content-Type", "application/json");
+		return _post(httpUrl, new ByteArrayInputStream(buildPostJson(toJson)),
+				null, false, header);
     }
 
     /**
@@ -286,7 +296,10 @@ public class Browser {
 			return _post(httpUrl, new ByteArrayInputStream(buildPostString(params, boundary)),
 					outputStream, true, header);
 		} else {
-			return postAsync(httpUrl, buildPostString(params), outputStream);
+			Map<String, String> header = new HashMap<>();
+			header.put("Content-Type", "application/x-www-form-urlencoded");
+			return _post(httpUrl, new ByteArrayInputStream(buildPostString(params)),
+					outputStream, false, header);
 		}
 	}
 	
@@ -297,7 +310,11 @@ public class Browser {
 	 * @throws IOException
 	 */
 	public HttpResponse post(String httpUrl, byte[] postData) throws IOException {
-		return post(httpUrl, new ByteArrayInputStream(postData), null);
+		Map<String, String> header = new HashMap<>();
+		if(!requestProperty.containsKey("Content-Type")) {
+			header.put("Content-Type", "text/plain");
+		}
+		return _post(httpUrl, new ByteArrayInputStream(postData), null, false, header);
 	}
 	
 	/**
@@ -308,7 +325,11 @@ public class Browser {
 	 * @throws IOException
 	 */
 	public HttpResponse post(String httpUrl, byte[] postData, OutputStream outputStream) throws IOException {
-		return post(httpUrl, new ByteArrayInputStream(postData), outputStream);
+		Map<String, String> header = new HashMap<>();
+		if(!requestProperty.containsKey("Content-Type")) {
+			header.put("Content-Type", "text/plain");
+		}
+		return _post(httpUrl, new ByteArrayInputStream(postData), outputStream, false, header);
 	}
 	
 	/**
@@ -318,7 +339,11 @@ public class Browser {
 	 * @throws IOException
 	 */
 	public HttpResponse post(String httpUrl, InputStream inputStream) throws IOException {
-		return post(httpUrl, inputStream, null);
+		Map<String, String> header = new HashMap<>();
+		if(!requestProperty.containsKey("Content-Type")) {
+			header.put("Content-Type", "text/plain");
+		}
+		return _post(httpUrl, inputStream, null, false, header);
 	}
 	
 	/**
@@ -330,7 +355,11 @@ public class Browser {
 	 */
 	public HttpResponse post(String httpUrl, InputStream inputStream, OutputStream outputStream)
 			throws IOException {
-		return _post(httpUrl, inputStream, outputStream, false, null);
+		Map<String, String> header = new HashMap<>();
+		if(!requestProperty.containsKey("Content-Type")) {
+			header.put("Content-Type", "text/plain");
+		}
+		return _post(httpUrl, inputStream, outputStream, false, header);
 	}
 	
 	/**
@@ -341,7 +370,11 @@ public class Browser {
 	 * @throws IOException
 	 */
 	public HttpResponse postAsync(String httpUrl, byte[] postData, OutputStream outputStream) throws IOException {
-		return postAsync(httpUrl, new ByteArrayInputStream(postData), outputStream);
+		Map<String, String> header = new HashMap<>();
+		if(!requestProperty.containsKey("Content-Type")) {
+			header.put("Content-Type", "text/plain");
+		}
+		return _post(httpUrl, new ByteArrayInputStream(postData), outputStream, true, header);
 	}
 	
 	/**
@@ -354,7 +387,11 @@ public class Browser {
 	 */
 	public HttpResponse postAsync(String httpUrl, InputStream inputStream, OutputStream outputStream)
 	        throws IOException {
-		return _post(httpUrl, inputStream, outputStream, true, null);
+		Map<String, String> header = new HashMap<>();
+		if(!requestProperty.containsKey("Content-Type")) {
+			header.put("Content-Type", "text/plain");
+		}
+		return _post(httpUrl, inputStream, outputStream, true, header);
 	}
 	
 	private HttpResponse _post(String httpUrl, InputStream inputStream, OutputStream outputStream,

@@ -1,5 +1,6 @@
 package com.pugwoo.wooutils.net;
 
+import com.pugwoo.wooutils.collect.MapUtils;
 import org.junit.Test;
 
 import java.io.*;
@@ -13,6 +14,24 @@ public class TestBrowser {
 		Browser browser = new Browser();
 		HttpResponse resp = browser.get("http://www.baidu.com");
 		System.out.println(resp.getContentString());
+	}
+
+	@Test
+	public void testBasicPost() throws Exception {
+		Browser browser = new Browser();
+		browser.setHttpProxy("127.0.0.1", 8888);
+		//browser.post("http://www.baidu.com",
+		//		MapUtils.of("key1", "val1", "key2", "val2"));
+
+		OutputStream out = new FileOutputStream("d:/a.txt");
+
+		Map<String, Object> map = MapUtils.of("key1", "val1", "key2", 33);
+
+
+		//browser.addRequestHeader("Content-Type", "text/plain");
+
+		browser.post("http://127.0.0.1:8080/post",
+				"content".getBytes(), out);
 	}
 	
 	// 测试上传文件
