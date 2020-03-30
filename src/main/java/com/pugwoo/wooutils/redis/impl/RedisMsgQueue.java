@@ -126,7 +126,10 @@ public class RedisMsgQueue {
 
             String msgJson = jedis.hget(mapKey, uuid);
             if(StringTools.isEmpty(msgJson)) {
-                LOGGER.error("get uuid:{} msg fail, msg is empty", uuid);
+                // 说明消息已经被消费了，清理掉uuid即可
+                jedis.lrem(listKey, 0, uuid);
+                jedis.lrem(doingKey, 0, uuid);
+                LOGGER.warn("get uuid:{} msg fail, msg is empty", uuid);
                 return null;
             }
 
@@ -151,10 +154,12 @@ public class RedisMsgQueue {
      * @return
      */
     public static boolean ack(RedisHelper redisHelper, String topic, String msgUuid) {
+        String listKey = getPendingKey(topic);
         String doingKey = getDoingKey(topic);
         String mapKey = getMapKey(topic);
 
         redisHelper.executePipeline(pipeline -> {
+            pipeline.lrem(listKey, 0, msgUuid);
             pipeline.lrem(doingKey, 0, msgUuid);
             pipeline.hdel(mapKey, msgUuid);
         });

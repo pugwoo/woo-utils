@@ -1,4 +1,5 @@
 v0.8.7 - [improve] 对于Browser的post byte[]/InputStream默认使用Content-type=text/plain
+       - [improve] 清理redis msgq中，当消息已经被ack后，还存留在doing列表的问题（不影响程序正确性）
 
 2020年1月17日
 v0.8.6 - [improve] 处理Browser工具中connection和inputStream的关闭
