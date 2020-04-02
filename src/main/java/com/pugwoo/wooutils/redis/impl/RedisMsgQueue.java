@@ -195,6 +195,9 @@ public class RedisMsgQueue {
             for(String uuid : uuidList) {
                 String json = jedis.hget(mapKey, uuid);
                 if(StringTools.isEmpty(json)) {
+                    // 清理不存在消息体的doing uuid
+                    jedis.lrem(doingKey, 0, uuid);
+                    LOGGER.warn("topic:{}, clear not exist DOING msg uuid:{}", topic, uuid);
                     continue;
                 }
                 RedisMsg redisMsg = JSON.parse(json, RedisMsg.class);
