@@ -70,7 +70,11 @@ public class DateUtils {
 	}
 	
 	/**
-	 * 自动解析，不会抛出异常
+	 * 自动解析各种格式的日期，不会抛出异常。<br>
+	 * <br>
+	 * 说明：<br>
+	 * 会尝试将数字当做时间戳转换，但只转换值大于等于946656000的时间戳，即2000年以后的 <br>
+	 *
 	 * @param date
 	 * @return 解析失败返回null，同时log error
 	 */
@@ -108,6 +112,10 @@ public class DateUtils {
 		}
 		Long timestamp = NumberUtils.parseLong(date);
 		if (timestamp == null) {
+			return null;
+		}
+
+		if (timestamp < 946656000) { // 不处理2000-01-01以前的时间戳
 			return null;
 		}
 
@@ -167,7 +175,11 @@ public class DateUtils {
 	}
 	
 	/**
-	 * 自动解析，失败抛出异常
+	 * 自动解析，失败抛出异常<br>
+	 *
+	 * 说明：<br>
+	 * 会尝试将数字当做时间戳转换，但只转换值大于等于946656000的时间戳，即2000年以后的 <br>
+	 *
 	 * @param date
 	 * @return
 	 */

@@ -1,4 +1,5 @@
 v0.8.8 - [improve] 自动清理redis msgq中，处于doing列表但是实际消息已经不存在的消息
+       - [modify] 日期解析中处理的时间戳，只处理2000年以后的
 
 2020年3月31日
 v0.8.7 - [improve] 对于Browser的post byte[]/InputStream默认使用Content-type=text/plain
