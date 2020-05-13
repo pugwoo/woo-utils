@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 基于redis实现的带ack机制的消息队列
@@ -299,49 +300,60 @@ public class RedisMsgQueue {
 
         private static final String LOCK_KEY = "_RedisMsgQueueRecoverMsgTaskLock_";
 
-        @Override
-        public void run() {
-
-            // 一直尝试拿锁
-            String lockUuid;
+        /** 一直尝试拿锁，直到拿到为止 */
+        private String getLock() {
             while(true) {
-                lockUuid = redisHelper.requireLock(LOCK_KEY, "-", 30);
+                String lockUuid = redisHelper.requireLock(LOCK_KEY, "-", 30);
                 if(lockUuid == null) { // 没有拿到锁，等待30秒重试
-                    try {
-                        Thread.sleep(30000);
-                    } catch (InterruptedException e) { // ignore
-                    }
+                    doSleep(30000);
                 } else {
-                    break;
+                    return lockUuid;
                 }
             }
+        }
 
-            // 起一条心跳线程一直延期,只要拿到锁，就一直用不释放
-            final String _lockUuid = lockUuid;
+        private void doSleep(long ms) {
+            try {
+                Thread.sleep(ms);
+            } catch (InterruptedException e) { // ignore
+            }
+        }
+
+        @Override
+        public void run() {
+            final AtomicReference<String> lockUuidRef = new AtomicReference<>();
+
             Thread thread = new Thread(() -> {
-                while(true) { // 一直循环不会退出，每9秒续30秒，也即一共有3次续期机会
-                    redisHelper.renewalLock(LOCK_KEY, "-", _lockUuid,30);
-
-                    try {
-                        Thread.sleep(9000);
-                    } catch (InterruptedException e) { // ignore
+                while(true) { // 一直循环不会退出，每5秒续30秒，也即一共有5次续期机会
+                    if(lockUuidRef.get() != null) {
+                        boolean result = redisHelper.renewalLock(LOCK_KEY, "-",
+                                lockUuidRef.get(),30);
+                        if (!result) { // 如果刷新锁失败，则废弃该锁
+                            lockUuidRef.set(null);
+                        }
                     }
+                    doSleep(5000);
                 }
             });
             thread.setName("RedisMsgQueue.RecoverMsgRenewalLockTask");
             thread.start();
 
             while(true) { // 一直循环不会退出
-                try {
-                    boolean hasSleep = doClean();
-                    if(!hasSleep) { // 如果刚清理完，还没睡眠，则
-                        try {
-                            Thread.sleep(10000);
-                        } catch (InterruptedException e) { // ignore
+                String lockUuid = getLock();
+                lockUuidRef.set(lockUuid);
+
+                while(true) { // 一直循环不会退出，除非锁不见了
+                    try {
+                        boolean hasSleep = doClean();
+                        if(!hasSleep) { // 如果刚清理完，还没睡眠，则睡眠一下
+                            doSleep(10000);
                         }
+                    } catch (Exception e) {
+                        LOGGER.error("do clean task fail", e);
                     }
-                } catch (Exception e) {
-                    LOGGER.error("do clean task fail", e);
+                    if(lockUuidRef.get() == null) { // 锁丢失了就重新拿锁
+                        break;
+                    }
                 }
             }
         }
