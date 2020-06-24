@@ -12,12 +12,15 @@ import java.util.List;
 
 public class TestDate {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		System.out.println(DateUtils.parse("2017-08-09"));
 
 		System.out.println(DateUtils.getStartTimeOfDay(new Date()));
 		System.out.println(DateUtils.getStartTimeOfDay(DateUtils.parse("2017-08-09 01:03:04")));
 		System.out.println(DateUtils.getEndTimeOfDay(DateUtils.parse("2017-08-09 01:03:04")));
+
+		System.out.println(DateUtils.parseThrowException("2020-06-01T01:59:43.000+0000"));
+		System.out.println(DateUtils.parseThrowException("2020-06-01T01:59:43.000 +0000"));
 	}
 
 	private static List<String> testDates = ListUtils.newArrayList(
