@@ -356,7 +356,7 @@ public class DateUtils {
 
 	/**
 	 * 获得指定时间date的当天的结束时间。
-	 * 例如date为2019-01-02 03:04:05时，返回2019-01-02 00:00:00.999
+	 * 例如date为2019-01-02 03:04:05时，返回2019-01-02 23:59:59.999
 	 * 【该接口性能最佳】
 	 */
     public static Date getEndTimeOfDay(Date date) {
