@@ -1,5 +1,6 @@
 v0.8.9 - [improve] 优化redis消息队列中清理线程的加锁逻辑
        - [add] DateUtils增加解析格式类型：2017-10-18T16:00:00.000+0000
+       - [add] StringTools增加replace替换功能，支持正则表达式捕获组(captureGroup)的替换
 
 2020年4月29日
 v0.8.8 - [improve] 自动清理redis msgq中，处于doing列表但是实际消息已经不存在的消息
