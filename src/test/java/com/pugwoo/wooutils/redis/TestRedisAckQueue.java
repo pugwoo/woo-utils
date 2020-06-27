@@ -1,6 +1,7 @@
 package com.pugwoo.wooutils.redis;
 
 
+import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.json.JSON;
 import com.pugwoo.wooutils.task.ExecuteThem;
 import org.junit.Test;
@@ -45,7 +46,26 @@ public class TestRedisAckQueue {
         System.out.println("revc msg nack uuid:" + msg.getUuid() + ",content:" + msg.getMsg());
         redisHelper.nack("mytopic2", msg.getUuid());
     }
-
+    
+    @Test
+    public void testSendBatch() {
+        List<String> msgList4 = ListUtils.newArrayList(
+                "msgconent" + UUID.randomUUID().toString(),
+                "msgconent" + UUID.randomUUID().toString(),
+                "msgconent" + UUID.randomUUID().toString()
+        );
+        List<String> uuidList4 = redisHelper.sendBatch("mytopic4", msgList4);
+        System.out.println("send msgList:" + uuidList4);
+    
+        List<String> msgList5 = ListUtils.newArrayList(
+                "msgconent" + UUID.randomUUID().toString(),
+                "msgconent" + UUID.randomUUID().toString(),
+                "msgconent" + UUID.randomUUID().toString()
+        );
+        List<String> uuidList5 = redisHelper.sendBatch("mytopic5", msgList5, 60);
+        System.out.println("send msgList:" + uuidList5);
+    }
+    
     @Test
     public void testSendRepeatedly() {
 

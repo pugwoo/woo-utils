@@ -8,6 +8,7 @@ import com.pugwoo.wooutils.string.Hash;
 import com.pugwoo.wooutils.string.StringTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,6 +17,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * 基于redis实现的带ack机制的消息队列
@@ -35,6 +38,11 @@ public class RedisMsgQueue {
 
     private static String getMapKey(String topic) {
         return topic + ":" + "MQMSG";
+    }
+    
+    /** 生成一个消息uuid */
+    private static String getMsgUuid() {
+        return "rmq" + Hash.md5(UUID.randomUUID().toString());
     }
 
     /**
@@ -58,7 +66,7 @@ public class RedisMsgQueue {
      */
     public static String send(RedisHelper redisHelper, String topic, String msg, int defaultAckTimeoutSec) {
 
-        String uuid = "rmq" + Hash.md5(UUID.randomUUID().toString());
+        String uuid = getMsgUuid();
 
         RedisMsg redisMsg = new RedisMsg();
         redisMsg.setUuid(uuid);
@@ -92,7 +100,80 @@ public class RedisMsgQueue {
 
         return success ? uuid : null;
     }
-
+    
+    /**
+     * 发送消息，返回消息的uuidList。默认的超时时间是30秒
+     * @param redisHelper
+     * @param topic topic将是redis的key
+     * @param msgList 消息内容列表
+     * @return 消息的uuidList，发送失败返回null
+     */
+    public static List<String> sendBatch(RedisHelper redisHelper, String topic, List<String> msgList) {
+        return sendBatch(redisHelper, topic, msgList, 30);
+    }
+    
+    /**
+     * 发送消息，返回消息的uuidList。默认的超时时间是30秒
+     * @param redisHelper
+     * @param topic   topic将是redis的key
+     * @param msgList 消息内容列表
+     * @return 消息的uuidList，发送失败返回null
+     */
+    public static List<String> sendBatch(RedisHelper redisHelper, String topic, List<String> msgList, int defaultAckTimeoutSec) {
+        if (CollectionUtils.isEmpty(msgList)) { return new ArrayList<>(); }
+        
+        long sentTime = System.currentTimeMillis();
+        List<RedisMsg> redisMsgList = msgList.stream()
+                .map(item -> {
+                    RedisMsg redisMsg = new RedisMsg();
+                    redisMsg.setUuid(getMsgUuid());
+                    redisMsg.setMsg(item);
+                    redisMsg.setSendTime(sentTime);
+                    redisMsg.setAckTimeout(defaultAckTimeoutSec);
+                    return redisMsg;
+                })
+                .collect(toList());
+        
+        String pendingKey = getPendingKey(topic);
+        String mapKey = getMapKey(topic);
+        List<Object> sendResultList = redisHelper.executePipeline(pipeline -> {
+            for (RedisMsg redisMsg : redisMsgList) {
+                pipeline.hset(mapKey, redisMsg.getUuid(), JSON.toJson(redisMsg));
+                pipeline.lpush(pendingKey, redisMsg.getUuid());
+            }
+        });
+        
+        List<String> resultList = new ArrayList<>();
+        int sendResultSize = sendResultList == null ? 0 : sendResultList.size();
+        for (int i = 0, iLen = redisMsgList.size(); i < iLen; i++) {
+            RedisMsg redisMsg = redisMsgList.get(i);
+            String uuid = redisMsg.getUuid();
+            String msg = redisMsg.getMsg();
+            
+            int msgResultIndex = i * 2;
+            int pendingResultIndex = msgResultIndex + 1;
+            Object msgResult = sendResultSize > msgResultIndex ? sendResultList.get(msgResultIndex) : null;
+            Object pendingResult = sendResultSize > pendingResultIndex ? sendResultList.get(pendingResultIndex) : null;
+            
+            boolean success = true;
+            if (msgResult == null || pendingResult == null) {
+                success = false;
+                LOGGER.error("send msg:{}, content:{} fail, redis result size != 2", uuid, msg);
+            } else {
+                if(!((msgResult instanceof Long) && msgResult.equals(1L))) {
+                    success = false;
+                    LOGGER.error("send msg:{}, content:{} fail, redis result[0] != 1", uuid, msg);
+                }
+                if(!((pendingResult instanceof Long) && ((Long) pendingResult) > 0L)) {
+                    success = false;
+                    LOGGER.error("send msg:{}, content:{} fail, redis result[1] < 1", uuid, msg);
+                }
+            }
+            resultList.add(success ? uuid : null);
+        }
+        return resultList;
+    }
+    
     /**
      * 接收消息，永久阻塞式，使用默认的actTimeout值
      * @param redisHelper

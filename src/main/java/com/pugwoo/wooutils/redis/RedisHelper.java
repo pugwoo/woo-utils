@@ -310,7 +310,25 @@ public interface RedisHelper {
 	 * @return 消息的uuid，发送失败返回null
 	 */
 	String send(String topic, String msg, int defaultAckTimeoutSec);
-
+	
+	/**
+	 * 批量发送消息，返回消息的uuid。默认的超时时间是30秒
+	 * @param topic topic将是redis的key
+	 * @param msgList 消息列表
+	 * @return 消息的uuidList，发送失败返回null
+	 */
+	List<String> sendBatch(String topic, List<String> msgList);
+	
+	/**
+	 * 批量发送消息，返回消息的uuid
+	 * @param topic 即redis的key
+	 * @param msgList 消息列表
+	 * @param defaultAckTimeoutSec 默认ack超时时间：当消费者消费了消息却没来得及设置ack超时时间时的默认超时秒数。
+	 *                             建议处理时间默认比较长的应用，可以将该值设置较大，例如60秒或120秒
+	 * @return 消息的uuidList，发送失败返回null
+	 */
+	List<String> sendBatch(String topic, List<String> msgList, int defaultAckTimeoutSec);
+	
 	/**
 	 * 接收消息，永久阻塞式，使用默认的actTimeout值
 	 * @param topic 即redis的key

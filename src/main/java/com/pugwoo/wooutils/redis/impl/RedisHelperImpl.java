@@ -582,6 +582,18 @@ public class RedisHelperImpl implements RedisHelper {
 		addTopicToTask(topic);
 		return RedisMsgQueue.send(this, topic, msg, defaultAckTimeoutSec);
 	}
+	
+	@Override
+	public List<String> sendBatch(String topic, List<String> msgList) {
+		addTopicToTask(topic);
+		return RedisMsgQueue.sendBatch(this, topic, msgList);
+	}
+	
+	@Override
+	public List<String> sendBatch(String topic, List<String> msgList, int defaultAckTimeoutSec) {
+		addTopicToTask(topic);
+		return RedisMsgQueue.sendBatch(this, topic, msgList, defaultAckTimeoutSec);
+	}
 
 	@Override
 	public RedisMsg receive(String topic) {
