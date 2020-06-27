@@ -37,28 +37,4 @@ public class StringToolsTests {
         assert !StringTools.isAlphabeticOrDigit("");
         assert !StringTools.isAlphabeticOrDigit(null);
     }
-
-    @Test
-    public void testReplaceAllGroup() {
-        assert "__====__====__".equals(StringTools.replaceAllGroup("__aaaa__aaaa__", "_aaaa_", "_====_"));
-        assert "__a==a__a==a__".equals(StringTools.replaceAllGroup("__aaaa__aaaa__", "_a(aa)a_", "=="));
-        assert "__a= a__a= a__".equals(StringTools.replaceAllGroup("__aaaa__aaaa__", "_a(a)(a)a_", "=", " "));
-        
-        assert "__{aaaa}__{aaaa}__".equals(StringTools.replaceAllGroup("__aaaa__aaaa__", "aaaa", group -> "{" + group + "}"));
-        assert "__a{aa}a__a{aa}a__".equals(StringTools.replaceAllGroup("__aaaa__aaaa__", "_a(aa)a_", group -> "{" + group + "}"));
-        assert "__a{a}{1}a__a{a}{1}a__".equals(StringTools.replaceAllGroup("__aaaa__aaaa__", "_a(a)(a)a_", group -> "{" + group + "}", group -> "{1}"));
-
-        assert "__aaaaa__a{b}a__".equals(StringTools.replaceAllGroup("__aaaaa__azbaa__", "_a(\\S)([bc])(\\S)a_", "{", null, "}"));
-    }
-    
-    @Test
-    public void testReplaceFirstGroup() {
-        assert "__====__aaaa__".equals(StringTools.replaceFirstGroup("__aaaa__aaaa__", "_aaaa_", "_====_"));
-        assert "__a==a__aaaa__".equals(StringTools.replaceFirstGroup("__aaaa__aaaa__", "_a(aa)a_", "=="));
-        assert "__a= a__aaaa__".equals(StringTools.replaceFirstGroup("__aaaa__aaaa__", "_a(a)(a)a_", "=", " "));
-    
-        assert "__{aaaa}__aaaa__".equals(StringTools.replaceFirstGroup("__aaaa__aaaa__", "aaaa", group -> "{" + group + "}"));
-        assert "__a{aa}a__aaaa__".equals(StringTools.replaceFirstGroup("__aaaa__aaaa__", "_a(aa)a_", group -> "{" + group + "}"));
-        assert "__a{a}{1}a__aaaa__".equals(StringTools.replaceFirstGroup("__aaaa__aaaa__", "_a(a)(a)a_", group -> "{" + group + "}", group -> "{1}"));
-    }
 }
