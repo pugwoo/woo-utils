@@ -148,7 +148,7 @@ public class RedisMsgQueue {
     }
 
     /**
-     * 确认消费消息
+     * 确认消费消息成功，移除消息
      * @param redisHelper
      * @param topic 即redis的key
      * @param msgUuid
@@ -165,6 +165,20 @@ public class RedisMsgQueue {
             pipeline.hdel(mapKey, msgUuid);
         });
 
+        return true;
+    }
+    
+    /**
+     * 确认消费消息失败，复原消息
+     *    该方法将消息复原后，可立即被消费
+     *    而超时的清理复原消息，被消费的频率会被超时时间控制
+     * @param redisHelper
+     * @param topic 即redis的key
+     * @param msgUuid
+     * @return
+     */
+    public static boolean nack(RedisHelper redisHelper, String topic, String msgUuid) {
+        recoverMsg(redisHelper, topic, msgUuid);
         return true;
     }
 

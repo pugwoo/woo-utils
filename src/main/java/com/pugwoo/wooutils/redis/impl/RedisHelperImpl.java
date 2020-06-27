@@ -599,7 +599,12 @@ public class RedisHelperImpl implements RedisHelper {
 	public boolean ack(String topic, String msgUuid) {
 		return RedisMsgQueue.ack(this, topic, msgUuid);
 	}
-
+	
+	@Override
+	public boolean nack(String topic, String msgUuid) {
+		return RedisMsgQueue.nack(this, topic, msgUuid);
+	}
+	
 	public String getHost() {
 		return host;
 	}

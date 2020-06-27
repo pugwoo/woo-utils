@@ -328,11 +328,21 @@ public interface RedisHelper {
 	RedisMsg receive(String topic, int waitTimeoutSec, Integer ackTimeoutSec);
 
 	/**
-	 * 确认消费消息
+	 * 确认消费消息成功，删除消息
 	 * @param topic 即redis的key
 	 * @param msgUuid
 	 * @return
 	 */
 	boolean ack(String topic, String msgUuid);
+	
+	/**
+	 * 确认消费消息失败，复原消息
+	 *   将消息复原后，可立即被消费
+	 *   而超时的清理复原消息，被消费的频率会被超时时间控制
+	 * @param topic 即redis的key
+	 * @param msgUuid
+	 * @return
+	 */
+	boolean nack(String topic, String msgUuid);
 
 }

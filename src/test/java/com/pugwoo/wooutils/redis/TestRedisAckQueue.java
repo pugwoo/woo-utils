@@ -19,9 +19,35 @@ public class TestRedisAckQueue {
 
     @Autowired
     private RedisHelper redisHelper;
+    
+    @Test
+    public void testSendOne() {
+        String uuid = redisHelper.send("mytopic2", "msgconent" + UUID.randomUUID().toString());
+        System.out.println("send msg:" + uuid);
+    }
+    
+    @Test
+    public void testRecvAckOne() {
+        RedisMsg msg = redisHelper.receive("mytopic2");
+        if(msg == null) {
+            return;
+        }
+        System.out.println("revc msg ack uuid:" + msg.getUuid() + ",content:" + msg.getMsg());
+        redisHelper.ack("mytopic2", msg.getUuid());
+    }
+    
+    @Test
+    public void testRecvNackOne() {
+        RedisMsg msg = redisHelper.receive("mytopic2");
+        if (msg == null) {
+            return;
+        }
+        System.out.println("revc msg nack uuid:" + msg.getUuid() + ",content:" + msg.getMsg());
+        redisHelper.nack("mytopic2", msg.getUuid());
+    }
 
     @Test
-    public void testSend() {
+    public void testSendRepeatedly() {
 
         while(true) {
             String uuid = redisHelper.send("mytopic1", "msgconent" + UUID.randomUUID().toString());
@@ -40,14 +66,14 @@ public class TestRedisAckQueue {
     }
 
     @Test
-    public void testRecv() {
+    public void testRecvAckRepeatedly() {
 
         while(true) {
             RedisMsg msg = redisHelper.receive("mytopic1");
             if(msg == null) {
                 continue;
             }
-            System.out.println("revc msg uuid:" + msg.getUuid() + ",content:" + msg.getMsg());
+            System.out.println("revc msg ack uuid:" + msg.getUuid() + ",content:" + msg.getMsg());
 
             //try {
             //    Thread.sleep(new Random().nextInt(10));
@@ -57,7 +83,26 @@ public class TestRedisAckQueue {
             redisHelper.ack("mytopic1", msg.getUuid());
         }
     }
-
+    
+    @Test
+    public void testRecvNackRepeatedly() {
+        
+        while(true) {
+            RedisMsg msg = redisHelper.receive("mytopic1");
+            if(msg == null) {
+                continue;
+            }
+            System.out.println("revc msg nack uuid:" + msg.getUuid() + ",content:" + msg.getMsg());
+    
+            //try {
+            //    Thread.sleep(new Random().nextInt(10));
+            //} catch (Exception e) {
+            //}
+            
+            redisHelper.nack("mytopic1", msg.getUuid());
+        }
+    }
+    
     @Test
     public void benchCheck2() {
         benchCheck();
