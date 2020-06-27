@@ -344,5 +344,12 @@ public interface RedisHelper {
 	 * @return
 	 */
 	boolean nack(String topic, String msgUuid);
+	
+	/**
+	 * 清理整个topic数据
+	 * @param topic 即redis的key
+	 * @return
+	 */
+	boolean cleanTopic(String topic);
 
 }

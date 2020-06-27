@@ -75,10 +75,10 @@ public class TestRedisAckQueue {
             }
             System.out.println("revc msg ack uuid:" + msg.getUuid() + ",content:" + msg.getMsg());
 
-            //try {
-            //    Thread.sleep(new Random().nextInt(10));
-            //} catch (Exception e) {
-            //}
+            try {
+                Thread.sleep(new Random().nextInt(2000));
+            } catch (Exception e) {
+            }
 
             redisHelper.ack("mytopic1", msg.getUuid());
         }
@@ -94,10 +94,10 @@ public class TestRedisAckQueue {
             }
             System.out.println("revc msg nack uuid:" + msg.getUuid() + ",content:" + msg.getMsg());
     
-            //try {
-            //    Thread.sleep(new Random().nextInt(10));
-            //} catch (Exception e) {
-            //}
+            try {
+                Thread.sleep(new Random().nextInt(2000));
+            } catch (Exception e) {
+            }
             
             redisHelper.nack("mytopic1", msg.getUuid());
         }
@@ -198,5 +198,9 @@ public class TestRedisAckQueue {
         System.out.println("结果:" + JSON.toJson(map.keySet()));
     }
 
+    @Test
+    public void testCleanTopic() {
+        redisHelper.cleanTopic("mytopic1");
+    }
 
 }

@@ -605,6 +605,11 @@ public class RedisHelperImpl implements RedisHelper {
 		return RedisMsgQueue.nack(this, topic, msgUuid);
 	}
 	
+	@Override
+	public boolean cleanTopic(String topic) {
+		return RedisMsgQueue.cleanTopic(this, topic);
+	}
+	
 	public String getHost() {
 		return host;
 	}

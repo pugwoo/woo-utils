@@ -181,6 +181,24 @@ public class RedisMsgQueue {
         recoverMsg(redisHelper, topic, msgUuid);
         return true;
     }
+    
+    /**
+     * 清理整个topic数据
+     * @param redisHelper
+     * @param topic 即redis的key
+     * @return
+     */
+    public static boolean cleanTopic(RedisHelper redisHelper, String topic) {
+        String pendingKey = getPendingKey(topic);
+        String doingKey = getDoingKey(topic);
+        String mapKey = getMapKey(topic);
+        return redisHelper.execute(jedis -> {
+            jedis.eval("redis.call('DEL', KEYS[1]); redis.call('DEL', KEYS[2]); redis.call('DEL', KEYS[3]);",
+                    ListUtils.newArrayList(mapKey, pendingKey, doingKey), ListUtils.newArrayList()
+            );
+            return true;
+        });
+    }
 
     ////////////// 以下是清理任务相关的
 
