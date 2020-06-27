@@ -3,6 +3,7 @@ v0.8.9 - [improve] 优化redis消息队列中清理线程的加锁逻辑
        - [add] RegexUtils增加replace替换功能，支持正则表达式捕获组(captureGroup)的替换
        - [add] redis消息队列增加nack立即响应消息消费失败，可立即被重新消费
        - [add] redis消息队列增加cleanTopic，清除整个主题消息
+       - [fix] redis消息队列复原消息时需要设置接收时间为null
 
 2020年4月29日
 v0.8.8 - [improve] 自动清理redis msgq中，处于doing列表但是实际消息已经不存在的消息

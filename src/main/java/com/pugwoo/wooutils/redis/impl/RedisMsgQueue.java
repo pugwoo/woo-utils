@@ -9,7 +9,11 @@ import com.pugwoo.wooutils.string.StringTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -246,17 +250,41 @@ public class RedisMsgQueue {
         return expireMsg;
     }
 
-    /**复原消费超时的消息*/
+    /**
+     * 复原消息
+     *   1. 超时清理
+     *   2. nack
+     */
     private static void recoverMsg(RedisHelper redisHelper, String topic, String uuid) {
 
-        String listKey = getPendingKey(topic);
+        String pendingKey = getPendingKey(topic);
         String doingKey = getDoingKey(topic);
-
+        
+        // 获取消息信息，如果为null，表示消息不存在
+        RedisMsg redisMsg = getMsg(redisHelper, topic, uuid);
+        if (redisMsg == null) {
+            redisHelper.execute(jedis -> jedis.eval(
+                    "redis.call('LREM', KEYS[1], 0, ARGV[1]); redis.call('LREM', KEYS[2], 0, ARGV[1]); ",
+                    ListUtils.newArrayList(doingKey, pendingKey), ListUtils.newArrayList(uuid)));
+            return;
+        }
+    
+        // 必须将消息接收时间重置为null
+        redisMsg.setRecvTime(null);
         redisHelper.execute(jedis -> {
+            // 判断消息是否已经存在，可能已经被ack，不能再设置回去
             // 这里如果是先加后删，则比较大概率被等待receive的客户端拿到之后pop push回doing列表，此动作如果在删除之前进行，就会出现误删情况
             // 如果是先删后加，理论上不会有问题，除了极端情况下，redis执行了第一条命令之后挂了才可能导致丢失数据，但这种可能性已经远远比第一种低
-            return jedis.eval("redis.call('LREM', KEYS[1], 0, ARGV[1]); redis.call('LPUSH', KEYS[2], ARGV[1])",
-                    ListUtils.newArrayList(doingKey, listKey), ListUtils.newArrayList(uuid));
+            String mapKey = getMapKey(topic);
+            return jedis.eval(
+                    "if redis.call('HEXISTS', KEYS[1], ARGV[1]) == 1 then " +
+                            "   redis.call('HSET', KEYS[1], ARGV[1], ARGV[2]) " +
+                            "   redis.call('LREM', KEYS[2], 0, ARGV[1]) " +
+                            "   redis.call('LPUSH', KEYS[3], ARGV[1]) " +
+                            " else " +
+                            "   redis.call('LREM', KEYS[2], 0, ARGV[1])" +
+                            " end",
+                    ListUtils.newArrayList(mapKey, doingKey, pendingKey), ListUtils.newArrayList(uuid, JSON.toJson(redisMsg)));
         });
     }
 
