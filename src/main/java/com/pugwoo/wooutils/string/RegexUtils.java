@@ -152,9 +152,9 @@ public class RegexUtils {
 	}
 	
 	/**
-	 * 字符串替换 <br/>
-	 *  1. 普通替换，与 String.replaceAll String.replaceFirst功能一致 <br/>
-	 *  2. 替换正则表达式捕获组(captureGroup)匹配到的字符串(单个/多个) <br/>
+	 * 字符串替换 <br>
+	 *  1. 普通替换，与 String.replaceAll String.replaceFirst功能一致 <br>
+	 *  2. 替换正则表达式捕获组(captureGroup)匹配到的字符串(单个/多个) <br>
 	 * @param first        是否仅替换第一个符合的匹配项
 	 * @param str          待替换的字符串
 	 * @param regex        正则表达式
@@ -180,9 +180,9 @@ public class RegexUtils {
 	}
 	
 	/**
-	 * 字符串替换 <br/>
-	 *  1. 普通替换，与 String.replaceAll String.replaceFirst功能一致 <br/>
-	 *  2. 替换正则表达式捕获组(captureGroup)匹配到的字符串(单个/多个) <br/>
+	 * 字符串替换 <br>
+	 *  1. 普通替换，与 String.replaceAll String.replaceFirst功能一致 <br>
+	 *  2. 替换正则表达式捕获组(captureGroup)匹配到的字符串(单个/多个) <br>
 	 * @param first        是否仅替换第一个符合的匹配项
 	 * @param str          待替换的字符串
 	 * @param regex        正则表达式

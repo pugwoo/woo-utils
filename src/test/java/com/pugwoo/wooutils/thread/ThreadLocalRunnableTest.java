@@ -6,8 +6,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * @author 锟斤拷 <br/>
- * @date 2020/07/04 <br/>
+ * @author 锟斤拷 <br>
+ * 2020/07/04 <br>
  *
  */
 public class ThreadLocalRunnableTest {

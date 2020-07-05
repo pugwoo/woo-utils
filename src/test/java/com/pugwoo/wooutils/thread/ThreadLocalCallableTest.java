@@ -10,8 +10,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
- * @author 锟斤拷 <br/>
- * @date 2020/07/04 <br/>
+ * @author 锟斤拷 <br>
+ *
+ * 2020/07/04 <br>
  *
  */
 public class ThreadLocalCallableTest {

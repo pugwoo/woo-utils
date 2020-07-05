@@ -1,8 +1,8 @@
 package com.pugwoo.wooutils.string;
 
 /**
- * @author 锟斤拷 <br/>
- * @date 2020/06/25 <br/>
+ * @author 锟斤拷 <br>
+ * 2020/06/25 <br>
  * 字符替换接口
  */
 @FunctionalInterface
