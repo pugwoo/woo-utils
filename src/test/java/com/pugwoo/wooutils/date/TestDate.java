@@ -18,9 +18,6 @@ public class TestDate {
 		System.out.println(DateUtils.getStartTimeOfDay(new Date()));
 		System.out.println(DateUtils.getStartTimeOfDay(DateUtils.parse("2017-08-09 01:03:04")));
 		System.out.println(DateUtils.getEndTimeOfDay(DateUtils.parse("2017-08-09 01:03:04")));
-
-		System.out.println(DateUtils.parseThrowException("2020-06-01T01:59:43.000+0000"));
-		System.out.println(DateUtils.parseThrowException("2020-06-01T01:59:43.000 +0000"));
 	}
 
 	private static List<String> testDates = ListUtils.newArrayList(
@@ -31,7 +28,9 @@ public class TestDate {
 			"2017/03/06 15:23", "2017-03-06 15:23:56", "2017/03/06 15:23:56",
 			"2017-10-18 16:00:00.000",
 			"2017-10-18T16:00:00.000Z",
-			"2017-10-18T16:00:00.000"
+			"2017-10-18T16:00:00.000",
+			"2018-10-18T16:00:00.000+0800",
+			"2018-10-18T16:00:00.000 +0800"
 	);
 
     @Test
@@ -39,15 +38,15 @@ public class TestDate {
 
 		for(String str : testDates) {
 			Date date = DateUtils.parse(str);
-			//	System.out.println(date);
+			System.out.println(date);
 			assert date != null;
 		}
 
 		for(String str : testDates) {
 			LocalDateTime localDt = DateUtils.parseLocalDateTime(str);
 		//	System.out.println(localDt);
-			System.out.println(DateUtils.format(localDt));
-			System.out.println(DateUtils.formatDate(localDt));
+		//	System.out.println(DateUtils.format(localDt));
+		//	System.out.println(DateUtils.formatDate(localDt));
 			assert localDt != null;
 		}
 
@@ -59,7 +58,7 @@ public class TestDate {
 
 		for(String str : testDates) {
 			LocalTime localDt = DateUtils.parseLocalTime(str);
-			System.out.println(localDt);
+			//System.out.println(localDt);
 			assert localDt != null;
 		}
 

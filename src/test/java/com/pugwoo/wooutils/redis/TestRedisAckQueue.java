@@ -220,7 +220,7 @@ public class TestRedisAckQueue {
 
     @Test
     public void testCleanTopic() {
-        redisHelper.cleanTopic("mytopic1");
+        redisHelper.removeTopic("mytopic1");
     }
 
 }
