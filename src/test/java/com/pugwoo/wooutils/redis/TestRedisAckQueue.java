@@ -135,15 +135,15 @@ public class TestRedisAckQueue {
         final String topic = "aaa";
 
         Map<String, String> map = new ConcurrentHashMap<>();
-        ExecuteThem executeThem = new ExecuteThem(400);
+        ExecuteThem executeThem = new ExecuteThem(40);
 
         AtomicLong totalSend = new AtomicLong();
         AtomicLong lastSend = new AtomicLong();
         AtomicLong totalRecv = new AtomicLong();
         AtomicLong lastRecv = new AtomicLong();
 
-        // 模拟2个发送者，每个发送100000条
-        for(int i = 0; i < 100; i++) {
+        // 模拟10个发送者，每个发送10000条
+        for(int i = 0; i < 10; i++) {
             executeThem.add(new Runnable() {
                 @Override
                 public void run() {
@@ -160,8 +160,8 @@ public class TestRedisAckQueue {
             });
         }
 
-        // 模拟10个接收者
-        for(int i = 0; i < 300; i++) {
+        // 模拟30个接收者
+        for(int i = 0; i < 30; i++) {
             executeThem.add(new Runnable() {
                 @Override
                 public void run() {
@@ -170,17 +170,8 @@ public class TestRedisAckQueue {
                         if(msg == null) {
                             break;
                         }
-                        // System.out.println("recv:" + msg.getUuid());
-                       // if(!map.containsKey(msg.getUuid())) {
-                       //     // 因为发送方发送完消息后，可能还没来得及放到map，就被消费了，所以这里等一等
-                       //     try {
-                       //         Thread.sleep(1000);
-                        //    } catch (Exception e) {
-                        //    }
-                        //}
-                       // if(!map.containsKey(msg.getUuid())) {
-                       //     System.err.println("map not contain key:" + msg.getUuid());
-                       // }
+                        // 因为发送方发送完消息后，可能还没来得及放到map，就被消费了，所以这里可能map没有删除掉
+                        // 但是这个概率非常非常低
                         map.remove(msg.getUuid());
                         redisHelper.ack(topic, msg.getUuid());
                         totalRecv.incrementAndGet();
