@@ -122,96 +122,10 @@ public class TestRedisAckQueue {
             redisHelper.nack("mytopic1", msg.getUuid());
         }
     }
-    
-    @Test
-    public void benchCheck2() {
-        benchCheck();
-    }
-
-
-    @Test
-    public void benchCheck() {
-
-        final String topic = "aaa";
-
-        Map<String, String> map = new ConcurrentHashMap<>();
-        ExecuteThem executeThem = new ExecuteThem(40);
-
-        AtomicLong totalSend = new AtomicLong();
-        AtomicLong lastSend = new AtomicLong();
-        AtomicLong totalRecv = new AtomicLong();
-        AtomicLong lastRecv = new AtomicLong();
-
-        // 模拟10个发送者，每个发送10000条
-        for(int i = 0; i < 10; i++) {
-            executeThem.add(new Runnable() {
-                @Override
-                public void run() {
-                    for(int j = 0; j < 10000; j++) {
-                        String uuid = redisHelper.send(topic, "aaaaaa");
-                        if(uuid ==null) {
-                            System.err.println("发送消息失败");
-                        } else {
-                            totalSend.incrementAndGet();
-                            map.put(uuid, "");
-                        }
-                    }
-                }
-            });
-        }
-
-        // 模拟30个接收者
-        for(int i = 0; i < 30; i++) {
-            executeThem.add(new Runnable() {
-                @Override
-                public void run() {
-                    while(true) {
-                        RedisMsg msg = redisHelper.receive(topic, 10, null);
-                        if(msg == null) {
-                            break;
-                        }
-                        // 因为发送方发送完消息后，可能还没来得及放到map，就被消费了，所以这里可能map没有删除掉
-                        // 但是这个概率非常非常低
-                        map.remove(msg.getUuid());
-                        redisHelper.ack(topic, msg.getUuid());
-                        totalRecv.incrementAndGet();
-                    }
-                }
-            });
-        }
-
-        Thread status = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(true) {
-                    long sendRate = totalSend.get() - lastSend.get();
-                    lastSend.set(totalSend.get());
-                    long recvRate = totalRecv.get() - lastRecv.get();
-                    lastRecv.set(totalRecv.get());
-
-                    System.out.println("send total:" + totalSend.get()
-                            + ",send rate:" + sendRate + "/s, recv total:" + totalRecv.get()
-                            + ",recv rate:" + recvRate + "/s");
-                    try {
-                        Thread.sleep(1000);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }
-        });
-        status.setDaemon(true);
-        status.start();
-
-        executeThem.waitAllTerminate();
-
-        System.out.println("结果:" + JSON.toJson(map.keySet()));
-    }
 
     @Test
     public void testCleanTopic() {
-        redisHelper.removeTopic("mytopic1");
+        redisHelper.removeTopic("mytopic5");
     }
 
 }
