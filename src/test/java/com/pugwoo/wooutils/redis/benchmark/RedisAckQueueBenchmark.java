@@ -117,7 +117,21 @@ public class RedisAckQueueBenchmark {
                             redisHelper.nack(topic, msg.getUuid());
                             nackCount.incrementAndGet();
                         } else {
-                            String valueInMap = map.remove(msg.getUuid());
+                            String valueInMap = null;
+                            for(int i = 0; i < 100; i++) {
+                                valueInMap = map.remove(msg.getUuid());
+                                if (valueInMap != null) {
+                                    break;
+                                }
+                                try {
+                                    Thread.sleep(100);
+                                } catch (InterruptedException e) {
+                                }
+                            }
+                            if (valueInMap == null) {
+                                System.err.println("map not contains:" + msg.getUuid());
+                            }
+
                             if (!msg.getMsg().equals(valueInMap)) {
                                 valueNotMatch.incrementAndGet();
                             }
