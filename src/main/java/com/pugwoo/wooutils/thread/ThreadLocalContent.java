@@ -8,8 +8,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author 锟斤拷 <br/>
- * @date 2020/07/05 <br/>
+ * @author 锟斤拷 <br>
+ * @date 2020/07/05 <br>
  * 约定! ThreadLocal实例必须为静态
  */
 public class ThreadLocalContent {
