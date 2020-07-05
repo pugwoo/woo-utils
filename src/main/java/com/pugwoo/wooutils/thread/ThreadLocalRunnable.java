@@ -4,7 +4,6 @@ import java.util.Map;
 
 /**
  * @author 锟斤拷 <br>
- * @date 2020/07/04 <br>
  * 适用于将指定的threadLocal的值从父线程传递到子线程中
  *
  *   {@link Thread#inheritableThreadLocals} 有类似的功能，但是其在线程创建的时候进行值传递初始化工作，使用线程池时会有点小问题
