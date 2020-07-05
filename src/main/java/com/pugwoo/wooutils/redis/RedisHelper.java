@@ -368,6 +368,6 @@ public interface RedisHelper {
 	 * @param topic 即redis的key
 	 * @return
 	 */
-	boolean cleanTopic(String topic);
+	boolean removeTopic(String topic);
 
 }

@@ -273,7 +273,7 @@ public class RedisMsgQueue {
      * @param topic 即redis的key
      * @return
      */
-    public static boolean cleanTopic(RedisHelper redisHelper, String topic) {
+    public static boolean removeTopic(RedisHelper redisHelper, String topic) {
         String pendingKey = getPendingKey(topic);
         String doingKey = getDoingKey(topic);
         String mapKey = getMapKey(topic);

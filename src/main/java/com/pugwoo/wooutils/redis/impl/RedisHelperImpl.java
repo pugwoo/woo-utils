@@ -618,8 +618,8 @@ public class RedisHelperImpl implements RedisHelper {
 	}
 	
 	@Override
-	public boolean cleanTopic(String topic) {
-		return RedisMsgQueue.cleanTopic(this, topic);
+	public boolean removeTopic(String topic) {
+		return RedisMsgQueue.removeTopic(this, topic);
 	}
 	
 	public String getHost() {
