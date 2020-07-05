@@ -1,8 +1,8 @@
 ## 开发计划
 
-1. redis helper消息队列支持批量发送、清理队列
-2. regex utils支持replaceGroup
-
+1. redis helper消息队列支持批量发送、清理队列【done】
+2. regex utils支持replaceGroup【done】
+3. 高速缓存支持LRU，设置缓存个数上限，提供TreeMap的线程安全版本
 
 ## 兼容性问题
 
