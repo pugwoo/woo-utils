@@ -4,7 +4,6 @@ import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.json.JSON;
 import com.pugwoo.wooutils.redis.RedisHelper;
 import com.pugwoo.wooutils.redis.RedisMsg;
-import com.pugwoo.wooutils.string.Hash;
 import com.pugwoo.wooutils.string.StringTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +38,7 @@ public class RedisMsgQueue {
     
     /** 生成一个消息uuid */
     private static String getMsgUuid() {
-        return "rmq" + Hash.md5(UUID.randomUUID().toString());
+        return "rmq" + UUID.randomUUID().toString().replace("-", "");
     }
 
     /**
