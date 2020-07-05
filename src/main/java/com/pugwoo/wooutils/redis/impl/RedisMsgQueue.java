@@ -10,11 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -27,6 +23,7 @@ import static java.util.stream.Collectors.toList;
 public class RedisMsgQueue {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisMsgQueue.class);
+    private static final String REDIS_MSG_QUEUE_TOPICS_KEY = "_RedisMsgQueueTopics_";
 
     private static String getPendingKey(String topic) {
         return topic + ":" + "MQLIST";
@@ -278,8 +275,8 @@ public class RedisMsgQueue {
         String doingKey = getDoingKey(topic);
         String mapKey = getMapKey(topic);
         return redisHelper.execute(jedis -> {
-            jedis.eval("redis.call('DEL', KEYS[1]); redis.call('DEL', KEYS[2]); redis.call('DEL', KEYS[3]);",
-                    ListUtils.newArrayList(mapKey, pendingKey, doingKey), ListUtils.newArrayList()
+            jedis.eval("redis.call('DEL', KEYS[1]); redis.call('DEL', KEYS[2]); redis.call('DEL', KEYS[3]); redis.call('SREM', KEYS[4], ARGV[1]);",
+                    ListUtils.newArrayList(mapKey, pendingKey, doingKey, REDIS_MSG_QUEUE_TOPICS_KEY), ListUtils.newArrayList(topic)
             );
             return true;
         });
@@ -385,17 +382,27 @@ public class RedisMsgQueue {
         }
 
         public void addTopic(String topic) {
-            if(topics.containsKey(topic)) {
+            if(topics.containsKey(topic)) { // 本地缓存，避免频繁写入redis
                 return;
             }
             topics.put(topic, "");
+            redisHelper.execute(jedis -> jedis.sadd(REDIS_MSG_QUEUE_TOPICS_KEY, topic));
         }
 
         /**清理过期消息，返回true表示有消费时间为null的情况，已经睡眠了10秒去清理了；返回false则表示没有*/
         private boolean doClean() {
             Map<String, List<String>> waitToClear = new HashMap<>(); // 等待清理的topic -> 消息uuid列表
 
-            for(String topic : topics.keySet()) {
+            Set<String> topicsInRedis = redisHelper.execute(jedis -> jedis.smembers(REDIS_MSG_QUEUE_TOPICS_KEY));
+            // 同步一下，如果topicsInRedis中没有但是本地有，则本地删除掉
+            for(String t : topics.keySet()) {
+                if (!topicsInRedis.contains(t)) {
+                    topics.remove(t);
+                }
+            }
+
+            for(String topic : topicsInRedis) {
+
                 List<RedisMsg> expires = getExpireDoingMsg(redisHelper, topic);
                 if(expires.isEmpty()) {
                     continue; // 不需要处理
