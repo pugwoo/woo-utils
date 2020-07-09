@@ -2,7 +2,7 @@
 
 1. redis helper消息队列支持批量发送、清理队列【done】
 2. regex utils支持replaceGroup【done】
-3. 高速缓存支持LRU，设置缓存个数上限，使用SynchronizedSortedMap代替TreeMap
+3. 高速缓存支持LRU，设置缓存个数上限(内存上限控制)，使用SynchronizedSortedMap代替TreeMap
 
 ## 兼容性问题
 
