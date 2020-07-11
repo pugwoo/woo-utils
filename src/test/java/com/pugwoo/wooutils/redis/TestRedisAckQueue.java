@@ -2,17 +2,15 @@ package com.pugwoo.wooutils.redis;
 
 
 import com.pugwoo.wooutils.collect.ListUtils;
-import com.pugwoo.wooutils.json.JSON;
-import com.pugwoo.wooutils.task.ExecuteThem;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 @ContextConfiguration(locations = {"classpath:applicationContext-context.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -35,6 +33,22 @@ public class TestRedisAckQueue {
         }
         System.out.println("revc msg ack uuid:" + msg.getUuid() + ",content:" + msg.getMsg());
         redisHelper.ack("mytopic2", msg.getUuid());
+    }
+
+    @Test
+    public void testRecvAndTimeout() {
+        RedisMsg msg = redisHelper.receive("mytopic2");
+        if(msg == null) {
+            return;
+        }
+
+        System.out.println("recv msg " + msg.getUuid());
+        System.out.println("now sleep 60s, default timeout is 30s");
+        try {
+            Thread.sleep(60 * 1000);
+        } catch (InterruptedException e) {
+        }
+        System.out.println("end");
     }
     
     @Test
