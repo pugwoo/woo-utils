@@ -209,7 +209,7 @@ public class RedisMsgQueue {
             String msgJson = jedis.hget(mapKey, uuid);
             if(StringTools.isEmpty(msgJson)) {
                 // 说明消息已经被消费了，清理掉uuid即可
-                jedis.lrem(listKey, 0, uuid);
+                // jedis.lrem(listKey, 0, uuid); // 去掉移除listKey，属于低概率，当消息堆积时，该命令时间复杂度是O(N)
                 jedis.lrem(doingKey, 0, uuid);
                 LOGGER.warn("get uuid:{} msg fail, msg is empty", uuid);
                 return null;
@@ -236,12 +236,12 @@ public class RedisMsgQueue {
      * @return
      */
     public static boolean ack(RedisHelper redisHelper, String topic, String msgUuid) {
-        String listKey = getPendingKey(topic);
+        // String listKey = getPendingKey(topic);
         String doingKey = getDoingKey(topic);
         String mapKey = getMapKey(topic);
 
         redisHelper.executePipeline(pipeline -> {
-            pipeline.lrem(listKey, 0, msgUuid);
+            // pipeline.lrem(listKey, 0, msgUuid); // 去掉移除listKey，属于低概率，当消息堆积时，该命令时间复杂度是O(N)
             pipeline.lrem(doingKey, 0, msgUuid);
             pipeline.hdel(mapKey, msgUuid);
         });
@@ -340,9 +340,12 @@ public class RedisMsgQueue {
         // 获取消息信息，如果为null，表示消息不存在
         RedisMsg redisMsg = getMsg(redisHelper, topic, uuid);
         if (redisMsg == null) {
-            redisHelper.execute(jedis -> jedis.eval(
-                    "redis.call('LREM', KEYS[1], 0, ARGV[1]); redis.call('LREM', KEYS[2], 0, ARGV[1]); ",
-                    ListUtils.newArrayList(doingKey, pendingKey), ListUtils.newArrayList(uuid)));
+            redisHelper.execute(jedis -> jedis.lrem(doingKey, 0, uuid));
+            // 不要移除pendingKey中的uuid，当消息堆积时，时间复杂度是O(N)
+            //redisHelper.execute(jedis -> jedis.eval(
+            //        "redis.call('LREM', KEYS[1], 0, ARGV[1]); redis.call('LREM', KEYS[2], 0, ARGV[1]); ",
+            //        ListUtils.newArrayList(doingKey, pendingKey), ListUtils.newArrayList(uuid)));
+
             return;
         }
     
@@ -351,7 +354,7 @@ public class RedisMsgQueue {
         redisHelper.execute(jedis -> {
             // 判断消息是否已经存在，可能已经被ack，不能再设置回去
             // 这里如果是先加后删，则比较大概率被等待receive的客户端拿到之后pop push回doing列表，此动作如果在删除之前进行，就会出现误删情况
-            // 如果是先删后加，理论上不会有问题，除了极端情况下，redis执行了第一条命令之后挂了才可能导致丢失数据，但这种可能性已经远远比第一种低
+            // 如果是先删后加，理论上不会有问题，除了极端情况下，redis执行了第一条命令之后redis挂了才可能导致丢失数据，但这种可能性已经远远比第一种低
             String mapKey = getMapKey(topic);
             return jedis.eval(
                     "if redis.call('HEXISTS', KEYS[1], ARGV[1]) == 1 then " +
