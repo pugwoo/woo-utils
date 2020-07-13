@@ -1,3 +1,6 @@
+
+v0.9.1 - [enhance] redis消息队列：优化当消息堆积时的ack确认性能
+
 2020年7月5日
 v0.9.0 - [add] DateUtils增加解析格式类型：2017-10-18T16:00:00.000+0000
        - [add] RegexUtils增加replace替换功能，支持正则表达式捕获组(captureGroup)的替换
@@ -5,7 +8,7 @@ v0.9.0 - [add] DateUtils增加解析格式类型：2017-10-18T16:00:00.000+0000
        - [add] redis消息队列：增加removeTopic，清除整个主题消息
        - [fix] redis消息队列：复原消息时需要设置接收时间为null，以解决再次消费时误恢复消息的问题
        - [add] redis消息队列：添加sendBatch批量发送消息
-       - [improve] redis消息队列：优化中清理线程的加锁逻辑
+       - [enhance] redis消息队列：优化中清理线程的加锁逻辑
        - [fix] redis消息队列：解决当有多个不同应用使用不同topic，但是共用一个redis实例时，topic的清理问题
        - [add] 父线程将threadLocal值传递给子线程的Callable/Runnable
 
