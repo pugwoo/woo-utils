@@ -370,4 +370,11 @@ public interface RedisHelper {
 	 */
 	boolean removeTopic(String topic);
 
+	/**
+	 * 消息队列状态
+	 * @param topic
+	 * @return
+	 */
+	RedisQueueStatus getQueueStatus(String topic);
+
 }

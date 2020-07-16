@@ -621,7 +621,12 @@ public class RedisHelperImpl implements RedisHelper {
 	public boolean removeTopic(String topic) {
 		return RedisMsgQueue.removeTopic(this, topic);
 	}
-	
+
+	@Override
+	public RedisQueueStatus getQueueStatus(String topic) {
+		return null; // TODO to implement
+	}
+
 	public String getHost() {
 		return host;
 	}
