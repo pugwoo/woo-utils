@@ -55,7 +55,7 @@ public class ExecuteThem {
 
 	public void add(Runnable... runnables) {
 		for(Runnable runable : runnables) {
-			executorService.execute(runable);
+			executorService.submit(runable);
 		}
 	}
 	
