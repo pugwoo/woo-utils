@@ -53,9 +53,13 @@ public class ExecuteThem {
 				new MyThreadFactory(threadNamePrefix));
 	}
 
+	/**
+	 * runnable任务使用execute加入，结果将不会在返回到结果中
+	 * @param runnables
+	 */
 	public void add(Runnable... runnables) {
 		for(Runnable runable : runnables) {
-			executorService.submit(runable);
+			executorService.execute(runable);
 		}
 	}
 	
