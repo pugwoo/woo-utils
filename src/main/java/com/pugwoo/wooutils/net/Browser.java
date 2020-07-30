@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.zip.GZIPInputStream;
 
 /**
  * 2016年2月4日 15:16:42 
@@ -596,6 +597,7 @@ public class Browser {
 		urlConnection.setReadTimeout(readTimeoutSeconds * 1000);
 		urlConnection.setRequestMethod(method);
 		urlConnection.setRequestProperty("User-agent", USER_AGENT);
+		urlConnection.setRequestProperty("Accept-Encoding", "gzip"); // support gzip
 
 		if(!enableRedirect) {
 			urlConnection.setInstanceFollowRedirects(false);
@@ -678,8 +680,14 @@ public class Browser {
 		httpResponse.setHeaders(headerFields);
 		
 		handleCookies(headerFields);
+
+		boolean isGzip = false;
+		List<String> contentEncoding = headerFields.get("Content-Encoding");
+		isGzip = contentEncoding != null && !contentEncoding.isEmpty()
+				&& "gzip".equals(contentEncoding.get(0));
 		
-		final InputStream in = urlConnection.getInputStream();
+		final InputStream in = isGzip ? new GZIPInputStream(urlConnection.getInputStream()) :
+				urlConnection.getInputStream();
 		byte[] buf = new byte[4096];
 		int len;
 		if(outputStream != null) {
