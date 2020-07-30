@@ -4,6 +4,7 @@ import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.json.JSON;
 import com.pugwoo.wooutils.redis.RedisHelper;
 import com.pugwoo.wooutils.redis.RedisMsg;
+import com.pugwoo.wooutils.redis.RedisQueueStatus;
 import com.pugwoo.wooutils.string.StringTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -279,6 +280,20 @@ public class RedisMsgQueue {
             );
             return true;
         });
+    }
+
+    public static RedisQueueStatus getQueueStatus(RedisHelper redisHelper, String topic) {
+        String pendingKey = getPendingKey(topic);
+        String doingKey = getDoingKey(topic);
+
+        RedisQueueStatus status = new RedisQueueStatus();
+        Long pendingLen = redisHelper.execute(jedis -> jedis.llen(pendingKey));
+        Long doingLen = redisHelper.execute(jedis -> jedis.llen(doingKey));
+
+        status.setPendingCount(pendingLen == null ? 0 : pendingLen.intValue());
+        status.setDoingCount(doingLen == null ? 0 : doingLen.intValue());
+
+        return status;
     }
 
     ////////////// 以下是清理任务相关的

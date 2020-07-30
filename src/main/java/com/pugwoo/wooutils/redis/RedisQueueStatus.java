@@ -16,11 +16,6 @@ public class RedisQueueStatus {
     private int doingCount;
 
     /**
-     * 消息队列中当前所有消息的总数
-     */
-    private int totalCount;
-
-    /**
      * 最后一个自然天的消费发送总数 （暂不实现）
      */
     // private int daySendMsgCount;
@@ -47,11 +42,4 @@ public class RedisQueueStatus {
         this.doingCount = doingCount;
     }
 
-    public int getTotalCount() {
-        return totalCount;
-    }
-
-    public void setTotalCount(int totalCount) {
-        this.totalCount = totalCount;
-    }
 }

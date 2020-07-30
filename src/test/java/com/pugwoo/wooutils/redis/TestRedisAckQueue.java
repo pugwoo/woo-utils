@@ -2,6 +2,7 @@ package com.pugwoo.wooutils.redis;
 
 
 import com.pugwoo.wooutils.collect.ListUtils;
+import com.pugwoo.wooutils.json.JSON;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,6 +141,12 @@ public class TestRedisAckQueue {
     @Test
     public void testCleanTopic() {
         redisHelper.removeTopic("mytopic5");
+    }
+
+    @Test
+    public void testGetStatus() {
+        RedisQueueStatus status = redisHelper.getQueueStatus("benchmarkQueue");
+        System.out.println(JSON.toJson(status));
     }
 
 }

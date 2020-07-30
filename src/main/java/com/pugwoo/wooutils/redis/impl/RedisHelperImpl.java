@@ -624,7 +624,7 @@ public class RedisHelperImpl implements RedisHelper {
 
 	@Override
 	public RedisQueueStatus getQueueStatus(String topic) {
-		return null; // TODO to implement
+		return RedisMsgQueue.getQueueStatus(this, topic);
 	}
 
 	public String getHost() {
