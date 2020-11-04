@@ -183,6 +183,14 @@ public class ListUtils {
 			}
 		}
 	}
+
+	public static boolean isEmpty(List<?> list) {
+		return list == null || list.isEmpty();
+	}
+
+	public static boolean isNotEmpty(List<?> list) {
+		return !isEmpty(list);
+	}
 	
 	/**
 	 * list中是否包含有符合条件的元素
