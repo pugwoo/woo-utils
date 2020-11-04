@@ -117,8 +117,41 @@ public class StringTools {
 		}
 		StringBuilder sb = new StringBuilder();
 		boolean isEmpty = true;
-		for(int i = 0; i < list.size(); i++) {
-			Object obj = list.get(i);
+		for(Object obj : list) {
+			if(obj == null) {
+				continue;
+			}
+			String objStr = obj.toString();
+			if(isEmpty(objStr)) {
+				continue;
+			}
+
+			if(!isEmpty) {
+				sb.append(splitLetter);
+			}
+			sb.append(objStr);
+			isEmpty = false;
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * 将数组的元素的toString 用分隔符splitLetter连起来。<br>
+	 * 如果数组中元素等于null或者toString为null或空字符串，则不加入。<br>
+	 *
+	 * 示例：输入array=[1,2,3],splitLetter=;，则输出1;2;3
+	 *
+	 * @param splitLetter
+	 * @param array
+	 * @return 不会返回null
+	 */
+	public static String join(Object[] array, String splitLetter) {
+		if (array == null || array.length == 0) {
+			return "";
+		}
+		StringBuilder sb = new StringBuilder();
+		boolean isEmpty = true;
+		for(Object obj : array) {
 			if(obj == null) {
 				continue;
 			}
