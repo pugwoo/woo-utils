@@ -63,6 +63,9 @@ public class Browser {
 	/**是否开启自动跳转，jdk默认也是开启的*/
 	private boolean enableRedirect = true;
 
+    /**支持禁止gzip压缩*/
+	private boolean disableGzip = false;
+
     /**禁用跳转，转为手工处理模式*/
 	public void disableRedirect() {
 		this.enableRedirect = false;
@@ -71,6 +74,16 @@ public class Browser {
 	/**开启跳转，默认是开启的*/
 	public void enableRedirect() {
 		this.enableRedirect = true;
+	}
+
+    /**禁用gzip*/
+	public void disableGzip() {
+		this.disableGzip = true;
+	}
+
+	/**启用gzip*/
+	public void enableGzip() {
+		this.disableGzip = false;
 	}
 
 	/**
@@ -598,7 +611,9 @@ public class Browser {
 		urlConnection.setReadTimeout(readTimeoutSeconds * 1000);
 		urlConnection.setRequestMethod(method);
 		urlConnection.setRequestProperty("User-agent", USER_AGENT);
-		urlConnection.setRequestProperty("Accept-Encoding", "gzip"); // support gzip
+		if (!disableGzip) {
+			urlConnection.setRequestProperty("Accept-Encoding", "gzip"); // support gzip
+		}
 
 		if(!enableRedirect) {
 			urlConnection.setInstanceFollowRedirects(false);
@@ -683,9 +698,11 @@ public class Browser {
 		handleCookies(headerFields);
 
 		boolean isGzip = false;
-		List<String> contentEncoding = headerFields.get("Content-Encoding");
-		isGzip = contentEncoding != null && !contentEncoding.isEmpty()
-				&& "gzip".equals(contentEncoding.get(0));
+		if (!disableGzip) {
+			List<String> contentEncoding = headerFields.get("Content-Encoding");
+			isGzip = contentEncoding != null && !contentEncoding.isEmpty()
+					&& "gzip".equals(contentEncoding.get(0));
+		}
 		
 		final InputStream in = isGzip ? new GZIPInputStream(urlConnection.getInputStream()) :
 				urlConnection.getInputStream();
