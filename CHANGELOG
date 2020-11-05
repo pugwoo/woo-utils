@@ -1,3 +1,4 @@
+2020年11月5日
 v0.9.2 - [add] 增加StringTools join方法对数组的支持
        - [add] ListUtils增加isEmpty isNotEmpty方法
        - [enhance] Browser支持禁用gzip
