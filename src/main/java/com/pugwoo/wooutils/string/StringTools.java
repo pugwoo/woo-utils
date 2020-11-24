@@ -1,8 +1,10 @@
 package com.pugwoo.wooutils.string;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.function.Predicate;
 
 /**
  * 2016年2月4日 11:29:00
@@ -235,6 +237,22 @@ public class StringTools {
 			isEmpty = false;
 		}
 		return sb.toString();
+	}
+
+	public static List<String> splitAndFilter(String str, String splitRegex,
+											  Predicate<String> predicate) {
+		if (str == null) {
+			return new ArrayList<>();
+		}
+
+		String[] strs = str.split(splitRegex);
+		List<String> result = new ArrayList<>();
+		for (String s : strs) {
+			if (predicate.test(s)) {
+				result.add(s);
+			}
+		}
+		return result;
 	}
 
 	/**

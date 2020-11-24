@@ -1,7 +1,10 @@
 package com.pugwoo.wooutils.string;
 
 import com.pugwoo.wooutils.collect.ListUtils;
+import com.pugwoo.wooutils.lang.EqualUtils;
 import org.junit.Test;
+
+import java.util.List;
 
 public class StringToolsTests {
 
@@ -65,5 +68,14 @@ public class StringToolsTests {
         assert !StringTools.isAlphabeticOrDigit("a5.4bc");
         assert !StringTools.isAlphabeticOrDigit("");
         assert !StringTools.isAlphabeticOrDigit(null);
+    }
+
+    @Test
+    public void testSplit() {
+        List<String> strings = StringTools.splitAndFilter("a;b;c;;;d",
+                ";", o -> StringTools.isNotBlank(o));
+        EqualUtils equalUtils = new EqualUtils();
+        equalUtils.ignoreListOrder(true);
+        assert equalUtils.isEqual(strings, ListUtils.newArrayList("a","b","c","d"));
     }
 }
