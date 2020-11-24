@@ -1,5 +1,6 @@
 package com.pugwoo.wooutils.string;
 
+import com.pugwoo.wooutils.collect.ListUtils;
 import org.junit.Test;
 
 public class StringToolsTests {
@@ -14,6 +15,34 @@ public class StringToolsTests {
         assert StringTools.isBlank(" \n ");
         assert StringTools.isBlank(" \r\n\t ");
         assert !StringTools.isBlank(" a ");
+
+        assert StringTools.isAnyEmpty();
+        assert StringTools.isAnyEmpty("a", null);
+        assert StringTools.isAnyEmpty("");
+        assert StringTools.isAnyEmpty("a", "", "b");
+        assert !StringTools.isAnyEmpty("a");
+        assert !StringTools.isAnyEmpty("a", "b");
+
+        assert StringTools.isAnyEmpty(ListUtils.newArrayList());
+        assert StringTools.isAnyEmpty(ListUtils.newArrayList(null));
+        assert StringTools.isAnyEmpty(ListUtils.newArrayList("a", "", "b"));
+        assert StringTools.isAnyEmpty(ListUtils.newArrayList(""));
+        assert !StringTools.isAnyEmpty(ListUtils.newArrayList("a"));
+        assert !StringTools.isAnyEmpty(ListUtils.newArrayList("a", "b"));
+
+        assert StringTools.isAnyBlank();
+        assert StringTools.isAnyBlank("a", null);
+        assert StringTools.isAnyBlank("  ");
+        assert StringTools.isAnyBlank("a", "  ", "b");
+        assert !StringTools.isAnyBlank("a");
+        assert !StringTools.isAnyBlank("a", "b");
+
+        assert StringTools.isAnyBlank(ListUtils.newArrayList());
+        assert StringTools.isAnyBlank(ListUtils.newArrayList(null));
+        assert StringTools.isAnyBlank(ListUtils.newArrayList("a", "  ", "b"));
+        assert StringTools.isAnyBlank(ListUtils.newArrayList("  "));
+        assert !StringTools.isAnyBlank(ListUtils.newArrayList("a"));
+        assert !StringTools.isAnyBlank(ListUtils.newArrayList("a", "b"));
     }
 
     @Test

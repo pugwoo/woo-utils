@@ -17,7 +17,41 @@ public class StringTools {
 	public static boolean isNotEmpty(String str) {
 		return !isEmpty(str);
 	}
-	
+
+	/**
+	 * 是否有任意一个String是空的
+	 * @param strs 当值为null或空数组时，返回true，即认为是空的
+	 */
+	public static boolean isAnyEmpty(String... strs) {
+		if (strs == null || strs.length == 0) {
+			return true;
+		}
+
+		for (String str : strs) {
+			if (isEmpty(str)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 是否有任意一个String是空的
+	 * @param strs 当值为null或空list时，返回true，即认为是空的
+	 */
+	public static boolean isAnyEmpty(List<String> strs) {
+		if (strs == null || strs.isEmpty()) {
+			return true;
+		}
+
+		for (String str : strs) {
+			if (isEmpty(str)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static boolean isBlank(String str) {
         if(isEmpty(str)) return true;
         for(char c : str.toCharArray()) {
@@ -30,6 +64,40 @@ public class StringTools {
 
 	public static boolean isNotBlank(String str) {
 		return !isBlank(str);
+	}
+
+	/**
+	 * 是否有任意一个String是空白的
+	 * @param strs 当值为null或空数组时，返回true，即认为是空白的
+	 */
+	public static boolean isAnyBlank(String... strs) {
+		if (strs == null || strs.length == 0) {
+			return true;
+		}
+
+		for (String str : strs) {
+			if (isBlank(str)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 是否有任意一个String是空白的
+	 * @param strs 当值为null或空list时，返回true，即认为是空白的
+	 */
+	public static boolean isAnyBlank(List<String> strs) {
+		if (strs == null || strs.isEmpty()) {
+			return true;
+		}
+
+		for (String str : strs) {
+			if (isBlank(str)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
