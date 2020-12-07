@@ -21,4 +21,16 @@ public class TestNumberUtils {
 
     }
 
+    @Test
+    public void testAvg() {
+        List<String> numbers = new ArrayList<>();
+        numbers.add("1.1");
+        numbers.add("1.2");
+
+        assert new BigDecimal("1.15").compareTo(NumberUtils.avg(numbers, o->o, 5))
+                == 0;
+        assert new BigDecimal("1.15").compareTo(NumberUtils.avg(numbers, o->o))
+                == 0;
+    }
+
 }

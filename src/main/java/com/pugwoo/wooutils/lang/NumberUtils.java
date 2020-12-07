@@ -1,6 +1,8 @@
 package com.pugwoo.wooutils.lang;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.function.Function;
@@ -133,7 +135,7 @@ public class NumberUtils {
 	 */
 	public static <T> BigDecimal sum(List<T> list, Function<? super T, ?> mapper) {
 		BigDecimal sum = BigDecimal.ZERO;
-		if(list == null) {
+		if(list == null || list.isEmpty()) {
 			return sum;
 		}
 		for(T t : list) {
@@ -162,4 +164,37 @@ public class NumberUtils {
 		}
 		return sum;
 	}
+
+	/**
+	 * 数值求平均值
+	 * @param list
+	 * @param mapper
+	 * @param decimalPlaces 保留小数点数，四舍五入
+	 * @return 数据不存在时返回0
+	 */
+	public static <T> BigDecimal avg(List<T> list, Function<? super T, ?> mapper, int decimalPlaces) {
+		if(list == null || list.isEmpty()) {
+			return BigDecimal.ZERO;
+		}
+
+		BigDecimal sum = sum(list, mapper);
+		return sum.divide(new BigDecimal(list.size()),
+				new MathContext(decimalPlaces, RoundingMode.HALF_UP));
+	}
+
+	/**
+	 * 数值求平均值
+	 * @param list
+	 * @param mapper
+	 * @return 数据不存在时返回0
+	 */
+	public static <T> BigDecimal avg(List<T> list, Function<? super T, ?> mapper) {
+		if(list == null || list.isEmpty()) {
+			return BigDecimal.ZERO;
+		}
+
+		BigDecimal sum = sum(list, mapper);
+		return sum.divide(new BigDecimal(list.size()));
+	}
+
 }
