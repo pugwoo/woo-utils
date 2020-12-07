@@ -1,5 +1,7 @@
 v0.9.3 - [add] StringTools增加isAnyBlank/isAllBlank和isAnyEmpty/isAllEmpty方法
        - [add] StringTools增加split字符 + filter结果
+       - [add]
+       - [move] ListUtils的sum方法移动到NumberUtils中
 
 2020年11月5日
 v0.9.2 - [add] 增加StringTools join方法对数组的支持

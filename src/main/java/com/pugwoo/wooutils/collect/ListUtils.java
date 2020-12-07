@@ -1,5 +1,7 @@
 package com.pugwoo.wooutils.collect;
 
+import com.pugwoo.wooutils.lang.NumberUtils;
+
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.Map.Entry;
@@ -401,29 +403,11 @@ public class ListUtils {
 	 * @param list
 	 * @param mapper
 	 * @return
+	 * @deprecated 请使用NumberUtils.sum，该接口将在高版本中删除
 	 */
+	@Deprecated
 	public static <T, R> BigDecimal sum(List<T> list, Function<? super T, ? extends R> mapper) {
-		BigDecimal sum = BigDecimal.ZERO;
-		if(list == null) {
-			return sum;
-		}
-		for(T t : list) {
-			if(t == null) continue;
-			Object val = mapper.apply(t);
-			if(val == null) continue;
-			BigDecimal a = null;
-			if(!(val instanceof BigDecimal)) {
-				try {
-					a = new BigDecimal(val.toString());
-				} catch (Exception e) {// ignore
-				}
-			} else {
-				a = (BigDecimal) val;
-			}
-			if(a == null) continue;
-			sum = sum.add(a);
-		}
-		return sum;
+		return NumberUtils.sum(list, mapper);
 	}
 	
 }

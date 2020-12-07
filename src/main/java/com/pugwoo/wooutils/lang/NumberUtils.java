@@ -2,6 +2,8 @@ package com.pugwoo.wooutils.lang;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.util.List;
+import java.util.function.Function;
 
 public class NumberUtils {
 	
@@ -121,5 +123,43 @@ public class NumberUtils {
 	public static BigDecimal roundUp(BigDecimal number, int decimalPlaces) {
 	    if(number == null) return null;
 	    return number.setScale(decimalPlaces, BigDecimal.ROUND_HALF_UP);
+	}
+
+	/**
+	 * 数值求和
+	 * @param list
+	 * @param mapper
+	 * @return
+	 */
+	public static <T> BigDecimal sum(List<T> list, Function<? super T, ?> mapper) {
+		BigDecimal sum = BigDecimal.ZERO;
+		if(list == null) {
+			return sum;
+		}
+		for(T t : list) {
+			if(t == null) {
+				continue;
+			}
+			Object val = mapper.apply(t);
+			if(val == null) {
+				continue;
+			}
+
+			BigDecimal a = null;
+			if(!(val instanceof BigDecimal)) {
+				try {
+					a = new BigDecimal(val.toString());
+				} catch (Exception e) { // ignore
+				}
+			} else {
+				a = (BigDecimal) val;
+			}
+
+			if(a == null) {
+				continue;
+			}
+			sum = sum.add(a);
+		}
+		return sum;
 	}
 }
