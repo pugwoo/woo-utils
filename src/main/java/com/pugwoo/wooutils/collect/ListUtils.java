@@ -14,18 +14,32 @@ public class ListUtils {
 
 	/**
 	 * 将数组转换成list，不同于Arrays.asList(array)，这个方法返回的数组可以对其进行修改操作
-	 * @param array
-	 * @param <T>
-	 * @return
+	 * @param elements 数组
 	 */
-	public static <T> List<T> toList(T[] array) {
-		if(array == null || array.length == 0) {
+	@SafeVarargs
+	public static <E> List<E> newArrayList(E... elements) {
+		if(elements == null || elements.length == 0) {
 			return new ArrayList<>();
 		}
-		List<T> list = new ArrayList<>(array.length);
-		for(T t : array) {
-			list.add(t);
+
+		List<E> list = new ArrayList<>(elements.length);
+		for(E e : elements) {
+			list.add(e);
 		}
+
+		return list;
+	}
+
+    public static <E> List<E> toList(Collection<E> c) {
+		if (c == null) {
+			return new ArrayList<>();
+		}
+
+		List<E> list = new ArrayList<>(c.size());
+		for (E e : c) {
+			list.add(e);
+		}
+
 		return list;
 	}
 	
@@ -229,20 +243,6 @@ public class ListUtils {
 			sets.add(r);
 		}
 		return false;
-	}
-
-	@SafeVarargs
-	public static <E> List<E> newArrayList(E... elements) {
-		if(elements == null || elements.length == 0) {
-			return new ArrayList<>();
-		}
-		
-		List<E> list = new ArrayList<>(elements.length);
-		for(E e : elements) {
-			list.add(e);
-		}
-		
-		return list;
 	}
 
 	/**
