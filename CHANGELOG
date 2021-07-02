@@ -1,3 +1,6 @@
+2021年7月2日
+v1.0.0 - [del] 移除redis和高速缓存部分，使用该功能请用：https://github.com/pugwoo/redis-helper
+
 2021年2月25日
 v0.9.3 - [add] StringTools增加isAnyBlank/isAllBlank和isAnyEmpty/isAllEmpty方法
        - [add] StringTools增加split字符 + filter结果
