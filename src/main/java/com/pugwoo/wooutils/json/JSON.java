@@ -1,6 +1,7 @@
 package com.pugwoo.wooutils.json;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -74,6 +75,21 @@ public class JSON {
 	}
 	
 	/**
+	 * 解析json字符串 通过TypeReference静态指定泛型
+	 *  例: JSON.parse(jsonString, new TypeReference< List < Date > >() {})
+	 * @param str json字符串
+	 * @param typeReference 类型引用实例
+	 * @return t
+	 */
+	public static <T> T parse(String str, TypeReference<T> typeReference) {
+		try {
+			return objectMapper.readValue(str, typeReference);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
 	 * 解析字符串为Map
 	 * @param str
 	 * @return
@@ -136,7 +152,20 @@ public class JSON {
 		}
 		return (T) parse(toJson(t), t.getClass());
 	}
-
+	
+	/**
+	 * 使用json的方式克隆对象，通过TypeReference静态指定泛型
+	 * 例: JSON.clone(obj, new TypeReference< List < Date > >() {})
+	 * @param t
+	 * @return
+	 */
+	public static <T> T clone(T t, TypeReference<T> typeReference) {
+		if(t == null) {
+			return null;
+		}
+		return parse(JSON.toJson(t), typeReference);
+	}
+	
 	/**
 	 * 允许拿到ObjectMapper进行修改
 	 * @return

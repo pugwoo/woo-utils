@@ -1,3 +1,7 @@
+2021年7月3日
+v1.0.1 - [add] JSON.parse支持TypeReference
+         [add] JSON.clone支持TypeReference
+
 2021年7月2日
 v1.0.0 - [del] 移除redis和高速缓存部分，使用该功能请用：https://github.com/pugwoo/redis-helper
 
