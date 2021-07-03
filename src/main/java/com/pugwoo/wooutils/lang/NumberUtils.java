@@ -1,9 +1,7 @@
 package com.pugwoo.wooutils.lang;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.List;
 import java.util.function.Function;
 
@@ -83,31 +81,23 @@ public class NumberUtils {
 	}
 	
 	/**
-	 * 保留decimalPlaces位小数，例如：
+	 * 保留decimalPlaces位小数，四舍五入 例如：
 	 * 输入 (1.236, 2) 输出1.24
 	 * 输入 (1.2, 2) 输出1.20
-	 * @param number
-	 * @param decimalPlaces
+	 * @param number 注意精度问题 建议使用 {@link #roundUp(BigDecimal, int)}
+	 * @param decimalPlaces 保留小数位数
 	 * @return
 	 */
 	public static String roundUp(double number, int decimalPlaces) {
-		StringBuilder format = new StringBuilder("#");
-		if(decimalPlaces > 0) {
-			format.append(".");
-		}
-		for(int i = 0; i < decimalPlaces; i++) {
-			format.append("0");
-		}
-		DecimalFormat df = new DecimalFormat(format.toString());
-		return df.format(number);
+		return roundUp(new BigDecimal(Double.toString(number)), decimalPlaces).toString();
 	}
 	
 	/**
 	 * 保留decimalPlaces位小数，例如：
 	 * 输入 (1.236, 2) 输出1.24
 	 * 输入 (1.2, 2) 输出1.20
-	 * @param number
-	 * @param decimalPlaces
+	 * @param number 注意精度问题 建议使用 {@link #roundUp(BigDecimal, int)}
+	 * @param decimalPlaces 保留小数位数
 	 * @return
 	 */
 	public static double roundUpToDouble(double number, int decimalPlaces) {
@@ -123,40 +113,40 @@ public class NumberUtils {
 	 * @return
 	 */
 	public static BigDecimal roundUp(BigDecimal number, int decimalPlaces) {
-	    if(number == null) return null;
+	    if(number == null) { return null; }
 	    return number.setScale(decimalPlaces, BigDecimal.ROUND_HALF_UP);
 	}
-
+	
 	/**
 	 * 数值求和
-	 * @param list
-	 * @param mapper
-	 * @return
+	 * @param list 待计算list item默认可以转为BigDecimal，如果转不了视为0
+	 * @return 数据不存在时返回0
+	 */
+	public static <T> BigDecimal sum(List<T> list) {
+		return sum(list, null);
+	}
+	
+	/**
+	 * 数值求和
+	 * @param list 待计算list
+	 * @param mapper 不提供视为item可以转为BigDecimal
+	 *               item -> 可以转为BigDecimal，如果转不了视为0
+	 * @return 数据不存在时返回0
 	 */
 	public static <T> BigDecimal sum(List<T> list, Function<? super T, ?> mapper) {
 		BigDecimal sum = BigDecimal.ZERO;
 		if(list == null || list.isEmpty()) {
 			return sum;
 		}
+		if (mapper == null) {
+			mapper = o -> o;
+		}
 		for(T t : list) {
 			if(t == null) {
 				continue;
 			}
 			Object val = mapper.apply(t);
-			if(val == null) {
-				continue;
-			}
-
-			BigDecimal a = null;
-			if(!(val instanceof BigDecimal)) {
-				try {
-					a = new BigDecimal(val.toString());
-				} catch (Exception e) { // ignore
-				}
-			} else {
-				a = (BigDecimal) val;
-			}
-
+			BigDecimal a = parseBigDecimal(val);
 			if(a == null) {
 				continue;
 			}
@@ -164,37 +154,34 @@ public class NumberUtils {
 		}
 		return sum;
 	}
-
+	
 	/**
 	 * 数值求平均值
-	 * @param list
-	 * @param mapper
+	 * @param list 待计算的list item默认可以转为BigDecimal，如果转不了视为0
 	 * @param decimalPlaces 保留小数点数，四舍五入
+	 * @return 数据不存在时返回0
+	 */
+	public static <T> BigDecimal avg(List<T> list, int decimalPlaces) {
+		return avg(list, null, decimalPlaces);
+	}
+	
+	/**
+	 * 数值求平均值
+	 * @param list   待计算的list
+	 * @param mapper item -> 可以转为BigDecimal，如果转不了视为0
+	 * @param decimalPlaces 保留小数点数，四舍五入
+	 *                      计算平均值出现无限循环小数而不指定保留小数位数会抛ArithmeticException
 	 * @return 数据不存在时返回0
 	 */
 	public static <T> BigDecimal avg(List<T> list, Function<? super T, ?> mapper, int decimalPlaces) {
 		if(list == null || list.isEmpty()) {
 			return BigDecimal.ZERO;
 		}
-
-		BigDecimal sum = sum(list, mapper);
-		return sum.divide(new BigDecimal(list.size()),
-				new MathContext(decimalPlaces, RoundingMode.HALF_UP));
-	}
-
-	/**
-	 * 数值求平均值
-	 * @param list
-	 * @param mapper
-	 * @return 数据不存在时返回0
-	 */
-	public static <T> BigDecimal avg(List<T> list, Function<? super T, ?> mapper) {
-		if(list == null || list.isEmpty()) {
-			return BigDecimal.ZERO;
+		if (mapper == null) {
+			mapper = o -> o;
 		}
-
 		BigDecimal sum = sum(list, mapper);
-		return sum.divide(new BigDecimal(list.size()));
+		return sum.divide(new BigDecimal(list.size()), decimalPlaces, RoundingMode.HALF_UP);
 	}
-
+	
 }

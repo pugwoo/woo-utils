@@ -1,6 +1,12 @@
 2021年7月3日
 v1.0.1 - [add] JSON.parse支持TypeReference
-         [add] JSON.clone支持TypeReference
+       - [add] JSON.clone支持TypeReference
+       - [fix] NumberUtils.roundUp 四舍五入及double精度的问题
+       - [enhance] NumberUtils.sum，如果类型转换参数mapper不提供，默认认为item可用无需转换;
+       - [add] NumberUtils.sum 无需提供类型转换参数mapper
+       - [enhance] NumberUtils.avg，如果类型转换参数mapper不提供，默认认为item可用无需转换
+       - [add] NumberUtils.avg 无需提供类型转换参数mapper
+       - [del] NumberUtils.avg 无指定保留小数位数的方法，因计算平均值出现无限循环小数而不指定保留小数位数会抛ArithmeticException而弃用
 
 2021年7月2日
 v1.0.0 - [del] 移除redis和高速缓存部分，使用该功能请用：https://github.com/pugwoo/redis-helper
