@@ -141,7 +141,7 @@ public class JSON {
 	}
 	
 	/**
-	 * 使用json的方式克隆对象，【不支持泛型】
+	 * 使用json的方式克隆对象，【不支持泛型，请使用clone(T t, TypeReference<T> typeReference) 以支持泛型】
 	 * @param t
 	 * @return
 	 */

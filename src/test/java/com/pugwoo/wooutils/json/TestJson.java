@@ -96,7 +96,7 @@ public class TestJson {
 		System.out.println("\n================ clone实例-类型引用");
 		Map<String, Date> map = new HashMap<>();
 		map.put("date", new Date());
-		// clone 不支持泛型
+
 		Map<String, Date> mapClone = JSON.clone(map, new TypeReference<Map<String, Date>>() {});
 		
 		System.out.println("     map: " + map);
