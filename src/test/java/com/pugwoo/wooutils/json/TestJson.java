@@ -1,5 +1,7 @@
 package com.pugwoo.wooutils.json;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.Test;
 
@@ -19,6 +21,36 @@ public class TestJson {
 		public void setMap(Map<String, Object> map) {
 			this.map = map;
 		}
+	}
+
+	public static class Student {
+		@JsonSetter(nulls= Nulls.AS_EMPTY) // 这个是生效的，可以使得当为null时，设置为空字符串
+		private String name = "default"; // 这里设置的默认值，会被json里的null值覆盖；但是如果json里面没有这个属性，那就是默认值了；所以这里还做不到，如果json里是null，怎么让它用默认值，而非转成null；除非改写setter方法，但也麻烦
+
+		@JsonSetter(nulls= Nulls.AS_EMPTY) // 这个有效，当是null时，值为0
+		private Integer age = 1;
+
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		public Integer getAge() {
+			return age;
+		}
+		public void setAge(Integer age) {
+			this.age = age;
+		}
+	}
+
+	@Test
+	public void testNullValue() {
+		String json = "{\"name\":null,\"age\":null}";
+		Student student = JSON.parse(json, Student.class);
+		System.out.println(student.getName() + "," + student.getAge());
+		assert student.getName().isEmpty();
+		assert student.getAge() == 0;
 	}
 	
 	@Test
