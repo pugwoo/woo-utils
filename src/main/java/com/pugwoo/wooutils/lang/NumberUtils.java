@@ -105,18 +105,17 @@ public class NumberUtils {
 	}
 	
 	/**
-	 * 保留decimalPlaces位小数，例如：
+	 * 四舍五入保留decimalPlaces位小数，例如：
 	 * 输入 (1.236, 2) 输出1.24
 	 * 输入 (1.2, 2) 输出1.20
-	 * @param number
-	 * @param decimalPlaces
-	 * @return
+	 * @param number 数字
+	 * @param decimalPlaces 保留的小数点位数
 	 */
 	public static BigDecimal roundUp(BigDecimal number, int decimalPlaces) {
 	    if(number == null) { return null; }
-	    return number.setScale(decimalPlaces, BigDecimal.ROUND_HALF_UP);
+	    return number.setScale(decimalPlaces, RoundingMode.HALF_UP);
 	}
-	
+
 	/**
 	 * 数值求和
 	 * @param list 待计算list item默认可以转为BigDecimal，如果转不了视为0
