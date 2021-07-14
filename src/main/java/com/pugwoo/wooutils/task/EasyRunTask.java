@@ -27,15 +27,15 @@ public class EasyRunTask {
 	private final int concurrentNum;
 	
 	/**抛出的异常记录[线程安全]*/
-	private List<Throwable> exceptions = new Vector<Throwable>();
+	private final List<Throwable> exceptions = new Vector<>();
 	/**任务总数[线程安全]*/
-	private AtomicInteger total = new AtomicInteger(0);
+	private final AtomicInteger total = new AtomicInteger(0);
 	/**执行的任务总数[线程安全]*/
-	private AtomicInteger processed = new AtomicInteger(0);
+	private final AtomicInteger processed = new AtomicInteger(0);
 	/**执行成功的任务总数[线程安全]*/
-	private AtomicInteger success = new AtomicInteger(0);
+	private final AtomicInteger success = new AtomicInteger(0);
 	/**执行失败的任务总数[线程安全]*/
-	private AtomicInteger fail = new AtomicInteger(0);
+	private final AtomicInteger fail = new AtomicInteger(0);
 	
 	/**任务开始时间*/
 	private Date startTime;
@@ -54,7 +54,7 @@ public class EasyRunTask {
 	
 	/**
 	 * 启动任务
-	 * @return
+	 * @return 操作结果
 	 */
 	public synchronized TaskResult start() {
 		return run(true);
@@ -62,7 +62,7 @@ public class EasyRunTask {
 	
 	/**
 	 * 停止之后恢复任务
-	 * @return
+	 * @return 操作结果
 	 */
 	public synchronized TaskResult resume() {
 		return run(false);
@@ -70,7 +70,7 @@ public class EasyRunTask {
 	
 	/**
 	 * 停止任务
-	 * @return
+	 * @return 操作结果
 	 */
 	public synchronized TaskResult stop() {
 		if(status == TaskStatusEnum.RUNNING) {
@@ -109,53 +109,50 @@ public class EasyRunTask {
 		}
 		status = TaskStatusEnum.RUNNING;
 		
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while(true) {
-					synchronized (that) { // 请求停止
-						if(status == TaskStatusEnum.STOPPING) {
-							status = TaskStatusEnum.STOPPED;
-							endTime = new Date();
-							return;
-						}
-					}
-					
-					int restCount = getRestCount();
-					if(getRestCount() <= 0) {
-						synchronized (that) { // 结束任务
-							status = TaskStatusEnum.FINISHED;
-							endTime = new Date();
-						}
+		new Thread(() -> {
+			while(true) {
+				synchronized (that) { // 请求停止
+					if(status == TaskStatusEnum.STOPPING) {
+						status = TaskStatusEnum.STOPPED;
+						endTime = new Date();
 						return;
 					}
-					
-					// 多线程执行任务，实际上，是一批一批地去执行，这样才能中途控制其停下
-					int nThreads = Math.min(restCount, concurrentNum);
-					ExecuteThem executeThem = new ExecuteThem(nThreads);
-					for(int i = 0; i < nThreads; i++) {
-					    executeThem.add(new Runnable() {
-							@Override
-							public void run() {
-								try {
-									TaskResult result = task.runStep();
-									if(result == null || !result.isSuccess()) {
-										fail.incrementAndGet();
-									} else {
-										success.incrementAndGet();
-									}
-								} catch (Throwable e) {
-									exceptions.add(e);
-									fail.incrementAndGet();
-								} finally {
-									processed.incrementAndGet();
-								}
-							}
-						});	
-					}
-					executeThem.waitAllTerminate();
-					total.set(processed.get() + getRestCount());
 				}
+
+				int restCount = getRestCount();
+				if(getRestCount() <= 0) {
+					synchronized (that) { // 结束任务
+						status = TaskStatusEnum.FINISHED;
+						endTime = new Date();
+					}
+					return;
+				}
+
+				// 多线程执行任务，实际上，是一批一批地去执行，这样才能中途控制其停下
+				int nThreads = Math.min(restCount, concurrentNum);
+				ExecuteThem executeThem = new ExecuteThem(nThreads);
+				for(int i = 0; i < nThreads; i++) {
+					executeThem.add(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								TaskResult result = task.runStep();
+								if(result == null || !result.isSuccess()) {
+									fail.incrementAndGet();
+								} else {
+									success.incrementAndGet();
+								}
+							} catch (Throwable e) {
+								exceptions.add(e);
+								fail.incrementAndGet();
+							} finally {
+								processed.incrementAndGet();
+							}
+						}
+					});
+				}
+				executeThem.waitAllTerminate();
+				total.set(processed.get() + getRestCount());
 			}
 		}, "EasyRunTaskExecute").start();
 
@@ -164,50 +161,42 @@ public class EasyRunTask {
 
 	/**
 	 * 获得当前的任务状态
-	 * @return
 	 */
 	public TaskStatusEnum getStatus() {
 		return status;
 	}
 	/**
 	 * 获得当前的异常
-	 * @return
 	 */
 	public List<Throwable> getExceptions() {
 		return exceptions;
 	}
 	/**
 	 * 获得所有的记录数
-	 * @return
 	 */
 	public int getTotal() {
 		return total.get();
 	}
 	/**
 	 * 获得已处理的记录数
-	 * @return
 	 */
 	public int getProcessed() {
 		return processed.get();
 	}
 	/**
 	 * 获得成功的记录数
-	 * @return
 	 */
 	public int getSuccess() {
 		return success.get();
 	}
 	/**
 	 * 获得失败的记录数
-	 * @return
 	 */
 	public int getFail() {
 		return fail.get();
 	}
-
 	/**
 	 * 获得任务执行开始时间
-	 * @return
 	 */
 	public Date getStartTime() {
 		return startTime;
@@ -215,7 +204,6 @@ public class EasyRunTask {
 
 	/**
 	 * 获得任务执行结束时间
-	 * @return
 	 */
 	public Date getEndTime() {
 		return endTime;
