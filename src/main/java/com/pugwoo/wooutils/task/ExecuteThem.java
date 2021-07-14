@@ -25,11 +25,11 @@ public class ExecuteThem {
      * 经过测试，320万的任务堆积，大概占用139M内存，即每个任务占用约50字节。
      * 所以任务堆积几百万本身产生的问题就要大于内存问题，所以这里仍然使用Executors.newFixedThreadPool，不会有问题。
      */
-	private ExecutorService executorService;
+	private final ExecutorService executorService;
 	
-	private List<Future<?>> futures = new ArrayList<>();
+	private final List<Future<?>> futures = new ArrayList<>();
 	
-	private List<Exception> exceptions = new ArrayList<>();
+	private final List<Exception> exceptions = new ArrayList<>();
 
 	public ExecuteThem() {
 		executorService = Executors.newFixedThreadPool(10,
@@ -55,18 +55,25 @@ public class ExecuteThem {
 
 	/**
 	 * runnable任务使用execute加入，结果将不会在返回到结果中
-	 * @param runnables
+	 * @param runnables 任务
 	 */
 	public void add(Runnable... runnables) {
 		for(Runnable runable : runnables) {
 			executorService.execute(runable);
 		}
 	}
-	
-	public void add(Callable<?>... callables) {
+
+	/**
+	 * callable任务加入执行，返回本次加入的future对象
+	 */
+	public List<Future<?>> add(Callable<?>... callables) {
+		List<Future<?>> curFutures = new ArrayList<>();
 		for(Callable<?> callable : callables) {
-			futures.add(executorService.submit(callable));
+			Future<?> future = executorService.submit(callable);
+			futures.add(future);
+			curFutures.add(future);
 		}
+		return curFutures;
 	}
 	
 	/**
@@ -75,8 +82,7 @@ public class ExecuteThem {
 	 * 对于Callable的返回值按顺序返回，返回已经执行的任务的值，如果执行任务抛出异常，那么返回值为null
 	 * 同时线程保存下异常
 	 * 
-	 * 主要：如果线程池被interrupted，那么线程池会放弃后面未执行的任务。
-	 * @return
+	 * 注意：如果线程池被interrupted，那么线程池会放弃后面未执行的任务。
 	 */
 	public List<Object> waitAllTerminate() {
 		return waitAllTerminate(Long.MAX_VALUE);
@@ -96,10 +102,7 @@ public class ExecuteThem {
 		for(Future<?> future : futures) {
 			try {
 				results.add(future.get());
-			} catch (InterruptedException e) {
-				results.add(null);
-				exceptions.add(e);
-			} catch (ExecutionException e) {
+			} catch (InterruptedException | ExecutionException e) {
 				results.add(null);
 				exceptions.add(e);
 			}
@@ -108,12 +111,18 @@ public class ExecuteThem {
 		return results;
 	}
 
+	/**
+	 * 查询执行任务抛出的异常
+	 */
+	public List<Exception> getExceptions() {
+		return exceptions;
+	}
 
 	private static class MyThreadFactory implements ThreadFactory {
 
-		private AtomicInteger count = new AtomicInteger(1);
+		private final AtomicInteger count = new AtomicInteger(1);
 
-		private String threadNamePrefix;
+		private final String threadNamePrefix;
 
 		public MyThreadFactory(String threadNamePrefix) {
 			this.threadNamePrefix = threadNamePrefix;
