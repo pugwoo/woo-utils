@@ -129,7 +129,7 @@ public class NumberUtils {
 	 * 数值求和
 	 * @param list 待计算list
 	 * @param mapper 不提供视为item可以转为BigDecimal
-	 *               item -> 可以转为BigDecimal，如果转不了视为0
+	 *               item 可以转为BigDecimal，如果转不了视为0
 	 * @return 数据不存在时返回0
 	 */
 	public static <T> BigDecimal sum(List<T> list, Function<? super T, ?> mapper) {
@@ -167,7 +167,7 @@ public class NumberUtils {
 	/**
 	 * 数值求平均值
 	 * @param list   待计算的list
-	 * @param mapper item -> 可以转为BigDecimal，如果转不了视为0
+	 * @param mapper item 可以转为BigDecimal，如果转不了视为0
 	 * @param decimalPlaces 保留小数点数，四舍五入
 	 *                      计算平均值出现无限循环小数而不指定保留小数位数会抛ArithmeticException
 	 * @return 数据不存在时返回0

@@ -76,7 +76,6 @@ public class JSON {
 	
 	/**
 	 * 解析json字符串 通过TypeReference静态指定泛型
-	 *  例: JSON.parse(jsonString, new TypeReference< List < Date > >() {})
 	 * @param str json字符串
 	 * @param typeReference 类型引用实例
 	 * @return t
@@ -141,7 +140,7 @@ public class JSON {
 	}
 	
 	/**
-	 * 使用json的方式克隆对象，【不支持泛型，请使用clone(T t, TypeReference<T> typeReference) 以支持泛型】
+	 * 使用json的方式克隆对象，【不支持泛型，请使用clone(T t, TypeReference typeReference) 以支持泛型】
 	 * @param t
 	 * @return
 	 */
@@ -155,7 +154,6 @@ public class JSON {
 	
 	/**
 	 * 使用json的方式克隆对象，通过TypeReference静态指定泛型
-	 * 例: JSON.clone(obj, new TypeReference< List < Date > >() {})
 	 * @param t
 	 * @return
 	 */
