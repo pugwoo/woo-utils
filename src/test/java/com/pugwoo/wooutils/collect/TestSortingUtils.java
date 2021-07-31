@@ -1,7 +1,6 @@
 package com.pugwoo.wooutils.collect;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class TestSortingUtils {
 
@@ -27,5 +26,17 @@ public class TestSortingUtils {
 		for(String str : list) {
 			System.out.println(str);
 		}
+	}
+
+    // 原生jdk1.8的排序写法
+	public void testJdk() {
+		// 先定义一个comparator
+		Comparator<Map<String, Object>> mapComparator = Comparator
+				.<Map<String, Object>>nullsLast((o1, o2) -> 0)
+				.thenComparing(o -> Integer.valueOf(o.get("a").toString()), Comparator.nullsLast(Comparator.reverseOrder()))
+				.thenComparing(o -> Integer.valueOf(o.get("a").toString()), Comparator.nullsLast(Comparator.naturalOrder()));
+
+		// 然后就可以用这个去排序了
+		// Collections.sort();
 	}
 }
