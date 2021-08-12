@@ -1,3 +1,5 @@
+v1.0.2 - [add] DateUtils增加1种日期格式
+
 2021年7月14日
 v1.0.1 - [add] JSON.parse支持TypeReference
        - [add] JSON.clone支持TypeReference
