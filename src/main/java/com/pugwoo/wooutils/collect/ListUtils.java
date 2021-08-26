@@ -180,6 +180,20 @@ public class ListUtils {
 	}
 
 	/**
+	 *  group by
+	 * @param list
+	 * @param keyMapper
+	 * @param <T>
+	 * @param <K>
+	 * @return
+	 */
+	public static <T, K> Map<K, List<T>> GroupBy(List<T> list,
+			Function<? super T, ? extends K> keyMapper) {
+		return toMapList(list,keyMapper,o->o);
+	}
+
+
+	/**
 	 * filter一个list
 	 * @param list
 	 * @param predicate
