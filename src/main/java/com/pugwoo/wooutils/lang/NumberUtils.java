@@ -167,6 +167,62 @@ public class NumberUtils {
 	}
 
 	/**
+	 * 求最小值
+	 * @param list 待计算list
+	 * @param mapper 转换成比较类型
+	 * @return 不存在时返回null
+	 */
+	public static <T, R extends Comparable<R>> R min(List<T> list,
+													 Function<? super T, R> mapper) {
+		if (list == null || list.isEmpty()) {
+			return null;
+		}
+
+		R min = null;
+		for (T t : list) {
+			if (t == null) {
+				continue;
+			}
+			R r = mapper.apply(t);
+			if (r == null) {
+				continue;
+			}
+			if (min == null || r.compareTo(min) < 0) {
+				min = r;
+			}
+		}
+		return min;
+	}
+
+	/**
+	 * 求最大值
+	 * @param list 待计算list
+	 * @param mapper 转换成比较类型
+	 * @return 不存在时返回null
+	 */
+	public static <T, R extends Comparable<R>> R max(List<T> list,
+													 Function<? super T, R> mapper) {
+		if (list == null || list.isEmpty()) {
+			return null;
+		}
+
+		R max = null;
+		for (T t : list) {
+			if (t == null) {
+				continue;
+			}
+			R r = mapper.apply(t);
+			if (r == null) {
+				continue;
+			}
+			if (max == null || r.compareTo(max) > 0) {
+				max = r;
+			}
+		}
+		return max;
+	}
+
+	/**
 	 * 数值求和
 	 * @param list 待计算list item默认可以转为BigDecimal，如果转不了视为0
 	 * @return 数据不存在时返回0

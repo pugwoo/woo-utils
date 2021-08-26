@@ -147,4 +147,14 @@ public class TestNumberUtils {
         assert new BigDecimal("0").compareTo(NumberUtils.avg(numberList, o -> o, 5)) == 0;
     }
 
+    @Test
+    public void testMinMax() {
+        List<Integer> list = ListUtils.newArrayList(8,1,3,2,0,9,4);
+        Integer min = NumberUtils.min(list, o -> o);
+        Integer max = NumberUtils.max(list, o -> o);
+
+        assert min == 0;
+        assert max == 9;
+    }
+
 }

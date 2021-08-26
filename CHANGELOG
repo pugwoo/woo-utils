@@ -1,4 +1,7 @@
 2021年8月26日
+v1.0.4 - [add] NumberUtils增加min和max方法
+
+2021年8月26日
 v1.0.3 - [add] ListUtils增加groupBy方法，等同于toMapList方法
        - [add] NumberUtils增加percent和divide方法
 
