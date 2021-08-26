@@ -9,7 +9,6 @@ public class NumberUtils {
 	
 	/**
 	 * 转换成integer，不会抛出异常，转换失败返回null
-	 * @return
 	 */
 	public static Integer parseInt(Object obj) {
 		if(obj == null) {
@@ -19,7 +18,7 @@ public class NumberUtils {
 			return (Integer) obj;
 		}
 		try {
-			return new Integer(obj.toString().trim());
+			return Integer.valueOf(obj.toString().trim());
 		} catch (Exception e) {
 			return null;
 		}
@@ -27,7 +26,6 @@ public class NumberUtils {
 	
 	/**
 	 * 转换成Long，不会抛出异常，转换失败返回null
-	 * @return
 	 */
 	public static Long parseLong(Object obj) {
 		if(obj == null) {
@@ -37,7 +35,7 @@ public class NumberUtils {
 			return (Long) obj;
 		}
 		try {
-			return new Long(obj.toString().trim());
+			return Long.valueOf(obj.toString().trim());
 		} catch (Exception e) {
 			return null;
 		}
@@ -45,7 +43,6 @@ public class NumberUtils {
 	
 	/**
 	 * 转换成Double，不会抛出异常，转换失败返回null
-	 * @return
 	 */
 	public static Double parseDouble(Object obj) {
 		if(obj == null) {
@@ -55,7 +52,7 @@ public class NumberUtils {
 			return (Double) obj;
 		}
 		try {
-			return new Double(obj.toString().trim());
+			return Double.valueOf(obj.toString().trim());
 		} catch (Exception e) {
 			return null;
 		}
@@ -63,8 +60,6 @@ public class NumberUtils {
 	
 	/**
 	 * 转换成BigDecimal，不会抛出异常，转换失败返回null
-	 * @param obj
-	 * @return
 	 */
 	public static BigDecimal parseBigDecimal(Object obj) {
 		if(obj == null) {
@@ -86,7 +81,6 @@ public class NumberUtils {
 	 * 输入 (1.2, 2) 输出1.20
 	 * @param number 注意精度问题 建议使用 {@link #roundUp(BigDecimal, int)}
 	 * @param decimalPlaces 保留小数位数
-	 * @return
 	 */
 	public static String roundUp(double number, int decimalPlaces) {
 		return roundUp(new BigDecimal(Double.toString(number)), decimalPlaces).toString();
@@ -98,10 +92,9 @@ public class NumberUtils {
 	 * 输入 (1.2, 2) 输出1.20
 	 * @param number 注意精度问题 建议使用 {@link #roundUp(BigDecimal, int)}
 	 * @param decimalPlaces 保留小数位数
-	 * @return
 	 */
 	public static double roundUpToDouble(double number, int decimalPlaces) {
-		return new Double(roundUp(number, decimalPlaces));
+		return Double.parseDouble(roundUp(number, decimalPlaces));
 	}
 	
 	/**
