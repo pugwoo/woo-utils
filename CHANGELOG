@@ -1,4 +1,5 @@
 v1.0.3 - [add] ListUtils增加groupBy方法，等同于toMapList方法
+       - [add] NumberUtils增加percent和divide方法
 
 2021年8月12日
 v1.0.2 - [add] DateUtils增加1种日期格式

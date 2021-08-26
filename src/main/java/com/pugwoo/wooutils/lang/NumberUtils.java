@@ -74,7 +74,64 @@ public class NumberUtils {
 			return null;
 		}
 	}
-	
+
+	/**
+	 * 计算百分比
+	 */
+	public static int percent(Integer num, Integer total) {
+		if (num == null || total == null || total == 0) {
+			return 0;
+		}
+		return (int) (num * 100.0 / total);
+	}
+
+	/**
+	 * 计算百分比
+	 */
+	public static int percent(BigDecimal num, BigDecimal total) {
+		if (num == null || total == null || total.compareTo(BigDecimal.ZERO) == 0) {
+			return 0;
+		}
+
+		return (int) (num.doubleValue() * 100.0 / total.doubleValue());
+	}
+
+	/**
+	 * 除法，四舍五入
+	 * @param scale 保持N位小数
+	 */
+	public static BigDecimal divide(BigDecimal a, BigDecimal b, Integer scale) {
+		if (scale == null) {
+			scale = 0;
+		}
+		if (a == null || b == null) {
+			return null;
+		}
+		return a.divide(b, scale, RoundingMode.HALF_UP);
+	}
+
+	/**
+	 * 除法，四舍五入
+	 * @param scale 保持N位小数
+	 */
+	public static BigDecimal divide(BigDecimal a, Integer b, Integer scale) {
+		if (a == null || b == null) {
+			return null;
+		}
+		return divide(a, BigDecimal.valueOf(b), scale);
+	}
+
+	/**
+	 * 除法，四舍五入
+	 * @param scale 保持N位小数
+	 */
+	public static BigDecimal divide(Integer a, BigDecimal b, Integer scale) {
+		if (a == null || b == null) {
+			return null;
+		}
+		return divide(BigDecimal.valueOf(a), b, scale);
+	}
+
 	/**
 	 * 保留decimalPlaces位小数，四舍五入 例如：
 	 * 输入 (1.236, 2) 输出1.24
