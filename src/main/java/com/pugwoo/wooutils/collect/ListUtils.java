@@ -36,9 +36,7 @@ public class ListUtils {
 		}
 
 		List<E> list = new ArrayList<>(c.size());
-		for (E e : c) {
-			list.add(e);
-		}
+		list.addAll(c);
 
 		return list;
 	}
