@@ -180,18 +180,16 @@ public class ListUtils {
 	}
 
 	/**
-	 *  group by
+	 *  group by （转换list为map）
 	 * @param list
 	 * @param keyMapper
 	 * @param <T>
 	 * @param <K>
 	 * @return
 	 */
-	public static <T, K> Map<K, List<T>> GroupBy(List<T> list,
-			Function<? super T, ? extends K> keyMapper) {
+	public static <T, K> Map<K, List<T>> groupBy(List<T> list, Function<? super T, ? extends K> keyMapper) {
 		return toMapList(list,keyMapper,o->o);
 	}
-
 
 	/**
 	 * filter一个list
