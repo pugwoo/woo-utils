@@ -1,4 +1,6 @@
 v1.0.5 - [add] ListUtils增加适用于数组的filter/forEach/transform方法
+       - [add] JSON.parse支持多个泛型（原来只支持1或2个泛型）
+       - [del] 移除JSON.parse的JavaType传参的方法
 
 2021年8月26日
 v1.0.4 - [add] NumberUtils增加min和max方法

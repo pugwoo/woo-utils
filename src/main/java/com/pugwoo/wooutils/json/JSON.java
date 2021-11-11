@@ -34,46 +34,16 @@ public class JSON {
 		}
 	}
 	
-	public static <T> T parse(String str, Class<T> clazz, Class<?> genericClass) {
+	public static <T> T parse(String str, Class<T> clazz, Class<?>... genericClasses) {
 		try {
 			JavaType type =  objectMapper.getTypeFactory()
-					.constructParametricType(clazz, genericClass);
+					.constructParametricType(clazz, genericClasses);
 			return objectMapper.readValue(str, type);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
-	public static <T> T parse(String str, Class<T> clazz, JavaType genericClass) {
-		try {
-			JavaType type =  objectMapper.getTypeFactory()
-					.constructParametricType(clazz, genericClass);
-			return objectMapper.readValue(str, type);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	public static <T> T parse(String str, Class<T> clazz, Class<?> genericClass1, Class<?> genericClass2) {
-		try {
-			JavaType type =  objectMapper.getTypeFactory()
-					.constructParametricType(clazz, genericClass1, genericClass2);
-			return objectMapper.readValue(str, type);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	public static <T> T parse(String str, Class<T> clazz, JavaType genericClass1, JavaType genericClass2) {
-		try {
-			JavaType type =  objectMapper.getTypeFactory()
-					.constructParametricType(clazz, genericClass1, genericClass2);
-			return objectMapper.readValue(str, type);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
+
 	/**
 	 * 解析json字符串 通过TypeReference静态指定泛型
 	 * @param str json字符串
@@ -140,7 +110,8 @@ public class JSON {
 	}
 	
 	/**
-	 * 使用json的方式克隆对象，【不支持泛型，请使用clone(T t, TypeReference typeReference) 以支持泛型】
+	 * 使用json的方式克隆对象
+	 * 【不支持泛型，请使用clone(T t, Class<?>... genericClasses)或clone(T t, TypeReference typeReference) 以支持泛型】
 	 * @param t
 	 * @return
 	 */
@@ -150,6 +121,17 @@ public class JSON {
 			return null;
 		}
 		return (T) parse(toJson(t), t.getClass());
+	}
+
+	/**
+	 * 使用json的方式克隆对象，支持泛型，支持多个泛型，但【不支持】嵌套泛型，嵌套泛型请使用clone(T t, TypeReference<T> typeReference)
+	 * @param genericClasses
+	 */
+	public static <T> T clone(T t, Class<?>... genericClasses) {
+		if (t == null) {
+			return null;
+		}
+		return (T) parse(toJson(t), t.getClass(), genericClasses);
 	}
 	
 	/**

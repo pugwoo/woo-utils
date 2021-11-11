@@ -133,6 +133,15 @@ public class TestJson {
 		
 		System.out.println("     map: " + map);
 		System.out.println("mapClone: " + mapClone);
+
+		assert mapClone.get("date").getClass() == Date.class;
+
+		mapClone = JSON.clone(map, String.class, Date.class);
+
+		System.out.println("     map: " + map);
+		System.out.println("mapClone: " + mapClone);
+
+		assert mapClone.get("date").getClass() == Date.class;
 	}
 	
 	@Test
@@ -155,5 +164,15 @@ public class TestJson {
 		System.out.println("list source: " + list);
 		System.out.println("list json  : " + listJson);
 		System.out.println("list clone : " + listClone);
+
+		assert listClone.get(0).get("mapmap").get("date").getClass() == Date.class;
+
+		// 说明：这种方式不支持嵌套泛型
+		listClone = JSON.clone(list, Map.class);
+		System.out.println("list source: " + list);
+		System.out.println("list json  : " + listJson);
+		System.out.println("list clone : " + listClone);
+
+		// assert listClone.get(0).get("mapmap").get("date").getClass() == Date.class;
 	}
 }
