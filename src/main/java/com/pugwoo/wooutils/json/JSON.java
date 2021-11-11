@@ -111,7 +111,7 @@ public class JSON {
 	
 	/**
 	 * 使用json的方式克隆对象
-	 * 【不支持泛型，请使用clone(T t, Class<?>... genericClasses)或clone(T t, TypeReference typeReference) 以支持泛型】
+	 * 【不支持泛型，请使用clone(T t, Class... genericClasses)或clone(T t, TypeReference typeReference) 以支持泛型】
 	 * @param t
 	 * @return
 	 */
@@ -124,7 +124,7 @@ public class JSON {
 	}
 
 	/**
-	 * 使用json的方式克隆对象，支持泛型，支持多个泛型，但【不支持】嵌套泛型，嵌套泛型请使用clone(T t, TypeReference<T> typeReference)
+	 * 使用json的方式克隆对象，支持泛型，支持多个泛型，但【不支持】嵌套泛型，嵌套泛型请使用clone(T t, TypeReference typeReference)
 	 * @param genericClasses
 	 */
 	public static <T> T clone(T t, Class<?>... genericClasses) {
