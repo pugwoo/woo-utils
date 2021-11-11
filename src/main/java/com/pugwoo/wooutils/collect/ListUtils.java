@@ -114,6 +114,18 @@ public class ListUtils {
 		}
 		return list.stream().map(mapper).collect(Collectors.toList());
 	}
+
+	public static <T, R> List<R> transform(T[] array,
+			Function<? super T, ? extends R> mapper) {
+		List<R> list = new ArrayList<>();
+		if (array != null) {
+			for (T t : array) {
+				R r = mapper.apply(t);
+				list.add(r);
+			}
+		}
+		return list;
+	}
 	
 	/**
 	 * 转换list为set
@@ -201,10 +213,35 @@ public class ListUtils {
 		}
 		return list.stream().filter(predicate).collect(Collectors.toList());
 	}
+
+	/**
+	 * filter一个数组
+	 */
+	public static <T> List<T> filter(T[] array, Predicate<? super T> predicate) {
+		if (array == null || array.length == 0) {
+			return new ArrayList<>();
+		}
+
+		List<T> list = new ArrayList<>();
+		for (T t : array) {
+			if (predicate.test(t)) {
+				list.add(t);
+			}
+		}
+		return list;
+	}
 	
 	public static <T> void forEach(List<T> list, Consumer<? super T> consumer) {
 		if(list != null) {
 			for(T t : list) {
+				consumer.accept(t);
+			}
+		}
+	}
+
+	public static <T> void forEach(T[] array, Consumer<? super T> consumer) {
+		if (array != null) {
+			for (T t : array) {
 				consumer.accept(t);
 			}
 		}

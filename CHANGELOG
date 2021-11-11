@@ -1,3 +1,5 @@
+v1.0.5 - [add] ListUtils增加适用于数组的filter/forEach/transform方法
+
 2021年8月26日
 v1.0.4 - [add] NumberUtils增加min和max方法
 
