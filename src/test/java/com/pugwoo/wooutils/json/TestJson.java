@@ -167,12 +167,13 @@ public class TestJson {
 
 		assert listClone.get(0).get("mapmap").get("date").getClass() == Date.class;
 
-		// 说明：这种方式不支持嵌套泛型
+		// 说明：这种方式不支持嵌套泛型，所以解析不了上面的类型
 		listClone = JSON.clone(list, Map.class);
 		System.out.println("list source: " + list);
 		System.out.println("list json  : " + listJson);
 		System.out.println("list clone : " + listClone);
 
-		// assert listClone.get(0).get("mapmap").get("date").getClass() == Date.class;
+		// assert listClone.get(0).get("mapmap").get("date").getClass() == Date.class; // 报错
 	}
+
 }

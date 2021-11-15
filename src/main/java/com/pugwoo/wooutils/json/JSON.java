@@ -33,7 +33,11 @@ public class JSON {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
+	/**
+	 * 解析json，只支持一层的泛型，不支持嵌套的泛型。
+	 * 说明：实际上用JavaType也是可以做到支持嵌套的，但是比较复杂，在表达上可读性不高，这种场景也不多，故先不封装。
+	 */
 	public static <T> T parse(String str, Class<T> clazz, Class<?>... genericClasses) {
 		try {
 			JavaType type =  objectMapper.getTypeFactory()
@@ -124,8 +128,8 @@ public class JSON {
 	}
 
 	/**
-	 * 使用json的方式克隆对象，支持泛型，支持多个泛型，但【不支持】嵌套泛型，嵌套泛型请使用clone(T t, TypeReference typeReference)
-	 * @param genericClasses
+	 * 使用json的方式克隆对象，支持泛型，支持多个泛型，
+	 * 但【不支持】嵌套泛型，嵌套泛型请使用clone(T t, TypeReference typeReference)
 	 */
 	public static <T> T clone(T t, Class<?>... genericClasses) {
 		if (t == null) {
@@ -136,8 +140,6 @@ public class JSON {
 	
 	/**
 	 * 使用json的方式克隆对象，通过TypeReference静态指定泛型
-	 * @param t
-	 * @return
 	 */
 	public static <T> T clone(T t, TypeReference<T> typeReference) {
 		if(t == null) {
