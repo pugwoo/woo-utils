@@ -5,9 +5,8 @@ import com.pugwoo.wooutils.lang.NumberUtils;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class ListUtils {
@@ -202,21 +201,18 @@ public class ListUtils {
 	}
 
 	/**
-	 * 按数量分组
+	 * list按指定的数量分组
 	 * @param list
-	 * @param num
-	 * @param <T>
-	 * @return
+	 * @param groupNum 分组的数量，必须大于等于1，当小于1时返回空数组
 	 */
-	public static <T> List<List<T>> groupByNum(List<T> list, int num) {
-		if (list == null) {
+	public static <T> List<List<T>> groupByNum(List<T> list, final int groupNum) {
+		if (list == null || groupNum < 1) {
 			return new ArrayList<>();
 		}
-		num = num > 1 ? num : 2;
-		int finalNum = num;
+		
 		return  list.stream().collect(new Collector<T, List<List<T>>, List<List<T>>>() {
 			// 每组的个数
-			private final int number = finalNum;
+			private final int number = groupNum;
 
 			@Override
 			public Supplier<List<List<T>>> supplier() {

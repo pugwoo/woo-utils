@@ -26,4 +26,21 @@ public class TestListUtils {
 
     }
 
+    @Test
+    public void testGroupByNum() {
+        List<Integer> list = ListUtils.newArrayList(1,2,3,4,5,6,7,8,9,10);
+        List<List<Integer>> lists = ListUtils.groupByNum(list, 1);
+        assert lists.size() == 4;
+        assert lists.get(0).size() == 3;
+        assert lists.get(1).size() == 3;
+        assert lists.get(2).size() == 3;
+        assert lists.get(3).size() == 1;
+        assert lists.get(0).get(0) == 1;
+        assert lists.get(0).get(1) == 2;
+        assert lists.get(0).get(2) == 3;
+        assert lists.get(1).get(0) == 4;
+        assert lists.get(1).get(1) == 5;
+        assert lists.get(1).get(2) == 6;
+    }
+
 }

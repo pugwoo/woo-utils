@@ -1,3 +1,5 @@
+v1.0.6 - [add] ListUtils添加分组方法groupByNum
+
 2021年11月11日
 v1.0.5 - [add] ListUtils增加适用于数组的filter/forEach/transform方法
        - [add] JSON.parse支持多个泛型（原来只支持1或2个泛型）
