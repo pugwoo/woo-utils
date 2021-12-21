@@ -9,7 +9,6 @@ public class NumberUtils {
 	
 	/**
 	 * 转换成integer，不会抛出异常，转换失败返回null
-	 * @return
 	 */
 	public static Integer parseInt(Object obj) {
 		if(obj == null) {
@@ -19,7 +18,7 @@ public class NumberUtils {
 			return (Integer) obj;
 		}
 		try {
-			return new Integer(obj.toString().trim());
+			return Integer.valueOf(obj.toString().trim());
 		} catch (Exception e) {
 			return null;
 		}
@@ -27,7 +26,6 @@ public class NumberUtils {
 	
 	/**
 	 * 转换成Long，不会抛出异常，转换失败返回null
-	 * @return
 	 */
 	public static Long parseLong(Object obj) {
 		if(obj == null) {
@@ -37,7 +35,7 @@ public class NumberUtils {
 			return (Long) obj;
 		}
 		try {
-			return new Long(obj.toString().trim());
+			return Long.valueOf(obj.toString().trim());
 		} catch (Exception e) {
 			return null;
 		}
@@ -45,7 +43,6 @@ public class NumberUtils {
 	
 	/**
 	 * 转换成Double，不会抛出异常，转换失败返回null
-	 * @return
 	 */
 	public static Double parseDouble(Object obj) {
 		if(obj == null) {
@@ -55,7 +52,7 @@ public class NumberUtils {
 			return (Double) obj;
 		}
 		try {
-			return new Double(obj.toString().trim());
+			return Double.valueOf(obj.toString().trim());
 		} catch (Exception e) {
 			return null;
 		}
@@ -63,8 +60,6 @@ public class NumberUtils {
 	
 	/**
 	 * 转换成BigDecimal，不会抛出异常，转换失败返回null
-	 * @param obj
-	 * @return
 	 */
 	public static BigDecimal parseBigDecimal(Object obj) {
 		if(obj == null) {
@@ -79,14 +74,70 @@ public class NumberUtils {
 			return null;
 		}
 	}
-	
+
+	/**
+	 * 计算百分比
+	 */
+	public static int percent(Integer num, Integer total) {
+		if (num == null || total == null || total == 0) {
+			return 0;
+		}
+		return (int) (num * 100.0 / total);
+	}
+
+	/**
+	 * 计算百分比
+	 */
+	public static int percent(BigDecimal num, BigDecimal total) {
+		if (num == null || total == null || total.compareTo(BigDecimal.ZERO) == 0) {
+			return 0;
+		}
+
+		return (int) (num.doubleValue() * 100.0 / total.doubleValue());
+	}
+
+	/**
+	 * 除法，四舍五入
+	 * @param scale 保持N位小数
+	 */
+	public static BigDecimal divide(BigDecimal a, BigDecimal b, Integer scale) {
+		if (scale == null) {
+			scale = 0;
+		}
+		if (a == null || b == null) {
+			return null;
+		}
+		return a.divide(b, scale, RoundingMode.HALF_UP);
+	}
+
+	/**
+	 * 除法，四舍五入
+	 * @param scale 保持N位小数
+	 */
+	public static BigDecimal divide(BigDecimal a, Integer b, Integer scale) {
+		if (a == null || b == null) {
+			return null;
+		}
+		return divide(a, BigDecimal.valueOf(b), scale);
+	}
+
+	/**
+	 * 除法，四舍五入
+	 * @param scale 保持N位小数
+	 */
+	public static BigDecimal divide(Integer a, BigDecimal b, Integer scale) {
+		if (a == null || b == null) {
+			return null;
+		}
+		return divide(BigDecimal.valueOf(a), b, scale);
+	}
+
 	/**
 	 * 保留decimalPlaces位小数，四舍五入 例如：
 	 * 输入 (1.236, 2) 输出1.24
 	 * 输入 (1.2, 2) 输出1.20
 	 * @param number 注意精度问题 建议使用 {@link #roundUp(BigDecimal, int)}
 	 * @param decimalPlaces 保留小数位数
-	 * @return
 	 */
 	public static String roundUp(double number, int decimalPlaces) {
 		return roundUp(new BigDecimal(Double.toString(number)), decimalPlaces).toString();
@@ -98,10 +149,9 @@ public class NumberUtils {
 	 * 输入 (1.2, 2) 输出1.20
 	 * @param number 注意精度问题 建议使用 {@link #roundUp(BigDecimal, int)}
 	 * @param decimalPlaces 保留小数位数
-	 * @return
 	 */
 	public static double roundUpToDouble(double number, int decimalPlaces) {
-		return new Double(roundUp(number, decimalPlaces));
+		return Double.parseDouble(roundUp(number, decimalPlaces));
 	}
 	
 	/**
@@ -114,6 +164,62 @@ public class NumberUtils {
 	public static BigDecimal roundUp(BigDecimal number, int decimalPlaces) {
 	    if(number == null) { return null; }
 	    return number.setScale(decimalPlaces, RoundingMode.HALF_UP);
+	}
+
+	/**
+	 * 求最小值
+	 * @param list 待计算list
+	 * @param mapper 转换成比较类型
+	 * @return 不存在时返回null
+	 */
+	public static <T, R extends Comparable<R>> R min(List<T> list,
+													 Function<? super T, R> mapper) {
+		if (list == null || list.isEmpty()) {
+			return null;
+		}
+
+		R min = null;
+		for (T t : list) {
+			if (t == null) {
+				continue;
+			}
+			R r = mapper.apply(t);
+			if (r == null) {
+				continue;
+			}
+			if (min == null || r.compareTo(min) < 0) {
+				min = r;
+			}
+		}
+		return min;
+	}
+
+	/**
+	 * 求最大值
+	 * @param list 待计算list
+	 * @param mapper 转换成比较类型
+	 * @return 不存在时返回null
+	 */
+	public static <T, R extends Comparable<R>> R max(List<T> list,
+													 Function<? super T, R> mapper) {
+		if (list == null || list.isEmpty()) {
+			return null;
+		}
+
+		R max = null;
+		for (T t : list) {
+			if (t == null) {
+				continue;
+			}
+			R r = mapper.apply(t);
+			if (r == null) {
+				continue;
+			}
+			if (max == null || r.compareTo(max) > 0) {
+				max = r;
+			}
+		}
+		return max;
 	}
 
 	/**
