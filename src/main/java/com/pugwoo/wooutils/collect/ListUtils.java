@@ -202,6 +202,70 @@ public class ListUtils {
 	}
 
 	/**
+	 * 按数量分组
+	 * @param list
+	 * @param num
+	 * @param <T>
+	 * @return
+	 */
+	public static <T> List<List<T>> groupByNum(List<T> list, int num) {
+		if (list == null) {
+			return new ArrayList<>();
+		}
+		num = num > 1 ? num : 2;
+		int finalNum = num;
+		return  list.stream().collect(new Collector<T, List<List<T>>, List<List<T>>>() {
+			// 每组的个数
+			private final int number = finalNum;
+
+			@Override
+			public Supplier<List<List<T>>> supplier() {
+				return ArrayList::new;
+			}
+
+			@Override
+			public BiConsumer<List<List<T>>, T> accumulator() {
+				return (list, item) -> {
+					if (list.isEmpty()) {
+						list.add(this.createNewList(item));
+					} else {
+						List<T> last = list.get(list.size() - 1);
+						if (last.size() < number) {
+							last.add(item);
+						} else {
+							list.add(this.createNewList(item));
+						}
+					}
+				};
+			}
+
+			@Override
+			public BinaryOperator<List<List<T>>> combiner() {
+				return (list1, list2) -> {
+					list1.addAll(list2);
+					return list1;
+				};
+			}
+
+			@Override
+			public Function<List<List<T>>, List<List<T>>> finisher() {
+				return Function.identity();
+			}
+
+			@Override
+			public Set<Characteristics> characteristics() {
+				return Collections.unmodifiableSet(EnumSet.of(Collector.Characteristics.IDENTITY_FINISH));
+			}
+
+			private List<T> createNewList(T item) {
+				List<T> newOne = new ArrayList<T>();
+				newOne.add(item);
+				return newOne;
+			}
+		});
+	}
+
+	/**
 	 * filter一个list
 	 * @param list
 	 * @param predicate
