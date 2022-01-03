@@ -101,6 +101,42 @@ public class StringTools {
 		}
 		return false;
 	}
+
+	/**
+	 * 返回两个字符串的共同前缀
+	 * @param str1
+	 * @param str2
+	 * @return 如果没有共同前缀则返回空字符串，不会返回null
+	 */
+	public static String getSamePrefix(String str1, String str2) {
+		int samePrefixLength = getSamePrefixLength(str1, str2);
+		if (samePrefixLength == 0) {
+			return "";
+		}
+
+		return str1.substring(0, samePrefixLength);
+	}
+
+	/**
+	 * 获得两个字符串相同前缀的长度。
+	 * 例如str1=abc，str2=abd，返回为2，即相同的前缀ab的长度
+	 */
+	public static int getSamePrefixLength(String str1, String str2) {
+		if (str1 == null || str2 == null) {
+			return 0;
+		}
+
+		int s1Length = str1.length();
+		int s2Length = str2.length();
+		int minLength = Math.min(s1Length, s2Length);
+
+		for (int i = 0; i < minLength; i++) {
+			if (str1.charAt(i) != str2.charAt(i)) {
+				return i;
+			}
+		}
+		return minLength;
+	}
 	
 	/**
 	 * 判断字符串str是否在strSet列表中

@@ -166,6 +166,24 @@ public class NumberUtils {
 	    return number.setScale(decimalPlaces, RoundingMode.HALF_UP);
 	}
 
+	public static BigDecimal max(BigDecimal a, BigDecimal b) {
+		if (a == null) {
+			return b;
+		} else if (b == null) {
+			return a;
+		}
+		return a.compareTo(b) >= 0 ? a : b;
+	}
+
+	public static BigDecimal min(BigDecimal a, BigDecimal b) {
+		if (a == null) {
+			return b;
+		} else if (b == null) {
+			return a;
+		}
+		return a.compareTo(b) > 0 ? b : a;
+	}
+
 	/**
 	 * 求最小值
 	 * @param list 待计算list
