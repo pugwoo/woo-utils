@@ -13,45 +13,9 @@ public class SortingUtils {
 
 	/**
 	 * 排序list。只需要返回一个可排序的值，例如Integer。
-	 * @param list
-	 * @param sortingField
+	 * @param list 排序列表
+	 * @param sortingFields 排序值，支持1个或多个
 	 */
-	public static <T, R extends Comparable<R>> void sort(List<T> list, final SortingField<T, R> sortingField) {
-		if(list == null || sortingField == null) {
-			return;
-		}
-		
-		Collections.sort(list, new Comparator<T>() {
-			@Override
-			public int compare(T left, T right) {
-				boolean isLeftNull = left == null;
-				boolean isRightNull = right == null;
-				if(isLeftNull && isRightNull) {
-					return 0;
-				} else if (isLeftNull) {
-					return sortingField.isNullFirst() ? -1 : 1;
-				} else if (isRightNull) {
-					return sortingField.isNullFirst() ? 1 : -1;
-				}
-				
-				R comparableLeft = sortingField.apply(left);
-				R comparableRight = sortingField.apply(right);
-				isLeftNull = comparableLeft == null;
-				isRightNull = comparableRight == null;
-				if(isLeftNull && isRightNull) {
-					return 0;
-				} else if (isLeftNull) {
-					return sortingField.isNullFirst() ? -1 : 1;
-				} else if (isRightNull) {
-					return sortingField.isNullFirst() ? 1 : -1;
-				}
-				
-				return sortingField.isAsc() ? comparableLeft.compareTo(comparableRight) 
-						: comparableRight.compareTo(comparableLeft);
-			}
-		});
-	}
-	
 	@SafeVarargs
 	public static <T> void sort(List<T> list, final SortingField<T, ? extends Comparable<?>>... sortingFields) {
 		if(list == null || sortingFields == null || sortingFields.length == 0) {
