@@ -3,6 +3,7 @@ package com.pugwoo.wooutils.collect;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * 2016年3月8日 17:59:16 排序工具，元素null safe<br>
@@ -59,4 +60,107 @@ public class SortingUtils {
 		});
 	}
 
+	/**
+	 * 排序，正序，null值在末尾
+	 * @param list
+	 * @param mappers
+	 */
+	@SafeVarargs @SuppressWarnings("unchecked")
+	public static <T, R extends Comparable<?>> void sortAscNullLast(List<T> list,
+																	Function<? super T, ? extends R>... mappers) {
+		if (mappers == null || mappers.length == 0) {
+			return;
+		}
+
+		SortingField<T, R>[] sortingFields = new SortingField[mappers.length];
+		for (int i = 0; i < mappers.length; i++) {
+			int finalI = i;
+			sortingFields[i] = new SortingField<T, R>(SortingOrderEnum.ASC, false) {
+				@Override
+				public R apply(T input) {
+					return mappers[finalI].apply(input);
+				}
+			};
+		}
+
+		SortingUtils.sort(list, sortingFields);
+	}
+
+	/**
+	 * 排序，正序，null值排前面
+	 * @param list
+	 * @param mappers
+	 */
+	@SafeVarargs @SuppressWarnings("unchecked")
+	public static <T, R extends Comparable<?>> void sortAscNullFirst(List<T> list,
+																	Function<? super T, ? extends R>... mappers) {
+		if (mappers == null || mappers.length == 0) {
+			return;
+		}
+
+		SortingField<T, R>[] sortingFields = new SortingField[mappers.length];
+		for (int i = 0; i < mappers.length; i++) {
+			int finalI = i;
+			sortingFields[i] = new SortingField<T, R>(SortingOrderEnum.ASC, true) {
+				@Override
+				public R apply(T input) {
+					return mappers[finalI].apply(input);
+				}
+			};
+		}
+
+		SortingUtils.sort(list, sortingFields);
+	}
+
+	/**
+	 * 排序，逆序，null值在末尾
+	 * @param list
+	 * @param mappers
+	 */
+	@SafeVarargs @SuppressWarnings("unchecked")
+	public static <T, R extends Comparable<?>> void sortDescNullLast(List<T> list,
+																	Function<? super T, ? extends R>... mappers) {
+		if (mappers == null || mappers.length == 0) {
+			return;
+		}
+
+		SortingField<T, R>[] sortingFields = new SortingField[mappers.length];
+		for (int i = 0; i < mappers.length; i++) {
+			int finalI = i;
+			sortingFields[i] = new SortingField<T, R>(SortingOrderEnum.DESC, false) {
+				@Override
+				public R apply(T input) {
+					return mappers[finalI].apply(input);
+				}
+			};
+		}
+
+		SortingUtils.sort(list, sortingFields);
+	}
+
+	/**
+	 * 排序，逆序，null值排前面
+	 * @param list
+	 * @param mappers
+	 */
+	@SafeVarargs @SuppressWarnings("unchecked")
+	public static <T, R extends Comparable<?>> void sortDescNullFirst(List<T> list,
+																	 Function<? super T, ? extends R>... mappers) {
+		if (mappers == null || mappers.length == 0) {
+			return;
+		}
+
+		SortingField<T, R>[] sortingFields = new SortingField[mappers.length];
+		for (int i = 0; i < mappers.length; i++) {
+			int finalI = i;
+			sortingFields[i] = new SortingField<T, R>(SortingOrderEnum.DESC, true) {
+				@Override
+				public R apply(T input) {
+					return mappers[finalI].apply(input);
+				}
+			};
+		}
+
+		SortingUtils.sort(list, sortingFields);
+	}
 }

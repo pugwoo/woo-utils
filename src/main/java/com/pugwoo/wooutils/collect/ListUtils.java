@@ -43,61 +43,45 @@ public class ListUtils {
 	/**
 	 * 排序，正序，null值在末尾
 	 * @param list
-	 * @param mapper
+	 * @param mappers
 	 */
+	@SafeVarargs @SuppressWarnings("unchecked")
 	public static <T, R extends Comparable<?>> void sortAscNullLast(List<T> list,
-			Function<? super T, ? extends R> mapper) {
-		SortingUtils.sort(list, new SortingField<T, R>(SortingOrderEnum.ASC, false) {
-			@Override
-			public R apply(T input) {
-				return mapper.apply(input);
-			}
-		});
+																	Function<? super T, ? extends R>... mappers) {
+		SortingUtils.sortAscNullLast(list, mappers);
 	}
 	
 	/**
 	 * 排序，正序，null值在前面
 	 * @param list
-	 * @param mapper
+	 * @param mappers
 	 */
+	@SafeVarargs @SuppressWarnings("unchecked")
 	public static <T, R extends Comparable<?>> void sortAscNullFirst(List<T> list,
-			Function<? super T, ? extends R> mapper) {
-		SortingUtils.sort(list, new SortingField<T, R>(SortingOrderEnum.ASC, true) {
-			@Override
-			public R apply(T input) {
-				return mapper.apply(input);
-			}
-		});
+			Function<? super T, ? extends R>... mappers) {
+		SortingUtils.sortAscNullFirst(list, mappers);
 	}
 	
 	/**
 	 * 排序，逆序，null值在末尾
 	 * @param list
-	 * @param mapper
+	 * @param mappers
 	 */
+	@SafeVarargs @SuppressWarnings("unchecked")
 	public static <T, R extends Comparable<?>> void sortDescNullLast(List<T> list,
-			Function<? super T, ? extends R> mapper) {
-		SortingUtils.sort(list, new SortingField<T, R>(SortingOrderEnum.DESC, false) {
-			@Override
-			public R apply(T input) {
-				return mapper.apply(input);
-			}
-		});
+			Function<? super T, ? extends R>... mappers) {
+		SortingUtils.sortDescNullLast(list, mappers);
 	}
 	
 	/**
 	 * 排序，逆序，null值在前面
 	 * @param list
-	 * @param mapper
+	 * @param mappers
 	 */
+	@SafeVarargs @SuppressWarnings("unchecked")
 	public static <T, R extends Comparable<?>> void sortDescNullFirst(List<T> list,
-			Function<? super T, ? extends R> mapper) {
-		SortingUtils.sort(list, new SortingField<T, R>(SortingOrderEnum.DESC, true) {
-			@Override
-			public R apply(T input) {
-				return mapper.apply(input);
-			}
-		});
+			Function<? super T, ? extends R>... mappers) {
+		SortingUtils.sortDescNullFirst(list, mappers);
 	}
 	
 	/**

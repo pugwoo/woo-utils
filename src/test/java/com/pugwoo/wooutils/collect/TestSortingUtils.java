@@ -1,30 +1,72 @@
 package com.pugwoo.wooutils.collect;
 
-import java.util.*;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.UUID;
 
 public class TestSortingUtils {
 
-	public static void main(String[] args) {
-		List<String> list = new ArrayList<String>();
-		list.add("11");
-		list.add("123");
-		list.add(null);
-		list.add("9");
-		
-		/**
-		 * 你只需要把要排序的对象，转换成已经是Comparable的对象，例如Java自带的int、Date、String等
-		 * 
-		 * 这个例子，就是按照字符串的长度来排序。
-		 */
-		SortingUtils.sort(list, new SortingField<String, Integer>(){
-			@Override
-			public Integer apply(String input) {
-				return input.length();
+	public static class StudentSortDO {
+		private String name;
+		private Integer age;
+
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		public Integer getAge() {
+			return age;
+		}
+		public void setAge(Integer age) {
+			this.age = age;
+		}
+	}
+
+	/**测试排序*/
+	@Test
+	public void testSort() {
+		// 创建随机10000条记录
+		List<StudentSortDO> list = new ArrayList<>();
+		for (int i = 0; i < 10000; i++) {
+			StudentSortDO d = new StudentSortDO();
+			d.setName(UUID.randomUUID().toString());
+			d.setAge(new Random().nextInt(100));
+			list.add(d);
+		}
+
+		ListUtils.sortAscNullLast(list, StudentSortDO::getAge, StudentSortDO::getName);
+
+		// 检查数据
+		for (int i = 0; i < 10000 - 1; i++) {
+			StudentSortDO d1 = list.get(i);
+			StudentSortDO d2 = list.get(i + 1);
+			if (Objects.equals(d1.getAge(), d2.getAge())) {
+				assert d1.getName().compareTo(d2.getName()) <= 0;
+			} else {
+				assert d1.getAge() < d2.getAge();
 			}
-		});
-		
-		for(String str : list) {
-			System.out.println(str);
+		}
+
+		// 逆序排一下
+		ListUtils.sortDescNullLast(list, StudentSortDO::getAge, StudentSortDO::getName);
+
+		// 检查数据
+		for (int i = 0; i < 10000 - 1; i++) {
+			StudentSortDO d1 = list.get(i);
+			StudentSortDO d2 = list.get(i + 1);
+			if (Objects.equals(d1.getAge(), d2.getAge())) {
+				assert d1.getName().compareTo(d2.getName()) >= 0;
+			} else {
+				assert d1.getAge() > d2.getAge();
+			}
 		}
 	}
 
