@@ -18,7 +18,7 @@ public class NumberUtils {
 			return (Integer) obj;
 		}
 		try {
-			return Integer.valueOf(obj.toString().trim());
+			return Integer.valueOf(obj.toString().trim().replaceAll(",", ""));
 		} catch (Exception e) {
 			return null;
 		}
@@ -35,7 +35,7 @@ public class NumberUtils {
 			return (Long) obj;
 		}
 		try {
-			return Long.valueOf(obj.toString().trim());
+			return Long.valueOf(obj.toString().trim().replaceAll(",", ""));
 		} catch (Exception e) {
 			return null;
 		}
@@ -52,7 +52,7 @@ public class NumberUtils {
 			return (Double) obj;
 		}
 		try {
-			return Double.valueOf(obj.toString().trim());
+			return Double.valueOf(obj.toString().trim().replaceAll(",", ""));
 		} catch (Exception e) {
 			return null;
 		}
@@ -69,7 +69,7 @@ public class NumberUtils {
 			return (BigDecimal) obj;
 		}
 		try {
-			return new BigDecimal(obj.toString().trim());
+			return new BigDecimal(obj.toString().trim().replaceAll(",", ""));
 		} catch (Exception e) {
 			return null;
 		}
