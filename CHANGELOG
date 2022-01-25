@@ -1,3 +1,4 @@
+2022年1月25日
 v1.0.7 - [add] StringTools增加计算相同前缀的长度的getSamePrefixLength方法和获得相同前缀的方法getSamePrefix
        - [add] NumberUtils增加max min对BigDecimal的比较
        - [enhance] ListUtils的sort4个方法支持多个mapper，这4个方法也同步到SortingUtils中

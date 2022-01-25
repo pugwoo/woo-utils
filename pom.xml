@@ -6,7 +6,7 @@
 	<groupId>com.pugwoo</groupId>
 	<artifactId>woo-utils</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.6</version>
+	<version>1.0.7</version>
 
 	<name>woo-utils</name>
 	<description>the common utils</description>
@@ -43,14 +43,14 @@
         <dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.32</version>
+			<version>1.7.33</version>
 		</dependency>
 
         <!-- json相关功能 -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.12.4</version>
+            <version>2.13.1</version>
         </dependency>
 
 		<!-- optional依赖：servlet相关功能需要 -->
