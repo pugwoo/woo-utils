@@ -17,7 +17,10 @@ import java.util.Map;
 public class JSON {
 
 	private static ObjectMapper objectMapper = new MyObjectMapper();
-	
+
+	/**只用于克隆对象用*/
+	private static ObjectMapper objectMapperForClone = new ObjectMapper();
+
 	public static Object parse(String str) {
 		try {
 			return objectMapper.readValue(str, Object.class);
@@ -124,7 +127,13 @@ public class JSON {
 		if(t == null) {
 			return null;
 		}
-		return (T) parse(toJson(t), t.getClass());
+
+		try {
+			String json = objectMapperForClone.writeValueAsString(t);
+			return (T) objectMapperForClone.readValue(json, t.getClass());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
@@ -135,9 +144,16 @@ public class JSON {
 		if (t == null) {
 			return null;
 		}
-		return (T) parse(toJson(t), t.getClass(), genericClasses);
+		try {
+			String json = objectMapperForClone.writeValueAsString(t);
+			JavaType type =  objectMapperForClone.getTypeFactory()
+					.constructParametricType(t.getClass(), genericClasses);
+			return objectMapperForClone.readValue(json, type);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
-	
+
 	/**
 	 * 使用json的方式克隆对象，通过TypeReference静态指定泛型
 	 */
@@ -145,7 +161,12 @@ public class JSON {
 		if(t == null) {
 			return null;
 		}
-		return parse(JSON.toJson(t), typeReference);
+		try {
+			String json = objectMapperForClone.writeValueAsString(t);
+			return objectMapperForClone.readValue(json, typeReference);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	/**

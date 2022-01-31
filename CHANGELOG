@@ -1,3 +1,6 @@
+2022年1月31日
+v1.0.8 - [fix] JSON的clone Date类型丢失毫秒数的问题
+
 2022年1月25日
 v1.0.7 - [add] StringTools增加计算相同前缀的长度的getSamePrefixLength方法和获得相同前缀的方法getSamePrefix
        - [add] NumberUtils增加max min对BigDecimal的比较
