@@ -2,6 +2,7 @@ package com.pugwoo.wooutils.lang;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
@@ -245,7 +246,7 @@ public class NumberUtils {
 	 * @param list 待计算list item默认可以转为BigDecimal，如果转不了视为0
 	 * @return 数据不存在时返回0
 	 */
-	public static <T> BigDecimal sum(List<T> list) {
+	public static <T> BigDecimal sum(Collection<T> list) {
 		return sum(list, null);
 	}
 	
@@ -256,7 +257,7 @@ public class NumberUtils {
 	 *               item 可以转为BigDecimal，如果转不了视为0
 	 * @return 数据不存在时返回0
 	 */
-	public static <T> BigDecimal sum(List<T> list, Function<? super T, ?> mapper) {
+	public static <T> BigDecimal sum(Collection<T> list, Function<? super T, ?> mapper) {
 		BigDecimal sum = BigDecimal.ZERO;
 		if(list == null || list.isEmpty()) {
 			return sum;
@@ -284,7 +285,7 @@ public class NumberUtils {
 	 * @param decimalPlaces 保留小数点数，四舍五入
 	 * @return 数据不存在时返回0
 	 */
-	public static <T> BigDecimal avg(List<T> list, int decimalPlaces) {
+	public static <T> BigDecimal avg(Collection<T> list, int decimalPlaces) {
 		return avg(list, null, decimalPlaces);
 	}
 	
@@ -296,7 +297,7 @@ public class NumberUtils {
 	 *                      计算平均值出现无限循环小数而不指定保留小数位数会抛ArithmeticException
 	 * @return 数据不存在时返回0
 	 */
-	public static <T> BigDecimal avg(List<T> list, Function<? super T, ?> mapper, int decimalPlaces) {
+	public static <T> BigDecimal avg(Collection<T> list, Function<? super T, ?> mapper, int decimalPlaces) {
 		if(list == null || list.isEmpty()) {
 			return BigDecimal.ZERO;
 		}

@@ -14,6 +14,20 @@ import static java.util.stream.Collectors.toList;
 
 public class TestMapUtils {
 
+    @Test
+	public void testTransform() {
+		Map<String, String> map = new HashMap<>();
+		map.put("one", "1");
+		map.put("two", "22");
+		map.put("three", "333");
+
+		Map<String, Integer> transform = MapUtils.transform(map, String::length);
+
+		assert transform.get("one").equals(1);
+		assert transform.get("two").equals(2);
+		assert transform.get("three").equals(3);
+	}
+
 	@Test
 	public void sortByKeyTest() {
 		List<String> keyList = Stream.of("hello", "you", "world").collect(toList());

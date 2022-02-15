@@ -1,3 +1,6 @@
+2022年2月15日
+v1.0.9 - [add] 增加MapUtils的transform方法
+
 2022年1月31日
 v1.0.8 - [fix] JSON的clone Date类型丢失毫秒数的问题
 

@@ -1,16 +1,27 @@
 package com.pugwoo.wooutils.collect;
 
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Function;
 
 public class MapUtils {
+
+	/**
+	 * 转换map的value值为转换后的值
+	 * @param map
+	 * @param mapper 支持lambda写法
+	 */
+	public static <K, V1, V2> Map<K, V2> transform(Map<K, V1> map, Function<V1, V2> mapper) {
+		if(map == null) {
+			return new HashMap<>();
+		}
+		Map<K, V2> map2 = new HashMap<>();
+		for (Map.Entry<K, V1> entry : map.entrySet()) {
+			map2.put(entry.getKey(), mapper.apply(entry.getValue()));
+		}
+		return map2;
+	}
 	
 	/**
 	 * 按Map的key排序。对于null值，无论正序或逆序，都排最后。
