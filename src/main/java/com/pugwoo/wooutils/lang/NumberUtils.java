@@ -98,6 +98,17 @@ public class NumberUtils {
 	}
 
 	/**
+	 * 计算百分比，保留scale位小数
+	 */
+	public static BigDecimal percent(BigDecimal num, BigDecimal total, Integer scale) {
+		if (num == null || total == null || total.compareTo(BigDecimal.ZERO) == 0) {
+			return BigDecimal.ZERO;
+		}
+		num = num.multiply(BigDecimal.valueOf(100));
+		return divide(num, total, scale);
+	}
+
+	/**
 	 * 除法，四舍五入
 	 * @param scale 保持N位小数
 	 */
