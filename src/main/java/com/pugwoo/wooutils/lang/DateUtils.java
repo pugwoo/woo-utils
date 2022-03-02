@@ -320,6 +320,77 @@ public class DateUtils {
 	
 	// ======================================
 
+	public static int getYear(Date date) {
+		if (date == null) {
+			return 0;
+		}
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		return cal.get(Calendar.YEAR);
+	}
+
+	/**
+	 * 获得日期的月份值，从1开始，1到12
+	 */
+	public static int getMonth(Date date) {
+		if (date == null) {
+			return 0;
+		}
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		return cal.get(Calendar.MONTH) + 1;
+	}
+
+	public static int getDay(Date date) {
+		if (date == null) {
+			return 0;
+		}
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		return cal.get(Calendar.DATE);
+	}
+
+	/**
+	 * 24小时制
+	 */
+	public static int getHour(Date date) {
+		if (date == null) {
+			return 0;
+		}
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		return cal.get(Calendar.HOUR_OF_DAY);
+	}
+
+	public static int getMinute(Date date) {
+		if (date == null) {
+			return 0;
+		}
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		return cal.get(Calendar.MINUTE);
+	}
+
+	public static int getSecond(Date date) {
+		if (date == null) {
+			return 0;
+		}
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		return cal.get(Calendar.SECOND);
+	}
+
+	public static int getMilliSecond(Date date) {
+		if (date == null) {
+			return 0;
+		}
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		return cal.get(Calendar.MILLISECOND);
+	}
+
+	// ======================================
+
 	// 当前系统时区距离0时区的毫秒数，例如东8区是28800000
 	private static int timezoneOffset = Calendar.getInstance().get(Calendar.ZONE_OFFSET);
 

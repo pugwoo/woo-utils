@@ -208,6 +208,18 @@ public class StringTools {
 	}
 
 	/**
+	 * 将数组的元素的toString 用分隔符splitLetter连起来。<br>
+	 * 这个方法提供的可变长的参数
+	 *
+	 * @param splitLetter
+	 * @param objects
+	 * @return 不会返回null
+	 */
+	public static String join(String splitLetter, Object... objects) {
+		return join(objects, splitLetter);
+	}
+
+	/**
 	 * 将list的元素的toString 用分隔符splitLetter连起来。<br>
 	 * 如果list中元素等于null或者toString为null或空字符串，则不加入。<br>
 	 *
