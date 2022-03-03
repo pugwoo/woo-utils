@@ -145,6 +145,17 @@ public class NumberUtils {
 	}
 
 	/**
+	 * 除法，四舍五入
+	 * @param scale 保持N位小数
+	 */
+	public static BigDecimal divide(Integer a, Integer b, Integer scale) {
+		if (a == null || b == null) {
+			return null;
+		}
+		return divide(BigDecimal.valueOf(a), BigDecimal.valueOf(b), scale);
+	}
+
+	/**
 	 * 保留decimalPlaces位小数，四舍五入 例如：
 	 * 输入 (1.236, 2) 输出1.24
 	 * 输入 (1.2, 2) 输出1.20
