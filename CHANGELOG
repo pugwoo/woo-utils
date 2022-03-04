@@ -1,5 +1,6 @@
 v1.0.10 - [add] DateUtils增加getYear/getMonth/getDay/getHour/getMinute/getSecond方法
         - [add] NumberUtils增加divide(Integer a,Integer b,Integer scale)方法
+        - [add] ListUtils增加partition方法，等同于groupByNum
 
 2022年2月15日
 v1.0.9 - [add] 增加MapUtils的transform方法

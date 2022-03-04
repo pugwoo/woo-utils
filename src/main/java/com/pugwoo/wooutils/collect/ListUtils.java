@@ -246,6 +246,15 @@ public class ListUtils {
 	}
 
 	/**
+	 * list按指定的数量分组
+	 * @param list
+	 * @param groupNum 分组的数量，必须大于等于1，当小于1时返回空数组
+	 */
+	public static <T> List<List<T>> partition(List<T> list, final int groupNum) {
+		return groupByNum(list, groupNum);
+	}
+
+	/**
 	 * filter一个list
 	 * @param list
 	 * @param predicate
