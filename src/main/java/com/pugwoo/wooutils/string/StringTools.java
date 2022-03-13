@@ -1,5 +1,6 @@
 package com.pugwoo.wooutils.string;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -399,5 +400,50 @@ public class StringTools {
         String ret = rs.toString();
         ret = ret.replaceAll("亿万", "亿");
         return ret;
+    }
+    
+    /**
+     * 判断给定的字符串中的字符是否全部都为GBK编码范围    <br>
+     * 如果给定字符串全部为英文，会返回true，因为无法判断 <br>
+     * <br>
+     * 资料: <br>
+     *  - https://www.qqxiuzi.cn/zh/hanzi-gbk-bianma.php <br>
+     *  - https://www.qqxiuzi.cn/bianma/zifuji.php       <br>
+     * <br>
+     *      Unicode: 57695 <br>
+     *          GBK: 没有  <br>
+     *      GB18030: ADE6 (jave8_jdk 转化为了该值) <br>
+     * <br>
+     * GBK编码范围 <br>
+     * 范围   第1字节  第2字节       编码数     字数    内容 <br>
+     * GBK/1  A1–A9   A1–FE         846        717   GB2312非汉字符号区,其中除GB2312的符号外，还有10个小写罗马数字和GB12345增补的符号 <br>
+     * GBK/2  B0–F7   A1–FE         6,768    6,763   GB2312汉字6763个，按原顺序排列 <br>
+     * GBK/3  81–A0   40–FE(7F除外) 6,080    6,080   GB13000.1中的CJK汉字6080个 <br>
+     * GBK/4  AA–FE   40–A0(7F除外) 8,160    8,160   扩充汉字, CJK汉字和增补的汉字8160个 <br>
+     * GBK/5  A8–A9   40–A0(7F除外) 192        166   GB13000.1扩充非汉字区 <br>
+     * @param str 待校验的字符串
+     * @return 所有字符都符合gbk
+     */
+    public static boolean isGbkCharset(String str) {
+        for (String s : str.split("")) {
+            byte[] gbks;
+            try {
+                // 单个字符转为GBK 如果转换失败，则表示不支持GBK；jdk这个GBK像是GB18030
+                gbks = s.getBytes("GBK");
+            } catch (UnsupportedEncodingException e) {
+                return false;
+            }
+            // 去除单字符 即洋文 ABC123等
+            if (gbks.length == 1) { continue; }
+            int gbk0 = gbks[0] & 0xFF;
+            int gbk1 = gbks[1] & 0xFF;
+            if ((0xA1 <= gbk0 && gbk0 <= 0xA9) && (0xA1 <= gbk1 && gbk1 <= 0xFE)) { continue; }                 // GBK/1
+            if ((0xB0 <= gbk0 && gbk0 <= 0xF7) && (0xA1 <= gbk1 && gbk1 <= 0xFE)) { continue; }                 // GBK/2
+            if ((0x81 <= gbk0 && gbk0 <= 0xA0) && (0x40 <= gbk1 && gbk1 <= 0xFE && gbk1 != 0x7F)) { continue; } // GBK/3
+            if ((0xAA <= gbk0 && gbk0 <= 0xFE) && (0x40 <= gbk1 && gbk1 <= 0xA0 && gbk1 != 0x7F)) { continue; } // GBK/4
+            if ((0xA8 <= gbk0 && gbk0 <= 0xA9) && (0x40 <= gbk1 && gbk1 <= 0xA0 && gbk1 != 0x7F)) { continue; } // GBK/5
+            return false;
+        }
+        return true;
     }
 }
