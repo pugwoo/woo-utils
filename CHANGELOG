@@ -1,5 +1,6 @@
 v1.0.11 - [add] StringTools增加isGbkCharset方法，校验给定字符串是否全部为gbk编码
           [enhance] ZipUtils流的关闭及异常处理
+          [add] ZipUtils添加文件的操作，兼容gbk编码异常及乱码问题
 
 2022年3月7日
 v1.0.10 - [add] DateUtils增加getYear/getMonth/getDay/getHour/getMinute/getSecond方法
