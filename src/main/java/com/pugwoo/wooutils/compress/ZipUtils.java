@@ -98,9 +98,19 @@ public class ZipUtils {
      * @param out 会自动close
      */
     public static void zip(List<ZipItem> zipItems, OutputStream out) throws IOException {
+        zip(zipItems, out, null);
+    }
+    
+    /**
+     * 压缩文件
+     * @param zipItems zipItemList 全部zipItem.in会自动关闭
+     * @param out 会自动close
+     * @param charsetNullable 字符集 如果为null，则使用ZipOutputStream默认的UTF-8
+     */
+    public static void zip(List<ZipItem> zipItems, OutputStream out, Charset charsetNullable) throws IOException {
         ZipOutputStream zipOut = null;
         try {
-            zipOut = new ZipOutputStream(out);
+            zipOut = charsetNullable == null ? new ZipOutputStream(out) : new ZipOutputStream(out, charsetNullable);
             if (zipItems != null) {
                 for (ZipItem zipItem : zipItems) {
                     zipOut.putNextEntry(new ZipEntry(zipItem.fileName));
