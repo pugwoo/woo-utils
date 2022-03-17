@@ -3,8 +3,6 @@ package com.pugwoo.wooutils.compress;
 import com.pugwoo.wooutils.io.IOUtils;
 import com.pugwoo.wooutils.string.StringTools;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,9 +11,9 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 /**
@@ -29,67 +27,6 @@ public class ZipUtils {
         public String fileName;
         /** 文件对应的输入流 */
         public InputStream in;
-    }
-    
-    public interface Iterator {
-        /**
-         * 获得下一个ZipItem，当返回null则表示读取完
-         * @return zipItem or null
-         * @throws IOException 解压操作异常 包括读取流异常/字符集错误等
-         */
-        ZipItem next() throws IOException;
-    }
-    
-    public static class ZipInputStreamIterator implements Iterator {
-        private final ZipInputStream zin;
-        private ZipInputStreamIterator(ZipInputStream zin) {
-            this.zin = zin;
-        }
-        
-        /**
-         * 获得下一个ZipItem，当返回null则表示读取完。<br>
-         * 【重要】ZipItem中的输入流in必须在本次读取完。
-         * @return zipItem
-         * @throws IOException 解压操作异常 {@link ZipInputStream#getNextEntry()}
-         */
-        @Override
-        public ZipItem next() throws IOException {
-            ZipEntry ze = zin.getNextEntry();
-            if (ze == null) {
-                return null;
-            }
-            ZipItem zipItem = new ZipItem();
-            zipItem.fileName = ze.getName();
-            zipItem.in = zin;
-            return zipItem;
-        }
-    }
-    
-    public static class ZipFileIterator implements Iterator {
-        private final ZipFile zipFile;
-        private final Enumeration<? extends ZipEntry> entries;
-        public ZipFileIterator(ZipFile zipFile) {
-            this.zipFile = zipFile;
-            this.entries = zipFile.entries();
-        }
-        
-        /**
-         * 获得下一个ZipItem，当返回null则表示读取完。<br>
-         * zipFile关闭之后不能再调用next()
-         */
-        @Override
-        public ZipItem next() throws IOException {
-            while (entries.hasMoreElements()) {
-                ZipEntry zipEntry = entries.nextElement();
-                if (!zipEntry.isDirectory()) {
-                    ZipItem zipItem = new ZipItem();
-                    zipItem.fileName = zipEntry.getName();
-                    zipItem.in = zipFile.getInputStream(zipEntry);
-                    return zipItem;
-                }
-            }
-            return null;
-        }
     }
     
     /**
@@ -129,136 +66,86 @@ public class ZipUtils {
     }
     
     /**
-     * 解压文件，节省内存方式
-     * @param in 不会自动close，close之后不能再调用Iterator.next()，请在处理完压缩包内文件后关闭
-     * @return zipInputStreamIterator
+     * 解压文件
+     *   会先尝试使用gbk编码打开，如果GBK打开失败，则使用默认的编码(UTF-8)
+     * @param zipFilePath 文件路径
+     * @param consumer zipItemList操作
      */
-    public static ZipInputStreamIterator unzip(InputStream in) {
-        ZipInputStream zin = new ZipInputStream(in);
-        return new ZipInputStreamIterator(zin);
+    public static void unzip(String zipFilePath, Consumer<List<ZipItem>> consumer) throws IOException {
+        unzip(zipFilePath, null, consumer);
     }
     
     /**
-     * 解压文件，会将文件解压到内存中，该方式会占用较多内存
-     * @param in 不会自动close，调用后可以立即关闭，因为数据都加载到内存中了
-     * @return zipItemList 注意zipItem中的in要自行关闭
+     * 解压文件
+     * @param zipFilePath 文件路径
+     * @param charsetNullable 字符集；
+     *                        如果提供，则使用指定的编码打开；
+     *                        如果未提供，会先尝试使用gbk编码打开，如果GBK打开失败，则使用默认的编码(UTF-8)
+     * @param consumer zipItemList操作
+     * @throws IOException 见 {@link ZipFile#getInputStream(ZipEntry)}
      */
-    public static List<ZipItem> unzipAll(InputStream in) throws IOException {
-        Iterator it = unzip(in);
-        ZipItem zipItem;
-        List<ZipItem> zipItems = new ArrayList<>();
+    public static void unzip(String zipFilePath, Charset charsetNullable, Consumer<List<ZipItem>> consumer) throws IOException {
+        ZipFile zipFile = null;
+        List<ZipItem> zipItemList = null;
         try {
-            while ((zipItem = it.next()) != null) {
-                ByteArrayOutputStream out = null;
-                try {
-                    out = new ByteArrayOutputStream();
-                    IOUtils.copy(zipItem.in, out);
-                    zipItem.in = new ByteArrayInputStream(out.toByteArray());
-                    zipItems.add(zipItem);
-                } finally {
-                    IOUtils.close(out);
+            zipFile = getZipFile(zipFilePath, charsetNullable);
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            zipItemList = new ArrayList<>(zipFile.size());
+            while (entries.hasMoreElements()) {
+                ZipEntry zipEntry = entries.nextElement();
+                if (zipEntry.isDirectory()) {
+                    continue;
+                }
+                ZipItem zipItem = new ZipItem();
+                zipItem.fileName = zipEntry.getName();
+                zipItem.in = zipFile.getInputStream(zipEntry);
+                zipItemList.add(zipItem);
+            }
+            
+            consumer.accept(zipItemList);
+        } finally {
+            if (zipItemList != null) {
+                for (ZipItem zipItem : zipItemList) {
+                    IOUtils.close(zipItem.in);
                 }
             }
-        } catch (IOException ioException) {
-            for (ZipItem item : zipItems) {
-                IOUtils.close(item.in);
-            }
-            throw ioException;
+            IOUtils.close(zipFile);
         }
-        return zipItems;
     }
     
     /**
-     * 解压文件
-     * @param zipFile 不会自动close，close之后不能再调用next()，请在处理完压缩包内文件后关闭
-     * @return ZipFileIterator
-     */
-    public static ZipFileIterator unzip(ZipFile zipFile) {
-        return new ZipFileIterator(zipFile);
-    }
-    
-    /**
-     * 解压文件
-     * @param zipFile 不会自动close，close之后不能操作zipItem.in，请在处理完压缩包内文件后关闭
-     * @return zipItemList
-     * @throws IOException zip操作的相关异常 见{@link ZipFile#getInputStream(ZipEntry)}
-     */
-    public static List<ZipItem> unzipAll(ZipFile zipFile) throws IOException {
-        Iterator it = unzip(zipFile);
-        List<ZipItem> zipItems = new ArrayList<>();
-        ZipItem zipItem;
-        while((zipItem = it.next()) != null) {
-            zipItems.add(zipItem);
-        }
-        return zipItems;
-    }
-    
-    /**
-     * 获取zipFile
-     *   会先尝试使用gbk编码打开，如果失败，则使用默认的编码(UTF-8)
-     * @param zipPath 路径
-     * @return zipFile
-     * @throws IOException 见{@link ZipFile#ZipFile(File)}
-     */
-    public static ZipFile getZipFile(String zipPath) throws IOException {
-        return getZipFile(zipPath, null);
-    }
-    
-    /**
-     * 获取zipFile
-     * @param zipPath 路径
+     * 打开zipFile
+     * @param filePath zip文件路径
      * @param charset 如果提供，则使用指定的编码打开；
      *                如果未提供，会先尝试使用gbk编码打开，如果失败，则使用默认的编码(UTF-8)
      * @return zipFile
      * @throws IOException 见{@link ZipFile#ZipFile(File, Charset)}
      */
-    public static ZipFile getZipFile(String zipPath, Charset charset) throws IOException {
-        return getZipFile(new File(zipPath), charset);
-    }
-    
-    /**
-     * 获取zipFile
-     *   会先尝试使用gbk编码打开，如果失败，则使用默认的编码(UTF-8)
-     * @param file zip文件
-     * @return zipFile
-     * @throws IOException 见{@link ZipFile#ZipFile(File, Charset)}
-     */
-    public static ZipFile getZipFile(File file) throws IOException {
-        return getZipFile(file, null);
-    }
-    
-    /**
-     * 获取zipFile
-     * @param file zip文件
-     * @param charset 如果提供，则使用指定的编码打开；
-     *                如果未提供，会先尝试使用gbk编码打开，如果失败，则使用默认的编码(UTF-8)
-     * @return zipFile
-     * @throws IOException 见{@link ZipFile#ZipFile(File, Charset)}
-     */
-    public static ZipFile getZipFile(File file, Charset charset) throws IOException {
+    private static ZipFile getZipFile(String filePath, Charset charset) throws IOException {
         if (charset != null) {
-            return new ZipFile(file, charset);
+            return new ZipFile(filePath, charset);
         }
-        ZipFile zipFile = getZipFileCharsetGbk(file);
+        ZipFile zipFile = getZipFileCharsetGbk(filePath);
         if (zipFile == null) {
-            zipFile = new ZipFile(file);
+            zipFile = new ZipFile(filePath);
         }
         return zipFile;
     }
     
     /**
-     * 获取用GBK打开的zip
+     * 尝试用GBK打开的zip
      *   会判断文件名编码是否为真正的GBK，否则返回null
-     * @param file zip文件
-     * @return zipFile or null
-     * @throws IOException 见{@link ZipFile#ZipFile(File, Charset)} 仅过滤掉字符的异常
+     * @param filePath zip文件路径
+     * @return zipFile or null(不是GBK编码)
+     * @throws IOException 见{@link ZipFile#ZipFile(File, Charset)}
+     * @throws IllegalArgumentException 除字符集问题外的其他异常
      */
-    private static ZipFile getZipFileCharsetGbk(File file) throws IOException {
+    private static ZipFile getZipFileCharsetGbk(String filePath) throws IOException {
         ZipFile zipFile = null;
-        // 默认不关闭 因为要返回
+        // 默认关闭掉使用GBK打开的zipFile
         boolean close = true;
         try {
-            zipFile = new ZipFile(file, Charset.forName("GBK"));
+            zipFile = new ZipFile(filePath, Charset.forName("GBK"));
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry entry;
