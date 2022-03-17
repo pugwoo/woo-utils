@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -23,6 +24,10 @@ public class TestZipUtils {
      */
     private final String testPath = "/tmp/test.zip";
     private final String testPathGbk = "/tmp/gbk.zip";
+
+    static {
+        new File("/tmp").mkdirs();
+    }
     
     @Test
     public void test01_zipUtf8() throws IOException {
@@ -64,17 +69,20 @@ public class TestZipUtils {
     
     @Test
     public void test13_unzip_gbk() throws IOException {
+        boolean isThrowException = false;
         try {
             unzip(testPathGbk, StandardCharsets.UTF_8, "UTF8打开gbk编码的zip");
-        } catch (IllegalArgumentException exception) {
+        } catch (Exception exception) {
             String message = exception.getMessage();
             // java.lang.IllegalArgumentException: MALFORMED[1] 编码无法打开的会抛这个异常
             if (message != null && exception.getMessage().toUpperCase().startsWith("MALFORMED")) {
                 System.out.println("编码异常: " + exception.getClass() + " : " + exception.getMessage());
                 return;
             }
-            throw exception;
+            // throw exception;
+            isThrowException = true;
         }
+        assert isThrowException;
     }
     
     private void unzip(String filePath, Charset charset, String msg) throws IOException {
