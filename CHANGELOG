@@ -1,3 +1,4 @@
+2022年3月17日
 v1.0.11 - [add] StringTools增加isGbkCharset方法，校验给定字符串是否全部为gbk编码
           [enhance] ZipUtils流的关闭及异常处理
           [del] ZipUtils解压inputStream
