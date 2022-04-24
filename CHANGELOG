@@ -1,3 +1,4 @@
+2022年4月24日
 v1.0.12 - [enhance] ListUtils多个方法接收参数由List改成Collection
         - [add] ListUtils增加isEmpty(Map)方法
 
