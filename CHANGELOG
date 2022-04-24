@@ -1,5 +1,5 @@
 v1.0.12 - [enhance] ListUtils多个方法接收参数由List改成Collection
-
+        - [add] ListUtils增加isEmpty(Map)方法
 
 2022年3月17日
 v1.0.11 - [add] StringTools增加isGbkCharset方法，校验给定字符串是否全部为gbk编码

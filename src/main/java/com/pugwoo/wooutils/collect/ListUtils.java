@@ -307,7 +307,15 @@ public class ListUtils {
 	public static boolean isNotEmpty(Collection<?> list) {
 		return !isEmpty(list);
 	}
-	
+
+	public static boolean isEmpty(Map<?, ?> map) {
+		return map == null || map.isEmpty();
+	}
+
+	public static boolean isNotEmpty(Map<?, ?> map) {
+		return !isEmpty(map);
+	}
+
 	/**
 	 * list中是否包含有符合条件的元素
 	 * @param list
