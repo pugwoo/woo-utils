@@ -90,7 +90,7 @@ public class ListUtils {
 	 * @param mapper 支持lambda写法
 	 * @return
 	 */
-	public static <T, R> List<R> transform(List<T> list,
+	public static <T, R> List<R> transform(Collection<T> list,
 			Function<? super T, ? extends R> mapper) {
 		if(list == null) {
 			return new ArrayList<>();
@@ -116,7 +116,7 @@ public class ListUtils {
 	 * @param mapper 支持lambda写法
 	 * @return
 	 */
-	public static <T, R> Set<R> toSet(List<T> list, Function<? super T, ? extends R> mapper) {
+	public static <T, R> Set<R> toSet(Collection<T> list, Function<? super T, ? extends R> mapper) {
 		if(list == null) {
 			return new HashSet<>();
 		}
@@ -130,7 +130,7 @@ public class ListUtils {
 	 * @param valueMapper
 	 * @return
 	 */
-	public static <T, K, V> Map<K, V> toMap(List<T> list,
+	public static <T, K, V> Map<K, V> toMap(Collection<T> list,
 			Function<? super T, ? extends K> keyMapper,
 			Function<? super T, ? extends V> valueMapper) {
 		if(list == null) {
@@ -151,7 +151,7 @@ public class ListUtils {
 	 * @param valueMapper
 	 * @return
 	 */
-	public static <T, K, V> Map<K, List<V>> toMapList(List<T> list,
+	public static <T, K, V> Map<K, List<V>> toMapList(Collection<T> list,
 			Function<? super T, ? extends K> keyMapper,
 			Function<? super T, ? extends V> valueMapper) {
 		if(list == null) {
@@ -180,7 +180,7 @@ public class ListUtils {
 	 * @param <K>
 	 * @return
 	 */
-	public static <T, K> Map<K, List<T>> groupBy(List<T> list, Function<? super T, ? extends K> keyMapper) {
+	public static <T, K> Map<K, List<T>> groupBy(Collection<T> list, Function<? super T, ? extends K> keyMapper) {
 		return toMapList(list,keyMapper,o->o);
 	}
 
@@ -189,7 +189,7 @@ public class ListUtils {
 	 * @param list
 	 * @param groupNum 分组的数量，必须大于等于1，当小于1时返回空数组
 	 */
-	public static <T> List<List<T>> groupByNum(List<T> list, final int groupNum) {
+	public static <T> List<List<T>> groupByNum(Collection<T> list, final int groupNum) {
 		if (list == null || groupNum < 1) {
 			return new ArrayList<>();
 		}
@@ -250,7 +250,7 @@ public class ListUtils {
 	 * @param list
 	 * @param groupNum 分组的数量，必须大于等于1，当小于1时返回空数组
 	 */
-	public static <T> List<List<T>> partition(List<T> list, final int groupNum) {
+	public static <T> List<List<T>> partition(Collection<T> list, final int groupNum) {
 		return groupByNum(list, groupNum);
 	}
 
@@ -260,7 +260,7 @@ public class ListUtils {
 	 * @param predicate
 	 * @return
 	 */
-	public static <T> List<T> filter(List<T> list, Predicate<? super T> predicate) {
+	public static <T> List<T> filter(Collection<T> list, Predicate<? super T> predicate) {
 		if(list == null) {
 			return new ArrayList<>();
 		}
@@ -284,7 +284,7 @@ public class ListUtils {
 		return list;
 	}
 	
-	public static <T> void forEach(List<T> list, Consumer<? super T> consumer) {
+	public static <T> void forEach(Collection<T> list, Consumer<? super T> consumer) {
 		if(list != null) {
 			for(T t : list) {
 				consumer.accept(t);
@@ -300,11 +300,11 @@ public class ListUtils {
 		}
 	}
 
-	public static boolean isEmpty(List<?> list) {
+	public static boolean isEmpty(Collection<?> list) {
 		return list == null || list.isEmpty();
 	}
 
-	public static boolean isNotEmpty(List<?> list) {
+	public static boolean isNotEmpty(Collection<?> list) {
 		return !isEmpty(list);
 	}
 	
@@ -314,7 +314,7 @@ public class ListUtils {
 	 * @param predicate
 	 * @return
 	 */
-	public static <T> boolean contains(List<T> list, Predicate<? super T> predicate) {
+	public static <T> boolean contains(Collection<T> list, Predicate<? super T> predicate) {
 		if(list == null) return false;
 		for(T t : list) {
 			if(predicate.test(t)) {
@@ -330,7 +330,7 @@ public class ListUtils {
 	 * @param mapper
 	 * @return
 	 */
-	public static <T, R> boolean hasDuplicate(List<T> list,
+	public static <T, R> boolean hasDuplicate(Collection<T> list,
 			Function<? super T, ? extends R> mapper) {
 		Set<R> sets = new HashSet<>();
 		for(T t : list) {
@@ -506,7 +506,7 @@ public class ListUtils {
 	 * @deprecated 请使用NumberUtils.sum，该接口将在高版本中删除
 	 */
 	@Deprecated
-	public static <T, R> BigDecimal sum(List<T> list, Function<? super T, ? extends R> mapper) {
+	public static <T, R> BigDecimal sum(Collection<T> list, Function<? super T, ? extends R> mapper) {
 		return NumberUtils.sum(list, mapper);
 	}
 	
