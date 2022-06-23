@@ -1,4 +1,5 @@
 v1.0.13 - [enhance] 优化DateUtils.parse性能，将常见的格式提前，提升1~2倍性能
+        - [enhance] DateUtils.parse解析开启setLenient(false)，减少解析时间的坑，例如2020-61-01解析为2025-01-01
 
 2022年4月24日
 v1.0.12 - [enhance] ListUtils多个方法接收参数由List改成Collection

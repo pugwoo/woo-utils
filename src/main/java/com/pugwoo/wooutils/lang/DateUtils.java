@@ -36,7 +36,6 @@ public class DateUtils {
 	/**时间格式**/
 	public final static String FORMAT_TIME = "HH:mm:ss";
 	
-	@SuppressWarnings("serial")
 	public static final Map<String, String> DATE_FORMAT_REGEXPS = new LinkedHashMap<String, String>() {{
 
 		// 最常用的
@@ -83,7 +82,6 @@ public class DateUtils {
 	 * 说明：<br>
 	 * 会尝试将数字当做时间戳转换，但只转换值大于等于946656000的时间戳，即2000年以后的 <br>
 	 *
-	 * @param date
 	 * @return 解析失败返回null，同时log error
 	 */
 	public static Date parse(String date) {
@@ -107,7 +105,9 @@ public class DateUtils {
 			return null;
 		}
 		try {
-			return new SimpleDateFormat(pattern).parse(date);
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+			simpleDateFormat.setLenient(false);
+			return simpleDateFormat.parse(date);
 		} catch (ParseException e) {
 			LOGGER.error("parse date error, date:{}", date, e);
 			return null;
@@ -167,7 +167,6 @@ public class DateUtils {
 
 	/**
 	 * 解析日期，不会抛出异常，如果解析失败，打log并返回null
-	 * @param date
 	 * @param pattern 日期格式pattern
 	 */
 	public static Date parse(String date, String pattern) {
@@ -175,7 +174,9 @@ public class DateUtils {
 			return null;
 		}
 		try {
-			return new SimpleDateFormat(pattern).parse(date);
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+			simpleDateFormat.setLenient(false);
+			return simpleDateFormat.parse(date);
 		} catch (ParseException e) {
 			LOGGER.error("parse date error, date:{}", date, e);
 			return null;
@@ -188,8 +189,6 @@ public class DateUtils {
 	 * 说明：<br>
 	 * 会尝试将数字当做时间戳转换，但只转换值大于等于946656000的时间戳，即2000年以后的 <br>
 	 *
-	 * @param date
-	 * @return
 	 */
 	public static Date parseThrowException(String date) throws ParseException {
 		if(date == null) {
@@ -211,19 +210,22 @@ public class DateUtils {
 			throw new ParseException("Unparseable date: \"" + date +
 					"\". Supported formats: " + DATE_FORMAT_REGEXPS.values(), -1);
 		}
-		return new SimpleDateFormat(pattern).parse(date);
+
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+		simpleDateFormat.setLenient(false);
+		return simpleDateFormat.parse(date);
 	}
 	
 	/**
 	 * 解析日期，失败抛出异常
-	 * @param date
-	 * @return
 	 */
 	public static Date parseThrowException(String date, String pattern) throws ParseException {
 		if(date == null || date.trim().isEmpty()) {
 			return null;
 		}
-		return new SimpleDateFormat(pattern).parse(date);
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+		simpleDateFormat.setLenient(false);
+		return simpleDateFormat.parse(date);
 	}
 	
 	/**
@@ -233,7 +235,9 @@ public class DateUtils {
 		if(date == null) {
 			return "";
 		}
-		return new SimpleDateFormat(FORMAT_STANDARD).format(date);
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(FORMAT_STANDARD);
+		simpleDateFormat.setLenient(false);
+		return simpleDateFormat.format(date);
 	}
 
 	/**
@@ -263,7 +267,9 @@ public class DateUtils {
 		if(date == null) {
 			return "";
 		}
-		return new SimpleDateFormat(FORMAT_DATE).format(date);
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(FORMAT_DATE);
+		simpleDateFormat.setLenient(false);
+		return simpleDateFormat.format(date);
 	}
 
 	/**
@@ -290,7 +296,9 @@ public class DateUtils {
 		if(date == null) {
 			return "";
 		}
-		return new SimpleDateFormat(pattern).format(date);
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+		simpleDateFormat.setLenient(false);
+		return simpleDateFormat.format(date);
 	}
 
 	public static String format(LocalDateTime date, String pattern) {
@@ -397,7 +405,7 @@ public class DateUtils {
 	// ======================================
 
 	// 当前系统时区距离0时区的毫秒数，例如东8区是28800000
-	private static int timezoneOffset = Calendar.getInstance().get(Calendar.ZONE_OFFSET);
+	private static final int timezoneOffset = Calendar.getInstance().get(Calendar.ZONE_OFFSET);
 
 	/**
 	 * 获得date到当前时间间隔了多少天，如果date是今天则返回0，如果date是昨天则返回1，以此类推。
@@ -449,8 +457,6 @@ public class DateUtils {
 
 	/**
 	 * 计算两个日期的天数差，不足一天的不算。
-	 * @param date1
-	 * @param date2
 	 * @return 返回值都大于等于0，不关心date1和date2的顺序
 	 */
 	public static int diffDays(Date date1, Date date2) {
@@ -462,8 +468,6 @@ public class DateUtils {
 	
 	/**
 	 * 计算两个日期的年份差，主要用于计算年龄。不足一年的不计，一年按365天计，不考虑闰年。
-	 * @param date1
-	 * @param date2
 	 * @return 返回值都大于等于0，不关心date1和date2的顺序
 	 */
 	public static int diffYears(Date date1, Date date2) {
@@ -478,14 +482,12 @@ public class DateUtils {
 	 * 4. 3600*24秒内，显示xx小时前
 	 * 5. 3600*24*10秒内，显示xx天前
 	 * 6. 其它显示真实日期，格式yyyy-MM-dd HH:mm
-	 * @param date
-	 * @return
 	 */
     public static String getIntervalToNow(Date date) {
         if(date == null){
             return "";
         }
-        String interval = "";
+        String interval;
         long seconds = (new Date().getTime() - date.getTime()) / 1000;
         if(seconds >= 0) {
             if (seconds < 10) {
