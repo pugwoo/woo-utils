@@ -45,9 +45,15 @@ public class TestListUtils {
 
     @Test
     public void testRandom() {
-        List<Integer> list = ListUtils.newArrayList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-        List<Integer> list2 = ListUtils.shuffle(list);
-        System.out.println(list2);
+        List<Integer> list = ListUtils.newArrayList();
+        for (int i = 0; i < 10000; i++) {
+            list.add(i);
+        }
+        long start = System.currentTimeMillis();
+        ListUtils.shuffle(list);
+        long end = System.currentTimeMillis();
+        System.out.println("cost:" + (end - start) + "ms");
+        System.out.println(list);
     }
 
 }
