@@ -516,6 +516,38 @@ public class ListUtils {
 	    }
 	}
 
+
+	/**
+	 * 随机打乱list
+	 */
+	public static <E> List<E> shuffle(List<E> list) {
+		if (isEmpty(list) || list.size() == 1) {
+			return list;
+		}
+
+		List<E> result = new ArrayList<>();
+
+		int size = list.size();
+		Set<Integer> indexSet = new HashSet<>();
+
+		Random random = new Random();
+		while(indexSet.size() < size) {
+			int index = random.nextInt(size);
+			while(indexSet.contains(index)) {
+				index++;
+				if (index >= size) {
+					index = 0;
+				}
+			}
+
+			result.add(list.get(index));
+			indexSet.add(index);
+		}
+
+		return result;
+	}
+
+
 	/**
 	 * 数值求和
 	 * @param list

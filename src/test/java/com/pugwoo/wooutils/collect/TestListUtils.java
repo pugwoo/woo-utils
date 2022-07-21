@@ -43,4 +43,11 @@ public class TestListUtils {
         assert lists.get(1).get(2) == 6;
     }
 
+    @Test
+    public void testRandom() {
+        List<Integer> list = ListUtils.newArrayList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        List<Integer> list2 = ListUtils.shuffle(list);
+        System.out.println(list2);
+    }
+
 }

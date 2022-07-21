@@ -1,5 +1,5 @@
 
-v1.0.14
+v1.0.14 - [add] ListUtils新增shuffle方法，可以随机洗乱list
         - [enhance] ListUtils.sub更名为ListUtils.subtract
 
 2022年6月23日
