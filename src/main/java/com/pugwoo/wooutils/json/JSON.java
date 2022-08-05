@@ -164,6 +164,15 @@ public class JSON {
 		return toJson(om -> om.writeValueAsString(obj));
 	}
 	
+	/**
+	 * 将对象转换为json字符串 格式化的
+	 * @param obj obj
+	 * @return json
+	 */
+	public static String toJsonFormatted(Object obj) {
+		return toJson(om -> om.writerWithDefaultPrettyPrinter().writeValueAsString(obj));
+	}
+	
 	// -------------------------------------------------------------- others
 	
 	/**
