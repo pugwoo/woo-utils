@@ -135,6 +135,15 @@ public class JSON {
 	}
 	
 	/**
+	 * 解析字符串为ListMap
+	 * @param str json字符串
+	 * @return mapList
+	 */
+	public static List<Map<String, Object>> parseToListMap(String str) {
+		return parse(str, TYPE_REFERENCE_LIST_MAP);
+	}
+	
+	/**
 	 * 解析对象，可以通过jackson的ObjectNode读取各种类型值
 	 * @param str json字符串
 	 * @return objectNode
