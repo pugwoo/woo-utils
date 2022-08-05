@@ -144,6 +144,31 @@ public class JSON {
 	}
 	
 	/**
+	 * 解析字符串为Map
+	 * @param str json字符串
+	 * @return map
+	 */
+	public static <T> List<T> parseToList(String str, Class<T> itemClazz) {
+		return parseToList(str, typeFactory ->
+				typeFactory.constructParametricType(List.class, itemClazz)
+		);
+	}
+	
+	/**
+	 * 将json字符串转换为 List < T >
+	 *
+	 * @param str json字符串
+	 * @param itemTypeRef item的类型
+	 * @return List < T >
+	 */
+	public static <T> List<T> parseToList(String str, TypeReference<T> itemTypeRef) {
+		return parseToList(str, typeFactory -> {
+			JavaType itemType = typeFactory.constructType(itemTypeRef);
+			return typeFactory.constructParametricType(List.class, itemType);
+		});
+	}
+	
+	/**
 	 * 解析对象，可以通过jackson的ObjectNode读取各种类型值
 	 * @param str json字符串
 	 * @return objectNode
@@ -154,12 +179,11 @@ public class JSON {
 	
 	/**
 	 * 解析数组
-	 * @param str
-	 * @return
+	 * @param str json字符串
+	 * @return jsonNodeList
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<JsonNode> parseArray(String str) {
-		return parse(str, List.class, JsonNode.class);
+		return parseToList(str, JsonNode.class);
 	}
 	
 	// -------------------------------------------------------------- 序列化 object -> json
