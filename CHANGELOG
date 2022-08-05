@@ -1,3 +1,10 @@
+v1.0.14
+        - [add] JSON增加常用的类型引用Map<String, Object>/List<Map<String, Object>
+        - [add] JSON增加方法setGlobalObjectMapper
+        - [deprecated] JSON.setObjectMapper
+        - [enhance] JSON增加方法setThreadObjectMapper/removeThreadObjectMapper/useThreadObjectMapper用于支持自定义objectMapper进行json操作
+        - [add] JSON增加方法parseToListMap/parseToList/toJsonFormatted
+
 2022年6月23日
 v1.0.13 - [enhance] 优化DateUtils.parse性能，将常见的格式提前，提升1~2倍性能
         - [enhance] DateUtils.parse解析开启setLenient(false)，减少解析时间的坑，例如2020-61-01解析为2025-01-01
