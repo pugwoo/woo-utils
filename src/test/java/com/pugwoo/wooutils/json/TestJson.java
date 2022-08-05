@@ -131,19 +131,31 @@ public class TestJson {
 		
 		System.out.println("\n ---- Object JSON.parse(String)");
 		Object object1 = JSON.parse(mapJson);
-		Object object2 = JSON.useOnce(defaultObjectMapper).parse(mapJson);
+		Object object2 = JSON.useThreadObjectMapper(defaultObjectMapper, () -> JSON.parse(mapJson));
+		Object object3;
+		try {
+			JSON.setThreadObjectMapper(defaultObjectMapper);
+			object3 = JSON.parse(mapJson);
+		} finally {
+			JSON.removeThreadObjectMapper();
+		}
 		System.out.println(object1);
 		System.out.println(object2);
+		System.out.println(object3);
 		
 		System.out.println("\n ---- Object JSON.parse(String, Class)");
 		Map map1 = JSON.parse(mapJson, Map.class);
-		Map map2 = JSON.useOnce(defaultObjectMapper).parse(mapJson, Map.class);
 		System.out.println(map1);
-		System.out.println(map2);
+		JSON.useThreadObjectMapper(defaultObjectMapper, () -> {
+			Map map2 = JSON.parse(mapJson, Map.class);
+			System.out.println(map2);
+		});
 		
 		System.out.println("\n ---- T JSON.parse(String, TypeReference)");
 		Map<String, String> mapStringString1 = JSON.parse(mapJson, new TypeReference<Map<String, String>>() {});
-		Map<String, String> mapStringString2 = JSON.useOnce(defaultObjectMapper).parse(mapJson, new TypeReference<Map<String, String>>() {});
+		Map<String, String> mapStringString2 = JSON.useThreadObjectMapper(defaultObjectMapper, () ->
+				JSON.parse(mapJson, new TypeReference<Map<String, String>>() {})
+		);
 		System.out.println(mapStringString1);
 		System.out.println(mapStringString2);
 		// 变量类型的实例不存在，因此Map<String, String> 符合 Map<String, Long>
@@ -151,21 +163,23 @@ public class TestJson {
 		
 		System.out.println("\n ---- Map<String, Object> JSON.parseToMap(String) ");
 		Map<String, Object> parseToMap1 = JSON.parseToMap(mapJson);
-		Map<String, Object> parseToMap2 = JSON.useOnce(defaultObjectMapper).parseToMap(mapJson);
+		Map<String, Object> parseToMap2 = JSON.useThreadObjectMapper(defaultObjectMapper, () -> JSON.parseToMap(mapJson));
 		System.out.println(parseToMap1);
 		System.out.println(parseToMap2);
 		
 		System.out.println("\n ---- List<Map<String, Object>> parseToListMap(String) ");
 		String parseToListMap = "[{\"name\":\"hello1\"}, {\"name\":\"hello2\"}]";
 		List<Map<String, Object>> parseToListMap1 = JSON.parseToListMap(parseToListMap);
-		List<Map<String, Object>> parseToListMap2 = JSON.useOnce(defaultObjectMapper).parseToListMap(parseToListMap);
+		List<Map<String, Object>> parseToListMap2 = JSON.useThreadObjectMapper(defaultObjectMapper, () -> JSON.parseToListMap(parseToListMap));
 		System.out.println(parseToListMap1);
 		System.out.println(parseToListMap2);
 		
 		System.out.println("\n ---- List<T> parseToList(String, Class) ");
 		String parseToListClassJson = "[123,456,789]";
 		List<Long> parseToList01 = JSON.parseToList(parseToListClassJson, Long.class);
-		List<Long> parseToList02 = JSON.useOnce(defaultObjectMapper).parseToList(parseToListClassJson, Long.class);
+		List<Long> parseToList02 = JSON.useThreadObjectMapper(defaultObjectMapper, () ->
+				JSON.parseToList(parseToListClassJson, Long.class)
+		);
 		System.out.println(parseToList01);
 		System.out.println(parseToList02);
 		System.out.println(parseToList01.get(0).getClass());
@@ -179,7 +193,9 @@ public class TestJson {
 		System.out.println("\n ---- List<T> parseToList(String, TypeReference) ");
 		String parseToListTypeReferenceJsonLong = "[123,456,789]";
 		List<Long> parseToListTypeReferenceLong01 = JSON.parseToList(parseToListTypeReferenceJsonLong, new TypeReference<Long>() {});
-		List<Long> parseToListTypeReferenceLong02 = JSON.useOnce(defaultObjectMapper).parseToList(parseToListTypeReferenceJsonLong, new TypeReference<Long>() {});
+		List<Long> parseToListTypeReferenceLong02 = JSON.useThreadObjectMapper(defaultObjectMapper, () ->
+				JSON.parseToList(parseToListTypeReferenceJsonLong, new TypeReference<Long>() {})
+		);
 		System.out.println(parseToListTypeReferenceLong01);
 		System.out.println(parseToListTypeReferenceLong02);
 		System.out.println(parseToListTypeReferenceLong01.get(0).getClass());
@@ -187,7 +203,9 @@ public class TestJson {
 		
 		String parseToListTypeReferenceJsonMap = "[{\"name\":\"hello1\"}, {\"name\":\"hello2\"}]";
 		List<Map<String, Object>> parseToListTypeReferenceMap01 = JSON.parseToList(parseToListTypeReferenceJsonMap, new TypeReference<Map<String, Object>>() {});
-		List<Map<String, Object>> parseToListTypeReferenceMap02 = JSON.useOnce(defaultObjectMapper).parseToList(parseToListTypeReferenceJsonMap, new TypeReference<Map<String, Object>>() {});
+		List<Map<String, Object>> parseToListTypeReferenceMap02 = JSON.useThreadObjectMapper(defaultObjectMapper, () ->
+				JSON.parseToList(parseToListTypeReferenceJsonMap, new TypeReference<Map<String, Object>>() {})
+		);
 		System.out.println(parseToListTypeReferenceMap01);
 		System.out.println(parseToListTypeReferenceMap02);
 		System.out.println(parseToListTypeReferenceMap01.get(0).getClass());
@@ -219,11 +237,11 @@ public class TestJson {
 		
 		System.out.println("\n ---- toJson ");
 		System.out.println(JSON.toJson(map));
-		System.out.println(JSON.useOnce(defaultObjectMapper).toJson(map));
+		System.out.println(JSON.useThreadObjectMapper(defaultObjectMapper, () -> JSON.toJson(map)));
 		
 		System.out.println("\n ---- toJsonFormatted ");
 		System.out.println(JSON.toJsonFormatted(map));
-		System.out.println(JSON.useOnce(defaultObjectMapper).toJsonFormatted(map));
+		System.out.println(JSON.useThreadObjectMapper(defaultObjectMapper, () -> JSON.toJsonFormatted(map)));
 		
 		System.out.println("\n -------------------------------------------- 其他 ");
 		System.out.println("\n ---- toMap ");
@@ -237,8 +255,10 @@ public class TestJson {
 		
 		System.out.println("\n -------------------------------------------- objectMapper ");
 		Assert.assertNotNull(JSON.getObjectMapper());
-		JSON.setObjectMapper(JSON.getObjectMapper());
-		Assert.assertThrows(IllegalArgumentException.class, () -> JSON.setObjectMapper(null));
+		JSON.setGlobalObjectMapper(JSON.getObjectMapper());
+		Assert.assertThrows(IllegalArgumentException.class, () -> JSON.setGlobalObjectMapper(null));
+		
+		
 		
 	}
 

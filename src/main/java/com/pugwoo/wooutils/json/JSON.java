@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * 封装起来的常用的json方法
@@ -41,7 +42,11 @@ public class JSON {
 	/**
 	 * 允许拿到ObjectMapper进行修改 <br>
 	 *     用于修改配置，建议全项目在初始化阶段配置一次 <br>
-	 *     如有不同的配置需求，也可以在调用方法之前使用{@link #useOnce(ObjectMapper)}来自定义objectMapper
+	 *     如有不同的配置需求，也可使用一下方法进行json操作 <br>
+	 *     1. {@link #setThreadObjectMapper(ObjectMapper)} + {@link #removeThreadObjectMapper()} <br>
+	 *     2. {@link #useThreadObjectMapper(ObjectMapper, Procedure)} <br>
+	 *     3. {@link #useThreadObjectMapper(ObjectMapper, Supplier)} <br>
+	 *
 	 * @return objectMapper
 	 */
 	public static ObjectMapper getObjectMapper() {
@@ -50,10 +55,22 @@ public class JSON {
 	
 	/**
 	 * 允许重新设置objectMapper <br>
-	 *     建议全项目在初始化阶段配置一次
+	 *     建议全项目在初始化阶段配置一次<br>
+	 * use {@link #setGlobalObjectMapper(ObjectMapper)}
 	 * @param objectMapper objectMapper
 	 */
+	@Deprecated
 	public static void setObjectMapper(ObjectMapper objectMapper) {
+		setGlobalObjectMapper(objectMapper);
+	}
+	
+	/**
+	 * 允许重新设置objectMapper <br>
+	 *     建议全项目在初始化阶段配置一次<br>
+	 *
+	 * @param objectMapper objectMapper
+	 */
+	public static void setGlobalObjectMapper(ObjectMapper objectMapper) {
 		if (objectMapper == null) {
 			throw new IllegalArgumentException("objectMapper must not be null!");
 		}
@@ -61,21 +78,70 @@ public class JSON {
 	}
 	
 	/**
-	 * 接下来的一次json调用将使用自定义的objectMapper进行操作 <br>
-	 *    常用于与第三方平台进行对接时的操作 <br>
-	 * <p>
-	 *    例如对于 Student.studentName <br>
-	 *        项目: 序列化为 studentName <br>
-	 *        第三方: 序列化为 student_name <br>
+	 * 自定义objectMapper进行JSON操作 使用ThreadLocal实现 <br>
+	 * 注意: 使用后请调用{@link #removeThreadObjectMapper()}清除<br>
+	 * <br>
+	 * 使用示例: <br>
+	 * <pre>
+try {
+    JSON.setThreadObjectMapper(customObjectMapper)
+    JSON.toJson(obj);
+} finally {
+    JSON.removeThreadObjectMapper();
+}
+	 * </pre>
 	 *
-	 * 注: 使用此方法后会遇到IDE的警告(通过实例引用访问 static 成员 ),忽略即可 <br>
-	 *
-	 * @param objectMapper 自定义的objectMapper
-	 * @return JSON
+	 * @param objectMapper objectMapper 如果为null将使用全局的ObjectMapper进行操作
 	 */
-	public static JSON useOnce(ObjectMapper objectMapper) {
+	public static void setThreadObjectMapper(ObjectMapper objectMapper) {
 		OBJECT_MAPPER_THREAD_LOCAL.set(objectMapper);
-		return null;
+	}
+	
+	/**
+	 * 清除线程的ObjectMapper
+	 */
+	public static void removeThreadObjectMapper() {
+		OBJECT_MAPPER_THREAD_LOCAL.remove();
+	}
+	
+	/**
+	 * 使用自定义的ObjectMapper进行执行JSON操作 <br>
+	 * <br>
+	 * 使用示例:<br>
+	 * <pre>
+JSON.useThreadObjectMapper(customObjectMapper, () -> {
+    JSON.toJson(obj);
+})
+	 * </pre>
+	 * @param objectMapper objectMapper 如果为null将使用全局的ObjectMapper进行操作
+	 * @param procedure 无参无返回执行
+	 */
+	public static void useThreadObjectMapper(ObjectMapper objectMapper, Procedure procedure) {
+		useThreadObjectMapper(objectMapper, () -> {
+			procedure.run();
+			return null;
+		});
+	}
+	
+	/**
+	 * 使用自定义的ObjectMapper进行执行JSON操作 <br>
+	 * <br>
+	 * 使用示例:<br>
+	 * <pre>
+String json = JSON.useThreadObjectMapper(customObjectMapper, () -> {
+    return JSON.toJson(obj);
+})
+	 * </pre>
+	 * @param objectMapper objectMapper 如果为null将使用全局的ObjectMapper进行操作
+	 * @param supplier 无参有返回执行
+	 */
+	public static <T> T useThreadObjectMapper(ObjectMapper objectMapper, Supplier<T> supplier) {
+		try {
+			setThreadObjectMapper(objectMapper);
+			return supplier.get();
+		} finally {
+			JSON.removeThreadObjectMapper();
+		}
 	}
 	
 	// -------------------------------------------------------------- 反序列化 json -> object
@@ -348,6 +414,14 @@ public class JSON {
 		 * @throws JsonMappingException objectMapper方法可能抛出的异常
 		 */
 		T apply(ObjectMapper objectMapper) throws IOException, JsonParseException, JsonMappingException;
+	}
+	
+	/**
+	 * 无参无返回执行
+	 */
+	@FunctionalInterface
+	public interface Procedure {
+		void run();
 	}
 	
 }
