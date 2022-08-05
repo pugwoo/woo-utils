@@ -16,11 +16,34 @@ import java.util.Map;
  */
 public class JSON {
 
+	/** 全局配置的objectMapper */
 	private static ObjectMapper objectMapper = new MyObjectMapper();
 
-	/**只用于克隆对象用*/
+	/** 只用于克隆对象用 */
 	private static final ObjectMapper OBJECT_MAPPER_FOR_CLONE = new ObjectMapper();
 
+	/**
+	 * 允许拿到ObjectMapper进行修改 <br>
+	 *     用于修改配置，建议全项目在初始化阶段配置一次 <br>
+	 *
+	 * @return objectMapper
+	 */
+	public static ObjectMapper getObjectMapper() {
+		return objectMapper;
+	}
+	
+	/**
+	 * 允许重新设置objectMapper <br>
+	 *     建议全项目在初始化阶段配置一次
+	 * @param objectMapper objectMapper
+	 */
+	public static void setObjectMapper(ObjectMapper objectMapper) {
+		if (objectMapper == null) {
+			throw new IllegalArgumentException("objectMapper must not be null!");
+		}
+		JSON.objectMapper = objectMapper;
+	}
+	
 	public static Object parse(String str) {
 		try {
 			return objectMapper.readValue(str, Object.class);
@@ -169,19 +192,4 @@ public class JSON {
 		}
 	}
 	
-	/**
-	 * 允许拿到ObjectMapper进行修改
-	 * @return
-	 */
-	public static ObjectMapper getObjectMapper() {
-		return objectMapper;
-	}
-
-	/**
-	 * 允许重新设置objectMapper
-	 * @param objectMapper
-	 */
-	public static void setObjectMapper(ObjectMapper objectMapper) {
-		JSON.objectMapper = objectMapper;
-	}
 }
