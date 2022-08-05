@@ -19,7 +19,7 @@ public class JSON {
 	private static ObjectMapper objectMapper = new MyObjectMapper();
 
 	/**只用于克隆对象用*/
-	private static ObjectMapper objectMapperForClone = new ObjectMapper();
+	private static final ObjectMapper OBJECT_MAPPER_FOR_CLONE = new ObjectMapper();
 
 	public static Object parse(String str) {
 		try {
@@ -129,8 +129,8 @@ public class JSON {
 		}
 
 		try {
-			String json = objectMapperForClone.writeValueAsString(t);
-			return (T) objectMapperForClone.readValue(json, t.getClass());
+			String json = OBJECT_MAPPER_FOR_CLONE.writeValueAsString(t);
+			return (T) OBJECT_MAPPER_FOR_CLONE.readValue(json, t.getClass());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -145,10 +145,10 @@ public class JSON {
 			return null;
 		}
 		try {
-			String json = objectMapperForClone.writeValueAsString(t);
-			JavaType type =  objectMapperForClone.getTypeFactory()
+			String json = OBJECT_MAPPER_FOR_CLONE.writeValueAsString(t);
+			JavaType type =  OBJECT_MAPPER_FOR_CLONE.getTypeFactory()
 					.constructParametricType(t.getClass(), genericClasses);
-			return objectMapperForClone.readValue(json, type);
+			return OBJECT_MAPPER_FOR_CLONE.readValue(json, type);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -162,8 +162,8 @@ public class JSON {
 			return null;
 		}
 		try {
-			String json = objectMapperForClone.writeValueAsString(t);
-			return objectMapperForClone.readValue(json, typeReference);
+			String json = OBJECT_MAPPER_FOR_CLONE.writeValueAsString(t);
+			return OBJECT_MAPPER_FOR_CLONE.readValue(json, typeReference);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
