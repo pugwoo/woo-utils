@@ -21,7 +21,15 @@ public class JSON {
 
 	/** 只用于克隆对象用 */
 	private static final ObjectMapper OBJECT_MAPPER_FOR_CLONE = new ObjectMapper();
-
+	
+	/** 类型引用 Map < String, Object > */
+	public final static TypeReference<Map<String, Object>> TYPE_REFERENCE_MAP =
+			new TypeReference<Map<String, Object>>() {};
+	
+	/** 类型引用 List< Map < String, Object > > */
+	public final static TypeReference<List<Map<String, Object>>> TYPE_REFERENCE_LIST_MAP =
+			new TypeReference<List<Map<String, Object>>>() {};
+	
 	/**
 	 * 允许拿到ObjectMapper进行修改 <br>
 	 *     用于修改配置，建议全项目在初始化阶段配置一次 <br>
