@@ -43,4 +43,17 @@ public class TestListUtils {
         assert lists.get(1).get(2) == 6;
     }
 
+    @Test
+    public void testRandom() {
+        List<Integer> list = ListUtils.newArrayList();
+        for (int i = 0; i < 10000; i++) {
+            list.add(i);
+        }
+        long start = System.currentTimeMillis();
+        ListUtils.shuffle(list);
+        long end = System.currentTimeMillis();
+        System.out.println("cost:" + (end - start) + "ms");
+        System.out.println(list);
+    }
+
 }

@@ -1,14 +1,20 @@
 package com.pugwoo.wooutils.json;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * 封装起来的常用的json方法
@@ -16,41 +22,165 @@ import java.util.Map;
  */
 public class JSON {
 
+	/** 全局配置的objectMapper */
 	private static ObjectMapper objectMapper = new MyObjectMapper();
 
-	/**只用于克隆对象用*/
-	private static ObjectMapper objectMapperForClone = new ObjectMapper();
-
-	public static Object parse(String str) {
+	/** 只用于克隆对象用 */
+	private static final ObjectMapper OBJECT_MAPPER_FOR_CLONE = new ObjectMapper();
+	
+	/** 用于支持自定义ObjectMapper进行json操作 */
+	private static final ThreadLocal<ObjectMapper> OBJECT_MAPPER_THREAD_LOCAL = new ThreadLocal<>();
+	
+	/** 类型引用 Map < String, Object > */
+	public final static TypeReference<Map<String, Object>> TYPE_REFERENCE_MAP =
+			new TypeReference<Map<String, Object>>() {};
+	
+	/** 类型引用 List< Map < String, Object > > */
+	public final static TypeReference<List<Map<String, Object>>> TYPE_REFERENCE_LIST_MAP =
+			new TypeReference<List<Map<String, Object>>>() {};
+	
+	/**
+	 * 允许拿到ObjectMapper进行修改 <br>
+	 *     用于修改配置，建议全项目在初始化阶段配置一次 <br>
+	 *     如有不同的配置需求，也可使用一下方法进行json操作 <br>
+	 *     1. {@link #setThreadObjectMapper(ObjectMapper)} + {@link #removeThreadObjectMapper()} <br>
+	 *     2. {@link #useThreadObjectMapper(ObjectMapper, Procedure)} <br>
+	 *     3. {@link #useThreadObjectMapper(ObjectMapper, Supplier)} <br>
+	 *
+	 * @return objectMapper
+	 */
+	public static ObjectMapper getObjectMapper() {
+		return objectMapper;
+	}
+	
+	/**
+	 * 允许重新设置objectMapper <br>
+	 *     建议全项目在初始化阶段配置一次<br>
+	 * use {@link #setGlobalObjectMapper(ObjectMapper)}
+	 * @param objectMapper objectMapper
+	 */
+	@Deprecated
+	public static void setObjectMapper(ObjectMapper objectMapper) {
+		setGlobalObjectMapper(objectMapper);
+	}
+	
+	/**
+	 * 允许重新设置objectMapper <br>
+	 *     建议全项目在初始化阶段配置一次<br>
+	 *
+	 * @param objectMapper objectMapper
+	 */
+	public static void setGlobalObjectMapper(ObjectMapper objectMapper) {
+		if (objectMapper == null) {
+			throw new IllegalArgumentException("objectMapper must not be null!");
+		}
+		JSON.objectMapper = objectMapper;
+	}
+	
+	/**
+	 * 自定义objectMapper进行JSON操作 使用ThreadLocal实现 <br>
+	 * 注意: 使用后请调用{@link #removeThreadObjectMapper()}清除<br>
+	 * <br>
+	 * 使用示例: <br>
+	 * <pre>
+try {
+    JSON.setThreadObjectMapper(customObjectMapper)
+    JSON.toJson(obj);
+} finally {
+    JSON.removeThreadObjectMapper();
+}
+	 * </pre>
+	 *
+	 * @param objectMapper objectMapper 如果为null将使用全局的ObjectMapper进行操作
+	 */
+	public static void setThreadObjectMapper(ObjectMapper objectMapper) {
+		OBJECT_MAPPER_THREAD_LOCAL.set(objectMapper);
+	}
+	
+	/**
+	 * 清除线程的ObjectMapper
+	 */
+	public static void removeThreadObjectMapper() {
+		OBJECT_MAPPER_THREAD_LOCAL.remove();
+	}
+	
+	/**
+	 * 使用自定义的ObjectMapper进行执行JSON操作 <br>
+	 * <br>
+	 * 使用示例:<br>
+	 * <pre>
+JSON.useThreadObjectMapper(customObjectMapper, () -> {
+    JSON.toJson(obj);
+})
+	 * </pre>
+	 * @param objectMapper objectMapper 如果为null将使用全局的ObjectMapper进行操作
+	 * @param procedure 无参无返回执行
+	 */
+	public static void useThreadObjectMapper(ObjectMapper objectMapper, Procedure procedure) {
+		useThreadObjectMapper(objectMapper, () -> {
+			procedure.run();
+			return null;
+		});
+	}
+	
+	/**
+	 * 使用自定义的ObjectMapper进行执行JSON操作 <br>
+	 * <br>
+	 * 使用示例:<br>
+	 * <pre>
+String json = JSON.useThreadObjectMapper(customObjectMapper, () -> {
+    return JSON.toJson(obj);
+})
+	 * </pre>
+	 * @param objectMapper objectMapper 如果为null将使用全局的ObjectMapper进行操作
+	 * @param supplier 无参有返回执行
+	 */
+	public static <T> T useThreadObjectMapper(ObjectMapper objectMapper, Supplier<T> supplier) {
 		try {
-			return objectMapper.readValue(str, Object.class);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+			setThreadObjectMapper(objectMapper);
+			return supplier.get();
+		} finally {
+			JSON.removeThreadObjectMapper();
 		}
 	}
 	
-	public static <T> T parse(String str, Class<T> clazz) {
-		try {
-			return objectMapper.readValue(str, clazz);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+	// -------------------------------------------------------------- 反序列化 json -> object
+	
+	/**
+	 * 解析json
+	 * @param str json字符串
+	 * @return object
+	 */
+	public static Object parse(String str) {
+		return parse(str, Object.class);
 	}
-
+	
+	/**
+	 * 解析json
+	 * @param str json字符串
+	 * @param clazz 对象类型
+	 * @return t
+	 */
+	public static <T> T parse(String str, Class<T> clazz) {
+		return parse(om -> om.readValue(str,clazz));
+	}
+	
 	/**
 	 * 解析json，只支持一层的泛型，不支持嵌套的泛型。
 	 * 说明：实际上用JavaType也是可以做到支持嵌套的，但是比较复杂，在表达上可读性不高，这种场景也不多，故先不封装。
+	 *
+	 * @param str json字符串
+	 * @param clazz 对象类型
+	 * @param genericClasses 对象的泛型
+	 * @return t
 	 */
 	public static <T> T parse(String str, Class<T> clazz, Class<?>... genericClasses) {
-		try {
-			JavaType type =  objectMapper.getTypeFactory()
-					.constructParametricType(clazz, genericClasses);
-			return objectMapper.readValue(str, type);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		return parse(om -> {
+			JavaType type =  om.getTypeFactory().constructParametricType(clazz, genericClasses);
+			return om.readValue(str, type);
+		});
 	}
-
+	
 	/**
 	 * 解析json字符串 通过TypeReference静态指定泛型
 	 * @param str json字符串
@@ -58,27 +188,56 @@ public class JSON {
 	 * @return t
 	 */
 	public static <T> T parse(String str, TypeReference<T> typeReference) {
-		try {
-			return objectMapper.readValue(str, typeReference);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		return parse(om -> om.readValue(str, typeReference));
 	}
 	
 	/**
 	 * 解析字符串为Map
-	 * @param str
-	 * @return
+	 * @param str json字符串
+	 * @return map
 	 */
-	@SuppressWarnings("unchecked")
 	public static Map<String, Object> parseToMap(String str) {
-		return parse(str, Map.class);
+		return parse(str, TYPE_REFERENCE_MAP);
+	}
+	
+	/**
+	 * 解析字符串为ListMap
+	 * @param str json字符串
+	 * @return mapList
+	 */
+	public static List<Map<String, Object>> parseToListMap(String str) {
+		return parse(str, TYPE_REFERENCE_LIST_MAP);
+	}
+	
+	/**
+	 * 解析字符串为Map
+	 * @param str json字符串
+	 * @return map
+	 */
+	public static <T> List<T> parseToList(String str, Class<T> itemClazz) {
+		return parseToList(str, typeFactory ->
+				typeFactory.constructParametricType(List.class, itemClazz)
+		);
+	}
+	
+	/**
+	 * 将json字符串转换为 List < T >
+	 *
+	 * @param str json字符串
+	 * @param itemTypeRef item的类型
+	 * @return List < T >
+	 */
+	public static <T> List<T> parseToList(String str, TypeReference<T> itemTypeRef) {
+		return parseToList(str, typeFactory -> {
+			JavaType itemType = typeFactory.constructType(itemTypeRef);
+			return typeFactory.constructParametricType(List.class, itemType);
+		});
 	}
 	
 	/**
 	 * 解析对象，可以通过jackson的ObjectNode读取各种类型值
-	 * @param str
-	 * @return
+	 * @param str json字符串
+	 * @return objectNode
 	 */
 	public static ObjectNode parseObject(String str) {
 		return parse(str, ObjectNode.class);
@@ -86,102 +245,183 @@ public class JSON {
 	
 	/**
 	 * 解析数组
-	 * @param str
-	 * @return
+	 * @param str json字符串
+	 * @return jsonNodeList
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<JsonNode> parseArray(String str) {
-		return parse(str, List.class, JsonNode.class);
+		return parseToList(str, JsonNode.class);
 	}
-
+	
+	// -------------------------------------------------------------- 序列化 object -> json
+	
 	/**
 	 * 将对象转换成json字符串
-	 * @param obj
-	 * @return
+	 * @param obj obj
+	 * @return json
 	 */
 	public static String toJson(Object obj) {
-		try {
-			return objectMapper.writeValueAsString(obj);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
+		return toJson(om -> om.writeValueAsString(obj));
 	}
+	
+	/**
+	 * 将对象转换为json字符串 格式化的
+	 * @param obj obj
+	 * @return json
+	 */
+	public static String toJsonFormatted(Object obj) {
+		return toJson(om -> om.writerWithDefaultPrettyPrinter().writeValueAsString(obj));
+	}
+	
+	// -------------------------------------------------------------- others
 	
 	/**
 	 * 转换对象为map
 	 * @param obj java bean对象，主要不要传入单个值如string Date等
-	 * @return
+	 * @return map
 	 */
 	public static Map<String, Object> toMap(Object obj) {
 		return parseToMap(toJson(obj));
 	}
 	
+	// -------------------------------------------------------------- clone
+	
 	/**
 	 * 使用json的方式克隆对象
-	 * 【不支持泛型，请使用clone(T t, Class... genericClasses)或clone(T t, TypeReference typeReference) 以支持泛型】
-	 * @param t
-	 * @return
+	 * 【不支持泛型，请使用{@link #clone(Object, Class[])}或{@link #clone(Object, TypeReference)}以支持泛型】
+	 * @param t 被克隆对象
+	 * @return 对象
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T> T clone(T t) {
-		if(t == null) {
-			return null;
-		}
-
-		try {
-			String json = objectMapperForClone.writeValueAsString(t);
-			return (T) objectMapperForClone.readValue(json, t.getClass());
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		return clone(t, typeFactory -> typeFactory.constructType(t.getClass()));
 	}
-
+	
 	/**
 	 * 使用json的方式克隆对象，支持泛型，支持多个泛型，
-	 * 但【不支持】嵌套泛型，嵌套泛型请使用clone(T t, TypeReference typeReference)
+	 * 但【不支持】嵌套泛型，嵌套泛型请使用{@link #clone(Object, TypeReference)}
+	 * @param t 被克隆对象
+	 * @param genericClasses 被克隆对象的泛型
+	 * @return 对象
 	 */
 	public static <T> T clone(T t, Class<?>... genericClasses) {
-		if (t == null) {
-			return null;
-		}
-		try {
-			String json = objectMapperForClone.writeValueAsString(t);
-			JavaType type =  objectMapperForClone.getTypeFactory()
-					.constructParametricType(t.getClass(), genericClasses);
-			return objectMapperForClone.readValue(json, type);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		return clone(t, typeFactory -> typeFactory.constructParametricType(t.getClass(), genericClasses));
 	}
-
+	
 	/**
 	 * 使用json的方式克隆对象，通过TypeReference静态指定泛型
 	 */
 	public static <T> T clone(T t, TypeReference<T> typeReference) {
-		if(t == null) {
-			return null;
-		}
+		return clone(t, typeFactory -> typeFactory.constructType(typeReference));
+	}
+	
+	// -------------------------------------------------------------- private
+	
+	/**
+	 * 将json字符串转换为对象 T
+	 *   适用于非常用的readValue外的其他方法调用，统一抛出{@link RuntimeException}
+	 *   也可以自己通过{@link #getObjectMapper()}获取objectMapper自行操作
+	 *
+	 * @param function objectMapper -> T
+	 * @return T
+	 */
+	private static <T> T parse(ObjectMapperFunc<T> function) {
+		return execute("json deserialization failed", function);
+	}
+	
+	/**
+	 * 将对象转换为json字符串 只是捕获了异常统一抛出{@link RuntimeException}
+	 *
+	 * @param function objectMapper -> T
+	 * @return json
+	 */
+	private static String toJson(ObjectMapperFunc<String> function) {
+		return execute("json serialization failed", function);
+	}
+	
+	/**
+	 * 将json字符串转换为 List < T >
+	 *
+	 * @param str json字符串
+	 * @param typeFactoryJavaTypeFunction typeFactory -> javaType
+	 * @return List < T >
+	 */
+	private static <T> List<T> parseToList(String str, Function<TypeFactory, JavaType> typeFactoryJavaTypeFunction) {
+		return parse(om -> {
+			TypeFactory typeFactory = om.getTypeFactory();
+			JavaType javaType = typeFactoryJavaTypeFunction.apply(typeFactory);
+			return om.readValue(str, javaType);
+		});
+	}
+	
+	/**
+	 * 使用json的方式克隆对象，通过javaType指定泛型
+	 */
+	private static <T> T clone(T t, Function<TypeFactory, JavaType> typeFactoryJavaTypeFunction) {
+		if(t == null) { return null; }
+		return execute(OBJECT_MAPPER_FOR_CLONE, "clone failed", om -> {
+			TypeFactory typeFactory = om.getTypeFactory();
+			JavaType javaType = typeFactoryJavaTypeFunction.apply(typeFactory);
+			String json = om.writeValueAsString(t);
+			return om.readValue(json, javaType);
+		});
+	}
+	
+	/**
+	 * json处理 统一抛出{@link RuntimeException}
+	 * @param exceptionMsg 异常信息 统一抛出的是{@link RuntimeException}
+	 * @param function     objectMapper -> T
+	 * @return T
+	 */
+	private static <T> T execute(String exceptionMsg, ObjectMapperFunc<T> function) {
+		return execute(null, exceptionMsg, function);
+	}
+	
+	/**
+	 * json处理 统一抛出{@link RuntimeException}
+	 * @param objectMapper 自定义的objectMapper, 如果不提供将使用{@link #OBJECT_MAPPER_THREAD_LOCAL}, 如果为null则使用默认的{@link #objectMapper}
+	 * @param exceptionMsg 异常信息 统一抛出的是{@link RuntimeException}
+	 * @param function     objectMapper -> T
+	 * @return T
+	 */
+	private static <T> T execute(ObjectMapper objectMapper, String exceptionMsg, ObjectMapperFunc<T> function) {
 		try {
-			String json = objectMapperForClone.writeValueAsString(t);
-			return objectMapperForClone.readValue(json, typeReference);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+			ObjectMapper executeObjectMapper = objectMapper;
+			if (executeObjectMapper == null) {
+				executeObjectMapper = OBJECT_MAPPER_THREAD_LOCAL.get();
+			}
+			if (executeObjectMapper == null) {
+				executeObjectMapper = JSON.objectMapper;
+			}
+			return function.apply(executeObjectMapper);
+		} catch (IOException e) {
+			throw new RuntimeException(Optional.ofNullable(exceptionMsg).orElse("json operate failed"), e);
+		} finally {
+			OBJECT_MAPPER_THREAD_LOCAL.remove();
 		}
 	}
 	
 	/**
-	 * 允许拿到ObjectMapper进行修改
-	 * @return
+	 * 用于执行objectMapper操作
+	 * @author sapluk
 	 */
-	public static ObjectMapper getObjectMapper() {
-		return objectMapper;
+	@FunctionalInterface
+	private interface ObjectMapperFunc<T> {
+		/**
+		 * function
+		 * @param objectMapper objectMapper
+		 * @return 执行结果
+		 * @throws IOException          objectMapper方法可能抛出的异常
+		 * @throws JsonParseException   objectMapper方法可能抛出的异常
+		 * @throws JsonMappingException objectMapper方法可能抛出的异常
+		 */
+		T apply(ObjectMapper objectMapper) throws IOException, JsonParseException, JsonMappingException;
 	}
-
+	
 	/**
-	 * 允许重新设置objectMapper
-	 * @param objectMapper
+	 * 无参无返回执行
 	 */
-	public static void setObjectMapper(ObjectMapper objectMapper) {
-		JSON.objectMapper = objectMapper;
+	@FunctionalInterface
+	public interface Procedure {
+		void run();
 	}
+	
 }

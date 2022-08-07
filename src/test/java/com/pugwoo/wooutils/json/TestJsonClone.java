@@ -95,7 +95,7 @@ public class TestJsonClone {
         DateDTO cloned = JSON.clone(dateDTO);
         assert dateDTO.getBirth().getTime() == cloned.getBirth().getTime();
 
-        List<DateDTO> list = new ArrayList();
+        List<DateDTO> list = new ArrayList<>();
         list.add(dateDTO);
 
         List<DateDTO> clonedList = JSON.clone(list, DateDTO.class);

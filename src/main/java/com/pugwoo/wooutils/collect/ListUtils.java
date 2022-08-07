@@ -453,11 +453,11 @@ public class ListUtils {
 
 		return result;
 	}
-	
+
 	/**
 	 * list相减，返回List a中有但是List b中没有的数据，去重，不保证顺序。
 	 */
-	public static <E> List<E> sub(List<E> a, List<E> b) {
+	public static <E> List<E> subtract(List<E> a, List<E> b) {
 		if(a == null || a.isEmpty()) {
 			return new ArrayList<>();
 		}
@@ -466,6 +466,16 @@ public class ListUtils {
 		}
 		Set<E> bSet = new HashSet<>(b);
 		return ListUtils.filter(a, o -> !bSet.contains(o));
+	}
+	
+	/**
+	 * list相减，返回List a中有但是List b中没有的数据，去重，不保证顺序。
+	 *
+	 * @deprecated 请使用subtract
+	 */
+	@Deprecated
+	public static <E> List<E> sub(List<E> a, List<E> b) {
+		return subtract(a, b);
 	}
 	
 	/**
@@ -505,6 +515,17 @@ public class ListUtils {
 	        return old;
 	    }
 	}
+
+	/**
+	 * 随机打乱list
+	 */
+	public static <E> void shuffle(List<E> list) {
+		if (isEmpty(list) || list.size() == 1) {
+			return;
+		}
+		Collections.shuffle(list);
+	}
+
 
 	/**
 	 * 数值求和
