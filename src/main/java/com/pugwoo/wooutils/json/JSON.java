@@ -31,11 +31,11 @@ public class JSON {
 	/** 用于支持自定义ObjectMapper进行json操作 */
 	private static final ThreadLocal<ObjectMapper> OBJECT_MAPPER_THREAD_LOCAL = new ThreadLocal<>();
 	
-	/** 类型引用 Map < String, Object > */
+	/** 类型引用 Map {@literal <} String, Object {@literal >} */
 	public final static TypeReference<Map<String, Object>> TYPE_REFERENCE_MAP =
 			new TypeReference<Map<String, Object>>() {};
 	
-	/** 类型引用 List< Map < String, Object > > */
+	/** 类型引用 List{@literal <} Map {@literal <} String, Object {@literal >} {@literal >} */
 	public final static TypeReference<List<Map<String, Object>>> TYPE_REFERENCE_LIST_MAP =
 			new TypeReference<List<Map<String, Object>>>() {};
 	
@@ -109,7 +109,7 @@ try {
 	 * <br>
 	 * 使用示例:<br>
 	 * <pre>
-JSON.useThreadObjectMapper(customObjectMapper, () -> {
+JSON.useThreadObjectMapper(customObjectMapper, () -{@literal >} {
     JSON.toJson(obj);
 })
 	 * </pre>
@@ -128,7 +128,7 @@ JSON.useThreadObjectMapper(customObjectMapper, () -> {
 	 * <br>
 	 * 使用示例:<br>
 	 * <pre>
-String json = JSON.useThreadObjectMapper(customObjectMapper, () -> {
+String json = JSON.useThreadObjectMapper(customObjectMapper, () -{@literal >} {
     return JSON.toJson(obj);
 })
 	 * </pre>
@@ -221,11 +221,11 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -> {
 	}
 	
 	/**
-	 * 将json字符串转换为 List < T >
+	 * 将json字符串转换为 List {@literal <} T {@literal >}
 	 *
 	 * @param str json字符串
 	 * @param itemTypeRef item的类型
-	 * @return List < T >
+	 * @return List {@literal <} T {@literal >}
 	 */
 	public static <T> List<T> parseToList(String str, TypeReference<T> itemTypeRef) {
 		return parseToList(str, typeFactory -> {
@@ -320,7 +320,7 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -> {
 	 *   适用于非常用的readValue外的其他方法调用，统一抛出{@link RuntimeException}
 	 *   也可以自己通过{@link #getObjectMapper()}获取objectMapper自行操作
 	 *
-	 * @param function objectMapper -> T
+	 * @param function objectMapper 转成 T
 	 * @return T
 	 */
 	private static <T> T parse(ObjectMapperFunc<T> function) {
@@ -330,7 +330,7 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -> {
 	/**
 	 * 将对象转换为json字符串 只是捕获了异常统一抛出{@link RuntimeException}
 	 *
-	 * @param function objectMapper -> T
+	 * @param function objectMapper 转成 T
 	 * @return json
 	 */
 	private static String toJson(ObjectMapperFunc<String> function) {
@@ -338,11 +338,11 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -> {
 	}
 	
 	/**
-	 * 将json字符串转换为 List < T >
+	 * 将json字符串转换为 List {@literal <} T {@literal >}
 	 *
 	 * @param str json字符串
-	 * @param typeFactoryJavaTypeFunction typeFactory -> javaType
-	 * @return List < T >
+	 * @param typeFactoryJavaTypeFunction typeFactory 转成 javaType
+	 * @return List {@literal <} T {@literal >}
 	 */
 	private static <T> List<T> parseToList(String str, Function<TypeFactory, JavaType> typeFactoryJavaTypeFunction) {
 		return parse(om -> {
@@ -368,7 +368,7 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -> {
 	/**
 	 * json处理 统一抛出{@link RuntimeException}
 	 * @param exceptionMsg 异常信息 统一抛出的是{@link RuntimeException}
-	 * @param function     objectMapper -> T
+	 * @param function     objectMapper 转成 T
 	 * @return T
 	 */
 	private static <T> T execute(String exceptionMsg, ObjectMapperFunc<T> function) {
@@ -379,7 +379,7 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -> {
 	 * json处理 统一抛出{@link RuntimeException}
 	 * @param objectMapper 自定义的objectMapper, 如果不提供将使用{@link #OBJECT_MAPPER_THREAD_LOCAL}, 如果为null则使用默认的{@link #objectMapper}
 	 * @param exceptionMsg 异常信息 统一抛出的是{@link RuntimeException}
-	 * @param function     objectMapper -> T
+	 * @param function     objectMapper 转成 T
 	 * @return T
 	 */
 	private static <T> T execute(ObjectMapper objectMapper, String exceptionMsg, ObjectMapperFunc<T> function) {
