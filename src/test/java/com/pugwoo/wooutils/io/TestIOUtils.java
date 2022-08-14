@@ -1,5 +1,6 @@
 package com.pugwoo.wooutils.io;
 
+import com.pugwoo.wooutils.string.StringTools;
 import org.junit.Test;
 
 import java.io.File;
@@ -18,6 +19,12 @@ public class TestIOUtils {
         for(File file : files) {
             System.out.println(file.getPath());
         }
+    }
+
+    @Test
+    public void testGetClasspathFile() throws IOException {
+        String content = IOUtils.readClasspathResourceAsString("applicationContext-context.xml");
+        assert StringTools.isNotBlank(content);
     }
 
 }

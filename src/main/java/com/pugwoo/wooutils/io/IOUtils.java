@@ -2,6 +2,7 @@ package com.pugwoo.wooutils.io;
 
 import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.string.RegexUtils;
+import com.pugwoo.wooutils.string.StringTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +22,9 @@ public class IOUtils {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IOUtils.class);
 
 	/**
-	 * 从inputstream读取字节并输出到to中
-	 * @param from
+	 * 从inputstream读取字节并输出到to中，直到inputstream EOF
+	 * @param from 输入流
 	 * @param to 需要自行关闭输出流
-	 * @return
-	 * @throws IOException
 	 */
 	public static long copy(InputStream from, OutputStream to) throws IOException {
 	    byte[] buf = new byte[8192];
@@ -114,6 +113,52 @@ public class IOUtils {
 				}
 			}
 		}
+	}
+
+	/**
+	 * 读取classpath目录下的资源，返回为String，默认是utf-8编码。
+	 * 如果需要其它编码，请获得byte[]之后自行转换。
+	 * 说明：当有多个同名的资源时，会返回第一个加载到jvm的资源内容，因此这里具有随机性。
+	 * @param path 路径，例如：abc.txt
+	 * @return 文件不存在返回null
+	 */
+	public static String readClasspathResourceAsString(String path) throws IOException {
+		InputStream in = readClasspathResourceInputStream(path);
+		if (in == null) {
+			return null;
+		}
+		return readAll(in, "UTF-8");
+	}
+
+	/**
+	 * 读取classpath目录下的资源，返回为byte[]。
+	 * 说明：当有多个同名的资源时，会返回第一个加载到jvm的资源内容，因此这里具有随机性。
+	 * @param path 路径，例如：abc.txt
+	 * @return 文件不存在返回null
+	 */
+	public static byte[] readClasspathResourceAsBytes(String path) throws IOException {
+		InputStream in = readClasspathResourceInputStream(path);
+		if (in == null) {
+			return null;
+		}
+		return readAll(in);
+	}
+
+	private static InputStream readClasspathResourceInputStream(String path) {
+		if (StringTools.isEmpty(path)) {
+			return null;
+		}
+		// 分为以/开头和没有以/开头的path进行尝试，优先没有/开头的，以为classLoader的方式不需要/开头
+		boolean beginWithSlash = path.startsWith("/");
+		String noSlash = beginWithSlash ? path.substring(1) : path;
+		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(noSlash);
+		if (in != null) {
+			return in;
+		}
+
+		// 尝试再用/开头的进行
+		String withSlash = beginWithSlash ? path : "/" + path;
+		return Thread.currentThread().getContextClassLoader().getResourceAsStream(withSlash);
 	}
 
 	/**
