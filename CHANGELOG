@@ -1,4 +1,5 @@
 v1.1.1 - [add] IOUtils增加读取classpath resources文件内容的方法
+       - [add] ListUtils增加flat方法，打平List<List<T>>为List<T>
 
 2022年8月7日
 v1.1.0 - [add] ListUtils新增shuffle方法，随机洗乱list

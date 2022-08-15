@@ -526,6 +526,17 @@ public class ListUtils {
 		Collections.shuffle(list);
 	}
 
+	/**
+	 * 打平一个嵌套list
+	 */
+	public static <E> List<E> flat(List<List<E>> list) {
+		if (list == null) {
+			return new ArrayList<>();
+		}
+		return list.stream()
+				   .flatMap(List::stream)
+				   .collect(Collectors.toList());
+	}
 
 	/**
 	 * 数值求和

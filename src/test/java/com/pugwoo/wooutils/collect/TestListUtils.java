@@ -1,7 +1,9 @@
 package com.pugwoo.wooutils.collect;
 
+import com.pugwoo.wooutils.lang.NumberUtils;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -54,6 +56,18 @@ public class TestListUtils {
         long end = System.currentTimeMillis();
         System.out.println("cost:" + (end - start) + "ms");
         System.out.println(list);
+    }
+
+    @Test
+    public void testFlatList() {
+        List<List<Integer>> lists = new ArrayList<>();
+        lists.add(ListUtils.newArrayList(1,2,3));
+        lists.add(ListUtils.newArrayList(4,5,6));
+        lists.add(ListUtils.newArrayList(7,8,9));
+
+        List<Integer> flat = ListUtils.flat(lists);
+        assert flat.size() == 9;
+        assert NumberUtils.sum(flat).intValue() == 45;
     }
 
 }
