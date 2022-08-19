@@ -1,3 +1,5 @@
+v1.1.2 - [add] Browser支持设置重试时间间隔
+
 2022年8月15日
 v1.1.1 - [add] 增加Yaml的解析工具类YAML
        - [add] IOUtils增加读取classpath resources文件内容的方法
