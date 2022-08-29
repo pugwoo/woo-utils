@@ -103,6 +103,8 @@ public class Browser {
 	private int getRetryTimes = 1;
 	/**POST默认不重试*/
 	private int postRetryTimes = 0;
+	/**重试的间隔时间，毫秒*/
+	private int retryIntervalMs = 0;
 
 	/**设置连接超时时间，默认10秒*/
 	public void setConnectTimeoutSeconds(int connectTimeoutSeconds) {
@@ -129,7 +131,12 @@ public class Browser {
 	public void setPostRetryTimes(int postRetryTimes) {
 		this.postRetryTimes = postRetryTimes;
 	}
-	
+
+	/**设置重试的间隔时间，毫秒，0表示不间隔*/
+	public void setRetryIntervalMs(int retryIntervalMs) {
+		this.retryIntervalMs = retryIntervalMs;
+	}
+
 	/**代理*/
 	private Proxy proxy = null;
 	
@@ -447,6 +454,13 @@ public class Browser {
 			} catch (IOException e) {
 				LOGGER.error("post url:{} exception msg:{}", httpUrl, e.getMessage());
 				ie = e;
+				if (retryIntervalMs > 0) {
+					try {
+						Thread.sleep(retryIntervalMs);
+					} catch (InterruptedException ex) {
+						// ignore
+					}
+				}
 			} finally {
 				if(!isAsync) { // 只有同步才关闭
 					try {
@@ -575,6 +589,13 @@ public class Browser {
 			} catch (IOException e) {
 				LOGGER.error("get url:{} error msg:{}", httpUrl, e.getMessage());
 				ie = e;
+				if (retryIntervalMs > 0) {
+					try {
+						Thread.sleep(retryIntervalMs);
+					} catch (InterruptedException ex) {
+						// ignore
+					}
+				}
 			} finally {
 				if(!isAsync) { // 只有同步才关闭
 					try {

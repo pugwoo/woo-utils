@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.pugwoo.wooutils.collect.MapUtils;
+import com.pugwoo.wooutils.lang.DateUtils;
+import com.pugwoo.wooutils.lang.EqualUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -319,6 +321,44 @@ public class TestJson {
 		
 		
 		
+	}
+
+	@Test
+	public void testLocalDate() {
+		WithLocalDate withLocalDate = new WithLocalDate();
+		withLocalDate.setName("tom");
+		withLocalDate.setBirthday(DateUtils.parseLocalDate("2020-11-12"));
+
+		String json = JSON.toJson(withLocalDate);
+		System.out.println(json);
+
+		WithLocalDate withLocalDate2 = JSON.parse(json, WithLocalDate.class);
+		System.out.println(JSON.toJson(withLocalDate2));
+		assert new EqualUtils().isEqual(withLocalDate, withLocalDate2);
+
+		WithLocalDate withLocalDate3 = JSON.clone(withLocalDate);
+		assert new EqualUtils().isEqual(withLocalDate, withLocalDate3);
+	}
+
+	public static class WithLocalDate {
+		private String name;
+		private LocalDate birthday;
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public LocalDate getBirthday() {
+			return birthday;
+		}
+
+		public void setBirthday(LocalDate birthday) {
+			this.birthday = birthday;
+		}
 	}
 
 }

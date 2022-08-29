@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
 import java.util.List;
@@ -25,8 +26,10 @@ public class JSON {
 	/** 全局配置的objectMapper */
 	private static ObjectMapper objectMapper = new MyObjectMapper();
 
-	/** 只用于克隆对象用 */
-	private static final ObjectMapper OBJECT_MAPPER_FOR_CLONE = new ObjectMapper();
+	/** 只用于克隆对象用，因此不需要过多的额外的配置 */
+	private static final ObjectMapper OBJECT_MAPPER_FOR_CLONE = new ObjectMapper() {{
+		registerModule(new JavaTimeModule());
+	}};
 	
 	/** 用于支持自定义ObjectMapper进行json操作 */
 	private static final ThreadLocal<ObjectMapper> OBJECT_MAPPER_THREAD_LOCAL = new ThreadLocal<>();
