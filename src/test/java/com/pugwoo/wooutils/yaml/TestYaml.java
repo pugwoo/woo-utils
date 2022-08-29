@@ -3,6 +3,8 @@ package com.pugwoo.wooutils.yaml;
 import com.pugwoo.wooutils.json.JSON;
 import org.junit.Test;
 
+import java.time.LocalDate;
+
 public class TestYaml {
 
     public static class Student {
@@ -54,6 +56,35 @@ public class TestYaml {
         Student student = YAML.parse(yaml, "/student", Student.class);
         System.out.println(JSON.toJson(student));
         assert student.getName().equals("nick");
+    }
+
+    @Test
+    public void testLocalDate() {
+        String yaml = "name: nick\n"
+                + "birthday: 2022-11-12\n";
+        WithLocalDate withLocalDate = YAML.parse(yaml, WithLocalDate.class);
+        System.out.println(JSON.toJson(withLocalDate));
+    }
+
+    public static class WithLocalDate {
+        private String name;
+        private LocalDate birthday;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public LocalDate getBirthday() {
+            return birthday;
+        }
+
+        public void setBirthday(LocalDate birthday) {
+            this.birthday = birthday;
+        }
     }
 
 }
