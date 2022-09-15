@@ -37,6 +37,9 @@ public class TestDate {
     @Test
 	public void test() {
 
+		assert DateUtils.parse("0000-00-00") == null;
+		assert DateUtils.parse("0000-00-00 00:00:00") == null;
+
 		for(String str : testDates) {
 			Date date = DateUtils.parse(str);
 			System.out.println(date);
