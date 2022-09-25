@@ -144,6 +144,12 @@ public class IOUtils {
 		return readAll(in);
 	}
 
+	/**
+	 * 读取classpath目录下的资源，返回为InputStream。
+	 * 说明：当有多个同名的资源时，会返回第一个加载到jvm的资源内容，因此这里具有随机性。
+	 * @param path 路径，例如：abc.txt
+	 * @return 文件不存在返回null
+	 */
 	private static InputStream readClasspathResourceInputStream(String path) {
 		if (StringTools.isEmpty(path)) {
 			return null;
