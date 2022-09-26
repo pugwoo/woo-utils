@@ -25,14 +25,16 @@ public class ExecuteThem {
      * 经过测试，320万的任务堆积，大概占用139M内存，即每个任务占用约50字节。
      * 所以任务堆积几百万本身产生的问题就要大于内存问题，所以这里仍然使用Executors.newFixedThreadPool，不会有问题。
      */
-	private final ExecutorService executorService;
+	private final ThreadPoolExecutor executorService;
 	
 	private final List<Future<?>> futures = new ArrayList<>();
 	
 	private final List<Exception> exceptions = new ArrayList<>();
 
 	public ExecuteThem() {
-		executorService = Executors.newFixedThreadPool(10,
+		executorService = new ThreadPoolExecutor(10, 10,
+				0L, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<>(),
 				new MyThreadFactory("exec-them"));
 	}
 
@@ -40,7 +42,9 @@ public class ExecuteThem {
      * @param nThreads 指定线程池最大线程数
      */
 	public ExecuteThem(int nThreads) {
-		executorService = Executors.newFixedThreadPool(nThreads,
+		executorService = new ThreadPoolExecutor(nThreads, nThreads,
+				0L, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<>(),
 				new MyThreadFactory("exec-them"));
 	}
 
@@ -49,7 +53,9 @@ public class ExecuteThem {
 	 * @param threadNamePrefix 线程池的前缀
 	 */
 	public ExecuteThem(int nThreads, String threadNamePrefix) {
-		executorService = Executors.newFixedThreadPool(nThreads,
+		executorService = new ThreadPoolExecutor(nThreads, nThreads,
+				0L, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<>(),
 				new MyThreadFactory(threadNamePrefix));
 	}
 
@@ -109,6 +115,13 @@ public class ExecuteThem {
 		}
 		
 		return results;
+	}
+
+	/**
+	 * 查询还没有执行的任务个数
+	 */
+	public int getWaitingJobs() {
+		return executorService.getQueue().size();
 	}
 
 	/**
