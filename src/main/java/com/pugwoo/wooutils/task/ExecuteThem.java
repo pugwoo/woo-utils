@@ -50,12 +50,35 @@ public class ExecuteThem {
 
 	/**
 	 * @param nThreads 指定线程池最大线程数
+	 * @param maxWaitJobs 最大等待的任务数，当到达最大等待任务数时，调用添加任务者将阻塞
+	 */
+	public ExecuteThem(int nThreads, int maxWaitJobs) {
+		executorService = new ThreadPoolExecutor(nThreads, nThreads,
+				0L, TimeUnit.MILLISECONDS,
+				new LimitedQueue<>(maxWaitJobs),
+				new MyThreadFactory("exec-them"));
+	}
+
+	/**
+	 * @param nThreads 指定线程池最大线程数
 	 * @param threadNamePrefix 线程池的前缀
 	 */
 	public ExecuteThem(int nThreads, String threadNamePrefix) {
 		executorService = new ThreadPoolExecutor(nThreads, nThreads,
 				0L, TimeUnit.MILLISECONDS,
 				new LinkedBlockingQueue<>(),
+				new MyThreadFactory(threadNamePrefix));
+	}
+
+	/**
+	 * @param nThreads 指定线程池最大线程数
+	 * @param maxWaitJobs 最大等待的任务数，当到达最大等待任务数时，调用添加任务者将阻塞
+	 * @param threadNamePrefix 线程池的前缀
+	 */
+	public ExecuteThem(int nThreads, int maxWaitJobs, String threadNamePrefix) {
+		executorService = new ThreadPoolExecutor(nThreads, nThreads,
+				0L, TimeUnit.MILLISECONDS,
+				new LimitedQueue<>(maxWaitJobs),
 				new MyThreadFactory(threadNamePrefix));
 	}
 
@@ -146,5 +169,23 @@ public class ExecuteThem {
 			return new Thread(r, threadNamePrefix + "-" + count.getAndIncrement());
 		}
 
+	}
+
+	public static class LimitedQueue<E> extends LinkedBlockingQueue<E> {
+		public LimitedQueue(int maxSize) {
+			super(maxSize);
+		}
+
+		@Override
+		public boolean offer(E e) {
+			// turn offer() and add() into a blocking calls (unless interrupted)
+			try {
+				put(e);
+				return true;
+			} catch(InterruptedException ie) {
+				Thread.currentThread().interrupt();
+				return false;
+			}
+		}
 	}
 }
