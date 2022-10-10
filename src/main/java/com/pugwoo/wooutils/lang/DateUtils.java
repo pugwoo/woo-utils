@@ -94,7 +94,6 @@ public class DateUtils {
 		}
 		String pattern = determineDateFormat(date);
 		if(pattern == null) {
-
 			// 检查是否是时间戳
 			Date _date = tryParseTimestamp(date);
 			if(_date != null) {
@@ -109,6 +108,9 @@ public class DateUtils {
 			simpleDateFormat.setLenient(false);
 			return simpleDateFormat.parse(date);
 		} catch (ParseException e) {
+			if ("0000-00-00 00:00:00".equals(date) || "0000-00-00".equals(date)) {
+				return null;
+			}
 			LOGGER.error("parse date error, date:{}", date, e);
 			return null;
 		}
@@ -178,6 +180,9 @@ public class DateUtils {
 			simpleDateFormat.setLenient(false);
 			return simpleDateFormat.parse(date);
 		} catch (ParseException e) {
+			if ("0000-00-00 00:00:00".equals(date) || "0000-00-00".equals(date)) {
+				return null;
+			}
 			LOGGER.error("parse date error, date:{}", date, e);
 			return null;
 		}
@@ -213,7 +218,14 @@ public class DateUtils {
 
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
 		simpleDateFormat.setLenient(false);
-		return simpleDateFormat.parse(date);
+		try {
+			return simpleDateFormat.parse(date);
+		} catch (Exception e) {
+			if ("0000-00-00 00:00:00".equals(date) || "0000-00-00".equals(date)) {
+				return null;
+			}
+			throw e;
+		}
 	}
 	
 	/**
@@ -225,7 +237,14 @@ public class DateUtils {
 		}
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
 		simpleDateFormat.setLenient(false);
-		return simpleDateFormat.parse(date);
+		try {
+			return simpleDateFormat.parse(date);
+		} catch (Exception e) {
+			if ("0000-00-00 00:00:00".equals(date) || "0000-00-00".equals(date)) {
+				return null;
+			}
+			throw e;
+		}
 	}
 	
 	/**

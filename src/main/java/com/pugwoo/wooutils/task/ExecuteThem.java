@@ -25,14 +25,16 @@ public class ExecuteThem {
      * 经过测试，320万的任务堆积，大概占用139M内存，即每个任务占用约50字节。
      * 所以任务堆积几百万本身产生的问题就要大于内存问题，所以这里仍然使用Executors.newFixedThreadPool，不会有问题。
      */
-	private final ExecutorService executorService;
+	private final ThreadPoolExecutor executorService;
 	
 	private final List<Future<?>> futures = new ArrayList<>();
 	
 	private final List<Exception> exceptions = new ArrayList<>();
 
 	public ExecuteThem() {
-		executorService = Executors.newFixedThreadPool(10,
+		executorService = new ThreadPoolExecutor(10, 10,
+				0L, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<>(),
 				new MyThreadFactory("exec-them"));
 	}
 
@@ -40,7 +42,20 @@ public class ExecuteThem {
      * @param nThreads 指定线程池最大线程数
      */
 	public ExecuteThem(int nThreads) {
-		executorService = Executors.newFixedThreadPool(nThreads,
+		executorService = new ThreadPoolExecutor(nThreads, nThreads,
+				0L, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<>(),
+				new MyThreadFactory("exec-them"));
+	}
+
+	/**
+	 * @param nThreads 指定线程池最大线程数
+	 * @param maxWaitJobs 最大等待的任务数，当到达最大等待任务数时，调用添加任务者将阻塞
+	 */
+	public ExecuteThem(int nThreads, int maxWaitJobs) {
+		executorService = new ThreadPoolExecutor(nThreads, nThreads,
+				0L, TimeUnit.MILLISECONDS,
+				new LimitedQueue<>(maxWaitJobs),
 				new MyThreadFactory("exec-them"));
 	}
 
@@ -49,7 +64,21 @@ public class ExecuteThem {
 	 * @param threadNamePrefix 线程池的前缀
 	 */
 	public ExecuteThem(int nThreads, String threadNamePrefix) {
-		executorService = Executors.newFixedThreadPool(nThreads,
+		executorService = new ThreadPoolExecutor(nThreads, nThreads,
+				0L, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<>(),
+				new MyThreadFactory(threadNamePrefix));
+	}
+
+	/**
+	 * @param nThreads 指定线程池最大线程数
+	 * @param maxWaitJobs 最大等待的任务数，当到达最大等待任务数时，调用添加任务者将阻塞
+	 * @param threadNamePrefix 线程池的前缀
+	 */
+	public ExecuteThem(int nThreads, int maxWaitJobs, String threadNamePrefix) {
+		executorService = new ThreadPoolExecutor(nThreads, nThreads,
+				0L, TimeUnit.MILLISECONDS,
+				new LimitedQueue<>(maxWaitJobs),
 				new MyThreadFactory(threadNamePrefix));
 	}
 
@@ -112,6 +141,13 @@ public class ExecuteThem {
 	}
 
 	/**
+	 * 查询还没有执行的任务个数
+	 */
+	public int getWaitingJobs() {
+		return executorService.getQueue().size();
+	}
+
+	/**
 	 * 查询执行任务抛出的异常
 	 */
 	public List<Exception> getExceptions() {
@@ -133,5 +169,23 @@ public class ExecuteThem {
 			return new Thread(r, threadNamePrefix + "-" + count.getAndIncrement());
 		}
 
+	}
+
+	public static class LimitedQueue<E> extends LinkedBlockingQueue<E> {
+		public LimitedQueue(int maxSize) {
+			super(maxSize);
+		}
+
+		@Override
+		public boolean offer(E e) {
+			// turn offer() and add() into a blocking calls (unless interrupted)
+			try {
+				put(e);
+				return true;
+			} catch(InterruptedException ie) {
+				Thread.currentThread().interrupt();
+				return false;
+			}
+		}
 	}
 }
