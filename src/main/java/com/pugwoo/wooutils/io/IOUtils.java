@@ -150,7 +150,7 @@ public class IOUtils {
 	 * @param path 路径，例如：abc.txt
 	 * @return 文件不存在返回null
 	 */
-	private static InputStream readClasspathResourceInputStream(String path) {
+	public static InputStream readClasspathResourceInputStream(String path) {
 		if (StringTools.isEmpty(path)) {
 			return null;
 		}
