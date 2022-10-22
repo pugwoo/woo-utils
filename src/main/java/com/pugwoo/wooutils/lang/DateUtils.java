@@ -144,6 +144,10 @@ public class DateUtils {
 
 	public static LocalDateTime toLocalDateTime(Date date) {
 		if(date == null) {return null;}
+		// java.sql.Date和java.sql.Time不支持date.toInstant()
+		if (date instanceof java.sql.Date || date instanceof java.sql.Time) {
+			date = new Date(date.getTime());
+		}
 		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 	}
 
@@ -154,6 +158,10 @@ public class DateUtils {
 
 	public static LocalDate toLocalDate(Date date) {
 		if(date == null) {return null;}
+		// java.sql.Date和java.sql.Time不支持date.toInstant()
+		if (date instanceof java.sql.Date || date instanceof java.sql.Time) {
+			date = new Date(date.getTime());
+		}
 		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 	}
 
@@ -164,6 +172,10 @@ public class DateUtils {
 
 	public static LocalTime toLocalTime(Date date) {
 		if(date == null) {return null;}
+		// java.sql.Date和java.sql.Time不支持date.toInstant()
+		if (date instanceof java.sql.Date || date instanceof java.sql.Time) {
+			date = new Date(date.getTime());
+		}
 		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
 	}
 
