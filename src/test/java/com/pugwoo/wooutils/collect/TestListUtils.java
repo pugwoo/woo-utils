@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class TestListUtils {
 
@@ -38,6 +39,13 @@ public class TestListUtils {
         assert list2.contains(1);
         assert list2.contains(2);
         assert list2.contains(3);
+
+        Stream<Integer> stream = list2.stream();
+        List<Integer> list3 = ListUtils.toList(stream);
+        assert list2.get(0).equals(list3.get(0));
+        assert list2.get(1).equals(list3.get(1));
+        assert list2.get(2).equals(list3.get(2));
+        assert list3.size() == 3;
     }
 
     @Test

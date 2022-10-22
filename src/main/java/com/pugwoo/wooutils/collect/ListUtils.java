@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.function.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ListUtils {
 
@@ -43,6 +44,13 @@ public class ListUtils {
 		List<E> list = new ArrayList<>(c.size());
 		list.addAll(c);
 		return list;
+	}
+
+	public static <E> List<E> toList(Stream<E> stream) {
+		if (stream == null) {
+			return new ArrayList<>();
+		}
+		return stream.collect(Collectors.toList());
 	}
 	
 	/**
