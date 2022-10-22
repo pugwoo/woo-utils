@@ -22,9 +22,7 @@ public class ListUtils {
 		}
 
 		List<E> list = new ArrayList<>(elements.length);
-		for(E e : elements) {
-			list.add(e);
-		}
+		list.addAll(Arrays.asList(elements));
 
 		return list;
 	}
@@ -45,7 +43,7 @@ public class ListUtils {
 	 * @param list
 	 * @param mappers
 	 */
-	@SafeVarargs @SuppressWarnings("unchecked")
+	@SafeVarargs
 	public static <T, R extends Comparable<?>> void sortAscNullLast(List<T> list,
 																	Function<? super T, ? extends R>... mappers) {
 		SortingUtils.sortAscNullLast(list, mappers);
@@ -56,7 +54,7 @@ public class ListUtils {
 	 * @param list
 	 * @param mappers
 	 */
-	@SafeVarargs @SuppressWarnings("unchecked")
+	@SafeVarargs
 	public static <T, R extends Comparable<?>> void sortAscNullFirst(List<T> list,
 			Function<? super T, ? extends R>... mappers) {
 		SortingUtils.sortAscNullFirst(list, mappers);
@@ -67,7 +65,7 @@ public class ListUtils {
 	 * @param list
 	 * @param mappers
 	 */
-	@SafeVarargs @SuppressWarnings("unchecked")
+	@SafeVarargs
 	public static <T, R extends Comparable<?>> void sortDescNullLast(List<T> list,
 			Function<? super T, ? extends R>... mappers) {
 		SortingUtils.sortDescNullLast(list, mappers);
@@ -78,7 +76,7 @@ public class ListUtils {
 	 * @param list
 	 * @param mappers
 	 */
-	@SafeVarargs @SuppressWarnings("unchecked")
+	@SafeVarargs
 	public static <T, R extends Comparable<?>> void sortDescNullFirst(List<T> list,
 			Function<? super T, ? extends R>... mappers) {
 		SortingUtils.sortDescNullFirst(list, mappers);
@@ -161,11 +159,7 @@ public class ListUtils {
 		for(T t : list) {
 			if(t == null) {continue;}
 			K key = keyMapper.apply(t);
-			List<V> values = map.get(key);
-			if(values == null) {
-				values = new ArrayList<>();
-				map.put(key, values);
-			}
+			List<V> values = map.computeIfAbsent(key, k -> new ArrayList<>());
 			V value = valueMapper.apply(t);
 			values.add(value);
 		}
@@ -238,7 +232,7 @@ public class ListUtils {
 			}
 
 			private List<T> createNewList(T item) {
-				List<T> newOne = new ArrayList<T>();
+				List<T> newOne = new ArrayList<>();
 				newOne.add(item);
 				return newOne;
 			}
@@ -374,13 +368,13 @@ public class ListUtils {
 			return new ArrayList<>();
 		}
 		Set<E> set = new HashSet<>(b);
-		return filter(a, o -> set.contains(o));
+		return filter(a, set::contains);
 	}
 
 	/**
 	 * list交集，返回List a和List b中都有的值，去重，不保证顺序。
 	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
-	 * @param mapper 实际上是以lamda表达式返回的值进行去重的
+	 * @param mapper 实际上是以lambda表达式返回的值进行去重的
 	 */
 	public static <E, R extends Comparable<?>> List<E> intersection(
 			Function<? super E, ? extends R> mapper, List<E>... lists) {
@@ -429,7 +423,7 @@ public class ListUtils {
 	/**
 	 * list并集，返回lists中有的值，去重，不保证顺序。
 	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
-	 * @param mapper 实际上是以lamda表达式返回的值进行去重的
+	 * @param mapper 实际上是以lambda表达式返回的值进行去重的
 	 */
 	public static <E, R extends Comparable<?>> List<E> union(
 			Function<? super E, ? extends R> mapper, List<E>... lists) {
@@ -487,9 +481,7 @@ public class ListUtils {
 			return new ArrayList<>();
 		}
 		final List<Entry<E1, E2>> result = new ArrayList<>();
-		ListUtils.forEach(a, o -> {
-			ListUtils.forEach(b, p -> result.add(new MyEntry(o, p)));
-		});
+		ListUtils.forEach(a, o -> ListUtils.forEach(b, p -> result.add(new MyEntry(o, p))));
 		return result;
 	}
 
