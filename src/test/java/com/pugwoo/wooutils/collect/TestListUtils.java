@@ -4,28 +4,40 @@ import com.pugwoo.wooutils.lang.NumberUtils;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class TestListUtils {
 
     @Test
-    public void testNewArray() {
-
+    public void testNewArrayList() {
         List<Integer> list = ListUtils.newArrayList(1, 2, 3);
         assert list.size() == 3;
         assert list.get(0).equals(1);
         assert list.get(1).equals(2);
         assert list.get(2).equals(3);
 
-        Set<Integer> sets = ListUtils.toSet(list, o -> o);
+        list = ListUtils.newList(1, 2, 3);
+        assert list.size() == 3;
+        assert list.get(0).equals(1);
+        assert list.get(1).equals(2);
+        assert list.get(2).equals(3);
+
+    }
+
+    @Test
+    public void testToList() {
+        Set<Integer> sets = new HashSet<>();
+        sets.add(1);
+        sets.add(2);
+        sets.add(3);
         List<Integer> list2 = ListUtils.toList(sets);
 
         assert list2.size() == 3;
-        assert list2.get(0).equals(1);
-        assert list2.get(1).equals(2);
-        assert list2.get(2).equals(3);
-
+        assert list2.contains(1);
+        assert list2.contains(2);
+        assert list2.contains(3);
     }
 
     @Test

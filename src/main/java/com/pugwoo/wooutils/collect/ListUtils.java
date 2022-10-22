@@ -23,8 +23,16 @@ public class ListUtils {
 
 		List<E> list = new ArrayList<>(elements.length);
 		list.addAll(Arrays.asList(elements));
-
 		return list;
+	}
+
+	/**
+	 * 将数组转换成list，不同于Arrays.asList(array)，这个方法返回的数组可以对其进行修改操作
+	 * @param elements 数组
+	 */
+	@SafeVarargs
+	public static <E> List<E> newList(E... elements) {
+		return newArrayList(elements);
 	}
 
     public static <E> List<E> toList(Collection<E> c) {
@@ -34,7 +42,6 @@ public class ListUtils {
 
 		List<E> list = new ArrayList<>(c.size());
 		list.addAll(c);
-
 		return list;
 	}
 	
