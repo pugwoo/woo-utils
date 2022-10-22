@@ -1,5 +1,8 @@
 package com.pugwoo.wooutils.lang;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collection;
@@ -7,7 +10,9 @@ import java.util.List;
 import java.util.function.Function;
 
 public class NumberUtils {
-	
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(NumberUtils.class);
+
 	/**
 	 * 转换成integer，不会抛出异常，转换失败返回null
 	 */
@@ -21,6 +26,7 @@ public class NumberUtils {
 		try {
 			return Integer.valueOf(obj.toString().trim().replaceAll(",", ""));
 		} catch (Exception e) {
+			LOGGER.error("parseInt fail, obj:{}", obj.toString(), e);
 			return null;
 		}
 	}
@@ -38,6 +44,7 @@ public class NumberUtils {
 		try {
 			return Long.valueOf(obj.toString().trim().replaceAll(",", ""));
 		} catch (Exception e) {
+			LOGGER.error("parseLong fail, obj:{}", obj.toString(), e);
 			return null;
 		}
 	}
@@ -55,6 +62,7 @@ public class NumberUtils {
 		try {
 			return Double.valueOf(obj.toString().trim().replaceAll(",", ""));
 		} catch (Exception e) {
+			LOGGER.error("parseDouble fail, obj:{}", obj.toString(), e);
 			return null;
 		}
 	}
@@ -72,6 +80,7 @@ public class NumberUtils {
 		try {
 			return new BigDecimal(obj.toString().trim().replaceAll(",", ""));
 		} catch (Exception e) {
+			LOGGER.error("parseBigDecimal fail, obj:{}", obj.toString(), e);
 			return null;
 		}
 	}
