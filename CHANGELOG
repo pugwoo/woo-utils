@@ -1,3 +1,4 @@
+2022年10月22日
 v1.1.4 - [fix] 修复DateUtils.toLocalDate，当java.util.Date传入是java.sql.Date时出错的问题
        - [enhance] NumberUtils增加解析数字失败时的error log
 
