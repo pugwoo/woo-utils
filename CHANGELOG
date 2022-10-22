@@ -1,3 +1,5 @@
+v1.1.4 - [fix] 修复DateUtils.toLocalDate，当java.util.Date传入是java.sql.Date时出错的问题
+
 2022年10月10日
 v1.1.3 - [add] ExecuteThem支持设置等待队列的最大长度，并且当队列满时会阻塞等待
        - [enhance] 支持全为0000-00-00 00:00:00的日期的解析，解决低版本java可能解析失败的问题
