@@ -1,4 +1,5 @@
 v1.1.5 - [add] ListUtils增加stream相关的若干方法: toList,
+       - [modify] ListUtils的groupByNum和partition限定只支持List入参，如果需要Collection，请使用Stream方式
 
 2022年10月22日
 v1.1.4 - [fix] 修复DateUtils.toLocalDate，当java.util.Date传入是java.sql.Date时出错的问题

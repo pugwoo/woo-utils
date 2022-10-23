@@ -5,9 +5,11 @@ import com.pugwoo.wooutils.lang.NumberUtils;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.*;
-import java.util.stream.Collector;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class ListUtils {
@@ -195,71 +197,29 @@ public class ListUtils {
 
 	/**
 	 * list按指定的数量分组
-	 * @param list
+	 * @param list 这里明确用List类型，不支持Collection
 	 * @param groupNum 分组的数量，必须大于等于1，当小于1时返回空数组
 	 */
-	public static <T> List<List<T>> groupByNum(Collection<T> list, final int groupNum) {
+	public static <T> List<List<T>> groupByNum(List<T> list, final int groupNum) {
 		if (list == null || groupNum < 1) {
 			return new ArrayList<>();
 		}
-		
-		return  list.stream().collect(new Collector<T, List<List<T>>, List<List<T>>>() {
-			// 每组的个数
-			private final int number = groupNum;
 
-			@Override
-			public Supplier<List<List<T>>> supplier() {
-				return ArrayList::new;
-			}
+		return IntStream.range(0, getNumberOfPartitions(list, groupNum))
+				.mapToObj(i -> list.subList(i * groupNum, Math.min((i + 1) * groupNum, list.size())))
+				.collect(Collectors.toList());
+	}
 
-			@Override
-			public BiConsumer<List<List<T>>, T> accumulator() {
-				return (list, item) -> {
-					if (list.isEmpty()) {
-						list.add(this.createNewList(item));
-					} else {
-						List<T> last = list.get(list.size() - 1);
-						if (last.size() < number) {
-							last.add(item);
-						} else {
-							list.add(this.createNewList(item));
-						}
-					}
-				};
-			}
-
-			@Override
-			public BinaryOperator<List<List<T>>> combiner() {
-				return (list1, list2) -> {
-					list1.addAll(list2);
-					return list1;
-				};
-			}
-
-			@Override
-			public Function<List<List<T>>, List<List<T>>> finisher() {
-				return Function.identity();
-			}
-
-			@Override
-			public Set<Characteristics> characteristics() {
-				return Collections.unmodifiableSet(EnumSet.of(Collector.Characteristics.IDENTITY_FINISH));
-			}
-
-			private List<T> createNewList(T item) {
-				List<T> newOne = new ArrayList<>();
-				newOne.add(item);
-				return newOne;
-			}
-		});
+	private static <T> int getNumberOfPartitions(Collection<T> list, int batchSize) {
+		return (list.size() + batchSize- 1) / batchSize;
 	}
 
 	/**
 	 * list按指定的数量分组
-	 * @param list
+	 * @param list 这里明确用List类型，不支持Collection
 	 * @param groupNum 分组的数量，必须大于等于1，当小于1时返回空数组
 	 */
-	public static <T> List<List<T>> partition(Collection<T> list, final int groupNum) {
+	public static <T> List<List<T>> partition(List<T> list, final int groupNum) {
 		return groupByNum(list, groupNum);
 	}
 
