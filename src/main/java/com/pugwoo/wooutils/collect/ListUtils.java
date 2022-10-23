@@ -196,6 +196,37 @@ public class ListUtils {
 	}
 
 	/**
+	 * stream按指定的数量分组，并返回stream<br/>
+	 * 代码来源：https://stackoverflow.com/questions/32434592/partition-a-java-8-stream
+	 * @param stream
+	 * @param groupNum 分组的数量，必须大于等于1。0等价于不分组(即groupNum无限大)
+	 */
+	public static <T> Stream<List<T>> partition(Stream<T> stream, int groupNum) {
+		if (stream == null) {
+			return new ArrayList<List<T>>().stream();
+		}
+		List<List<T>> currentBatch = new ArrayList<>(); //just to make it mutable
+		currentBatch.add(new ArrayList<>(groupNum));
+		return Stream.concat(stream
+				.sequential()
+				.map(t -> {
+					currentBatch.get(0).add(t);
+					return currentBatch.get(0).size() == groupNum ? currentBatch.set(0,new ArrayList<>(groupNum)) : null;
+				}), Stream.generate(() -> currentBatch.get(0).isEmpty() ? null : currentBatch.get(0))
+				.limit(1)
+		).filter(Objects::nonNull);
+	}
+
+	/**
+	 * stream按指定的数量分组，并返回stream
+	 * @param stream
+	 * @param groupNum 分组的数量，必须大于等于1。0等价于不分组(即groupNum无限大)
+	 */
+	public static <T> Stream<List<T>> groupByNum(Stream<T> stream, final int groupNum) {
+		return partition(stream, groupNum);
+	}
+
+	/**
 	 * list按指定的数量分组
 	 * @param list 这里明确用List类型，不支持Collection
 	 * @param groupNum 分组的数量，必须大于等于1，当小于1时返回空数组
@@ -221,6 +252,17 @@ public class ListUtils {
 	 */
 	public static <T> List<List<T>> partition(List<T> list, final int groupNum) {
 		return groupByNum(list, groupNum);
+	}
+
+	public static <T> List<List<T>> groupByNum(Set<T> set, final int groupNum) {
+		if (set == null) {
+			return new ArrayList<>();
+		}
+		return groupByNum(set.stream(), groupNum).collect(Collectors.toList());
+	}
+
+	public static <T> List<List<T>> partition(Set<T> set, final int groupNum) {
+		return groupByNum(set, groupNum);
 	}
 
 	/**

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TestListUtils {
@@ -48,10 +49,35 @@ public class TestListUtils {
         assert list3.size() == 3;
     }
 
+    // testPartition
     @Test
     public void testGroupByNum() {
         List<Integer> list = ListUtils.newArrayList(1,2,3,4,5,6,7,8,9,10);
         List<List<Integer>> lists = ListUtils.groupByNum(list, 3);
+        assetGroupByNum(lists);
+
+        lists = ListUtils.partition(list, 3);
+        assetGroupByNum(lists);
+
+        Stream<List<Integer>> stream = ListUtils.partition(list.stream(), 3);
+        lists = stream.collect(Collectors.toList());
+        assetGroupByNum(lists);
+
+        stream = ListUtils.groupByNum(list.stream(), 3);
+        lists = stream.collect(Collectors.toList());
+        assetGroupByNum(lists);
+
+        // set的partition
+        Set<Integer> set = new HashSet<>();
+        for (int i = 1; i <= 10; i++) {
+            set.add(i);
+        }
+        List<List<Integer>> partition = ListUtils.partition(set, 3);
+        assert partition.size() == 4;
+        assert partition.get(0).size() == 3;
+    }
+
+    private void assetGroupByNum(List<List<Integer>> lists) {
         assert lists.size() == 4;
         assert lists.get(0).size() == 3;
         assert lists.get(1).size() == 3;
