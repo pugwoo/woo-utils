@@ -8,6 +8,13 @@ import java.util.function.Function;
 public class MapUtils {
 
 	/**
+	 * 判断一个map是否为空
+	 */
+	public static boolean isEmpty(Map<?, ?> map) {
+		return map == null || map.isEmpty();
+	}
+
+	/**
 	 * 转换map的value值为转换后的值
 	 * @param map
 	 * @param mapper 支持lambda写法

@@ -5,9 +5,12 @@ import com.pugwoo.wooutils.lang.NumberUtils;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.*;
-import java.util.stream.Collector;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class ListUtils {
 
@@ -22,11 +25,17 @@ public class ListUtils {
 		}
 
 		List<E> list = new ArrayList<>(elements.length);
-		for(E e : elements) {
-			list.add(e);
-		}
-
+		list.addAll(Arrays.asList(elements));
 		return list;
+	}
+
+	/**
+	 * 将数组转换成list，不同于Arrays.asList(array)，这个方法返回的数组可以对其进行修改操作
+	 * @param elements 数组
+	 */
+	@SafeVarargs
+	public static <E> List<E> newList(E... elements) {
+		return newArrayList(elements);
 	}
 
     public static <E> List<E> toList(Collection<E> c) {
@@ -36,8 +45,14 @@ public class ListUtils {
 
 		List<E> list = new ArrayList<>(c.size());
 		list.addAll(c);
-
 		return list;
+	}
+
+	public static <E> List<E> toList(Stream<E> stream) {
+		if (stream == null) {
+			return new ArrayList<>();
+		}
+		return stream.collect(Collectors.toList());
 	}
 	
 	/**
@@ -45,7 +60,7 @@ public class ListUtils {
 	 * @param list
 	 * @param mappers
 	 */
-	@SafeVarargs @SuppressWarnings("unchecked")
+	@SafeVarargs
 	public static <T, R extends Comparable<?>> void sortAscNullLast(List<T> list,
 																	Function<? super T, ? extends R>... mappers) {
 		SortingUtils.sortAscNullLast(list, mappers);
@@ -56,7 +71,7 @@ public class ListUtils {
 	 * @param list
 	 * @param mappers
 	 */
-	@SafeVarargs @SuppressWarnings("unchecked")
+	@SafeVarargs
 	public static <T, R extends Comparable<?>> void sortAscNullFirst(List<T> list,
 			Function<? super T, ? extends R>... mappers) {
 		SortingUtils.sortAscNullFirst(list, mappers);
@@ -67,7 +82,7 @@ public class ListUtils {
 	 * @param list
 	 * @param mappers
 	 */
-	@SafeVarargs @SuppressWarnings("unchecked")
+	@SafeVarargs
 	public static <T, R extends Comparable<?>> void sortDescNullLast(List<T> list,
 			Function<? super T, ? extends R>... mappers) {
 		SortingUtils.sortDescNullLast(list, mappers);
@@ -78,7 +93,7 @@ public class ListUtils {
 	 * @param list
 	 * @param mappers
 	 */
-	@SafeVarargs @SuppressWarnings("unchecked")
+	@SafeVarargs
 	public static <T, R extends Comparable<?>> void sortDescNullFirst(List<T> list,
 			Function<? super T, ? extends R>... mappers) {
 		SortingUtils.sortDescNullFirst(list, mappers);
@@ -161,11 +176,7 @@ public class ListUtils {
 		for(T t : list) {
 			if(t == null) {continue;}
 			K key = keyMapper.apply(t);
-			List<V> values = map.get(key);
-			if(values == null) {
-				values = new ArrayList<>();
-				map.put(key, values);
-			}
+			List<V> values = map.computeIfAbsent(key, k -> new ArrayList<>());
 			V value = valueMapper.apply(t);
 			values.add(value);
 		}
@@ -185,73 +196,73 @@ public class ListUtils {
 	}
 
 	/**
-	 * list按指定的数量分组
-	 * @param list
-	 * @param groupNum 分组的数量，必须大于等于1，当小于1时返回空数组
+	 * stream按指定的数量分组，并返回stream<br/>
+	 * 代码来源：https://stackoverflow.com/questions/32434592/partition-a-java-8-stream
+	 * @param stream
+	 * @param groupNum 分组的数量，必须大于等于1。0等价于不分组(即groupNum无限大)
 	 */
-	public static <T> List<List<T>> groupByNum(Collection<T> list, final int groupNum) {
-		if (list == null || groupNum < 1) {
-			return new ArrayList<>();
+	public static <T> Stream<List<T>> partition(Stream<T> stream, int groupNum) {
+		if (stream == null) {
+			return new ArrayList<List<T>>().stream();
 		}
-		
-		return  list.stream().collect(new Collector<T, List<List<T>>, List<List<T>>>() {
-			// 每组的个数
-			private final int number = groupNum;
+		List<List<T>> currentBatch = new ArrayList<>(); //just to make it mutable
+		currentBatch.add(new ArrayList<>(groupNum));
+		return Stream.concat(stream
+				.sequential()
+				.map(t -> {
+					currentBatch.get(0).add(t);
+					return currentBatch.get(0).size() == groupNum ? currentBatch.set(0,new ArrayList<>(groupNum)) : null;
+				}), Stream.generate(() -> currentBatch.get(0).isEmpty() ? null : currentBatch.get(0))
+				.limit(1)
+		).filter(Objects::nonNull);
+	}
 
-			@Override
-			public Supplier<List<List<T>>> supplier() {
-				return ArrayList::new;
-			}
-
-			@Override
-			public BiConsumer<List<List<T>>, T> accumulator() {
-				return (list, item) -> {
-					if (list.isEmpty()) {
-						list.add(this.createNewList(item));
-					} else {
-						List<T> last = list.get(list.size() - 1);
-						if (last.size() < number) {
-							last.add(item);
-						} else {
-							list.add(this.createNewList(item));
-						}
-					}
-				};
-			}
-
-			@Override
-			public BinaryOperator<List<List<T>>> combiner() {
-				return (list1, list2) -> {
-					list1.addAll(list2);
-					return list1;
-				};
-			}
-
-			@Override
-			public Function<List<List<T>>, List<List<T>>> finisher() {
-				return Function.identity();
-			}
-
-			@Override
-			public Set<Characteristics> characteristics() {
-				return Collections.unmodifiableSet(EnumSet.of(Collector.Characteristics.IDENTITY_FINISH));
-			}
-
-			private List<T> createNewList(T item) {
-				List<T> newOne = new ArrayList<T>();
-				newOne.add(item);
-				return newOne;
-			}
-		});
+	/**
+	 * stream按指定的数量分组，并返回stream
+	 * @param stream
+	 * @param groupNum 分组的数量，必须大于等于1。0等价于不分组(即groupNum无限大)
+	 */
+	public static <T> Stream<List<T>> groupByNum(Stream<T> stream, final int groupNum) {
+		return partition(stream, groupNum);
 	}
 
 	/**
 	 * list按指定的数量分组
-	 * @param list
+	 * @param list 这里明确用List类型，不支持Collection
 	 * @param groupNum 分组的数量，必须大于等于1，当小于1时返回空数组
 	 */
-	public static <T> List<List<T>> partition(Collection<T> list, final int groupNum) {
+	public static <T> List<List<T>> groupByNum(List<T> list, final int groupNum) {
+		if (list == null || groupNum < 1) {
+			return new ArrayList<>();
+		}
+
+		return IntStream.range(0, getNumberOfPartitions(list, groupNum))
+				.mapToObj(i -> list.subList(i * groupNum, Math.min((i + 1) * groupNum, list.size())))
+				.collect(Collectors.toList());
+	}
+
+	private static <T> int getNumberOfPartitions(Collection<T> list, int batchSize) {
+		return (list.size() + batchSize- 1) / batchSize;
+	}
+
+	/**
+	 * list按指定的数量分组
+	 * @param list 这里明确用List类型，不支持Collection
+	 * @param groupNum 分组的数量，必须大于等于1，当小于1时返回空数组
+	 */
+	public static <T> List<List<T>> partition(List<T> list, final int groupNum) {
 		return groupByNum(list, groupNum);
+	}
+
+	public static <T> List<List<T>> groupByNum(Set<T> set, final int groupNum) {
+		if (set == null) {
+			return new ArrayList<>();
+		}
+		return groupByNum(set.stream(), groupNum).collect(Collectors.toList());
+	}
+
+	public static <T> List<List<T>> partition(Set<T> set, final int groupNum) {
+		return groupByNum(set, groupNum);
 	}
 
 	/**
@@ -374,13 +385,13 @@ public class ListUtils {
 			return new ArrayList<>();
 		}
 		Set<E> set = new HashSet<>(b);
-		return filter(a, o -> set.contains(o));
+		return filter(a, set::contains);
 	}
 
 	/**
 	 * list交集，返回List a和List b中都有的值，去重，不保证顺序。
 	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
-	 * @param mapper 实际上是以lamda表达式返回的值进行去重的
+	 * @param mapper 实际上是以lambda表达式返回的值进行去重的
 	 */
 	public static <E, R extends Comparable<?>> List<E> intersection(
 			Function<? super E, ? extends R> mapper, List<E>... lists) {
@@ -429,7 +440,7 @@ public class ListUtils {
 	/**
 	 * list并集，返回lists中有的值，去重，不保证顺序。
 	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
-	 * @param mapper 实际上是以lamda表达式返回的值进行去重的
+	 * @param mapper 实际上是以lambda表达式返回的值进行去重的
 	 */
 	public static <E, R extends Comparable<?>> List<E> union(
 			Function<? super E, ? extends R> mapper, List<E>... lists) {
@@ -487,9 +498,7 @@ public class ListUtils {
 			return new ArrayList<>();
 		}
 		final List<Entry<E1, E2>> result = new ArrayList<>();
-		ListUtils.forEach(a, o -> {
-			ListUtils.forEach(b, p -> result.add(new MyEntry(o, p)));
-		});
+		ListUtils.forEach(a, o -> ListUtils.forEach(b, p -> result.add(new MyEntry(o, p))));
 		return result;
 	}
 
