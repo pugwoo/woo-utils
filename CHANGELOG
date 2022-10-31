@@ -1,3 +1,4 @@
+2022年10月31日
 v1.1.5 - [add] ListUtils增加stream相关的若干方法: toList,groupByNum,partition
        - [modify] ListUtils的groupByNum和partition限定只支持List入参，如果需要Collection，请使用Stream方式
        - [enhance] StringTools.join方法增加(String splitLetter, Collection)参数方式
