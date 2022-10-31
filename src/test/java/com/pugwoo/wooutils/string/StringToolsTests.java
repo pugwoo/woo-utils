@@ -78,4 +78,12 @@ public class StringToolsTests {
         equalUtils.ignoreListOrder(true);
         assert equalUtils.isEqual(strings, ListUtils.newArrayList("a","b","c","d"));
     }
+
+    @Test
+    public void testJoin() {
+        assert "a,b,c".equals(StringTools.join(",", "a", "b", "c"));
+        assert "a,b,c".equals(StringTools.join(",", ListUtils.newList("a", "b", "c")));
+        assert "a,b,c".equals(StringTools.join(new String[]{"a", "b", "c"}, ","));
+        assert "a,b,c".equals(StringTools.join( ListUtils.newList("a", "b", "c"), ","));
+    }
 }

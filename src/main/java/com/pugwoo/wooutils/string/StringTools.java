@@ -1,10 +1,7 @@
 package com.pugwoo.wooutils.string;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -224,6 +221,17 @@ public class StringTools {
 	}
 
 	/**
+	 * 将容器元素collection 用分隔符splitLetter连起来。<br>
+	 * 这个方法提供的可变长的参数
+	 *
+	 * @param splitLetter
+	 * @return 不会返回null
+	 */
+	public static String join(String splitLetter, Collection<?> collection) {
+		return join(collection, splitLetter);
+	}
+
+	/**
 	 * 将list的元素的toString 用分隔符splitLetter连起来。<br>
 	 * 如果list中元素等于null或者toString为null或空字符串，则不加入。<br>
 	 *
@@ -233,7 +241,7 @@ public class StringTools {
 	 * @param list
 	 * @return 不会返回null
 	 */
-	public static String join(List<?> list, String splitLetter) {
+	public static String join(Collection<?> list, String splitLetter) {
 		if (list == null || list.isEmpty()) {
 			return "";
 		}
