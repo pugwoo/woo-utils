@@ -7,6 +7,7 @@ import org.junit.Test;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Month;
 import java.util.Date;
 import java.util.List;
 
@@ -65,6 +66,19 @@ public class TestDate {
 			//System.out.println(localDt);
 			assert localDt != null;
 		}
+
+		LocalDate localDate = DateUtils.parseLocalDate("2022-01-01");
+		assert localDate.getYear() == 2022;
+		assert localDate.getMonth() == Month.JANUARY;
+		assert localDate.getDayOfMonth() == 1;
+
+		assert "2022-01-01".equals(DateUtils.format(localDate));
+
+		LocalDateTime localDateTime = DateUtils.parseLocalDateTime("2022-01-01");
+		assert "2022-01-01 00:00:00".equals(DateUtils.format(localDateTime));
+		localDateTime = DateUtils.parseLocalDateTime("2022-01-01 01:02:03");
+		assert "2022-01-01 01:02:03".equals(DateUtils.format(localDateTime));
+
 
 	}
 

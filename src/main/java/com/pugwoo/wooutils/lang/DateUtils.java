@@ -288,7 +288,7 @@ public class DateUtils {
 		if(localDate == null) {
 			return "";
 		}
-		return localDate.format(DateTimeFormatter.ofPattern(DateUtils.FORMAT_STANDARD));
+		return localDate.format(DateTimeFormatter.ofPattern(DateUtils.FORMAT_DATE));
 	}
 	
 	/**
