@@ -95,9 +95,9 @@ public class DateUtils {
 		String pattern = determineDateFormat(date);
 		if(pattern == null) {
 			// 检查是否是时间戳
-			Date _date = tryParseTimestamp(date);
-			if(_date != null) {
-				return _date;
+			Date date2 = tryParseTimestamp(date);
+			if(date2 != null) {
+				return date2;
 			}
 
 			LOGGER.error("date parse, pattern not support, date:{}", date);
@@ -129,7 +129,7 @@ public class DateUtils {
 			return null;
 		}
 
-		// 时间戳小于42亿则认为是秒，否则是毫秒
+		// 时间戳小于42亿则认为是秒（此时已经是2103-02-04），否则是毫秒
 		if(timestamp < 4200000000L) {
 			return new Date(timestamp * 1000L);
 		} else {

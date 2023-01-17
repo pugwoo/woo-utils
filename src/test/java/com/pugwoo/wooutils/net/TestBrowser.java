@@ -30,8 +30,8 @@ public class TestBrowser {
 
 		//browser.addRequestHeader("Content-Type", "text/plain");
 
-		browser.post("http://127.0.0.1:8080/post",
-				"content".getBytes(), out);
+//		browser.post("http://127.0.0.1:8080/post",
+//				"content".getBytes(), out);
 	}
 	
 	// 测试上传文件
@@ -46,8 +46,8 @@ public class TestBrowser {
 //				new FileInputStream("C:\\Users\\nickt\\Desktop\\1.png"));
 //		params.put("file2", file2);
 		params.put("info", "myinfo");
-		browser.post("http://127.0.0.1:8080/admin/admin_upload/upload",
-				params);
+//		browser.post("http://127.0.0.1:8080/admin/admin_upload/upload",
+//				params);
 	}
 
 	@Test

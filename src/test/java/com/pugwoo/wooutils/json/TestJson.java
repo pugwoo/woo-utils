@@ -13,12 +13,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -85,16 +83,35 @@ public class TestJson {
 	
 	@Test
 	public void parseTest() {
-		System.out.println("\n================ 解析json示例");
-		
-		System.out.println(JSON.parse("\"2017-03-03 15:34\"", Date.class));
-		System.out.println(JSON.parse("\"2017年3月30日\"", Date.class));
-		System.out.println(JSON.parse("\"  \"", Date.class));
-		
-		System.out.println();
-		
+		// 测试解析日期
+		assert JSON.parse("\"2017-03-03 15:34\"", Date.class).equals(DateUtils.parse("2017-03-03 15:34"));
+		assert JSON.parse("\"2017年3月30日\"", Date.class).equals(DateUtils.parse("2017年3月30日"));
+		assert JSON.parse("1673961578", Date.class).equals(DateUtils.parse("2023-01-17 21:19:38"));
+		assert JSON.parse("\"  \"", Date.class) == null;
+		assert JSON.parse(null, Date.class) == null;
+		assert JSON.parse("", Date.class) == null;
+		assert JSON.parse("  ", Date.class) == null;
+		assert JSON.parse(" \t\n\r ", Date.class) == null;
+
+		// 解析LocalDateTime
+		assert JSON.parse("\"2022-03-04 05:06:07\"", LocalDateTime.class)
+				.equals(DateUtils.parseLocalDateTime("2022-03-04 05:06:07"));
+		assert JSON.parse("\"2022-03-04 05:06:07\"", LocalDate.class)
+				.equals(DateUtils.parseLocalDate("2022-03-04 05:06:07"));
+		assert JSON.parse("\"2022-03-04 05:06:07\"", LocalTime.class)
+				.equals(DateUtils.parseLocalTime("2022-03-04 05:06:07"));
+
+		// 测试解析日期异常的场景
+		boolean hasEx = false;
+		try {
+			JSON.parse("\" 123 \"", Date.class);
+		} catch (Exception e) {
+			hasEx =true;
+		}
+		assert hasEx;
+
 		MyClass myclass = JSON.parse("{\"map\":\"\"}", MyClass.class);
-		System.out.println(JSON.toJson(myclass));
+		assert myclass.getMap() == null;
 	}
 	
 	@Test

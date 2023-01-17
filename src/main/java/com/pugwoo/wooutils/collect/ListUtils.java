@@ -548,6 +548,30 @@ public class ListUtils {
 	}
 
 	/**
+	 * 将多个数组合并成一个数组
+	 */
+	public static Object[] concatArray(Object[] ...objs) {
+		if (objs == null || objs.length == 0) {
+			return new Object[0];
+		}
+		int size = 0;
+		for (Object[] obj : objs) {
+			size += obj == null ? 0 : obj.length;
+		}
+		Object[] result = new Object[size];
+		int current = 0;
+		for (Object[] obj : objs) {
+			if (obj == null) {
+				continue;
+			}
+			for (Object o : obj) {
+				result[current++] = o;
+			}
+		}
+		return result;
+	}
+
+	/**
 	 * 数值求和
 	 * @param list
 	 * @param mapper

@@ -86,4 +86,20 @@ public class StringToolsTests {
         assert "a,b,c".equals(StringTools.join(new String[]{"a", "b", "c"}, ","));
         assert "a,b,c".equals(StringTools.join( ListUtils.newList("a", "b", "c"), ","));
     }
+
+    @Test
+    public void testNthIndexOf() {
+        String a = "a1a2a3a4";
+        assert StringTools.nthIndexOf(a, "a", 1) == 0;
+        assert StringTools.nthIndexOf(a, "a", 2) == 2;
+        assert StringTools.nthIndexOf(a, "a", 3) == 4;
+        assert StringTools.nthIndexOf(a, "a", 4) == 6;
+        assert StringTools.nthIndexOf(a, "a", 5) == -1;
+
+        assert StringTools.nthLastIndexOf(a, "a", 1) == 6;
+        assert StringTools.nthLastIndexOf(a, "a", 2) == 4;
+        assert StringTools.nthLastIndexOf(a, "a", 3) == 2;
+        assert StringTools.nthLastIndexOf(a, "a", 4) == 0;
+        assert StringTools.nthLastIndexOf(a, "a", 5) == -1;
+    }
 }

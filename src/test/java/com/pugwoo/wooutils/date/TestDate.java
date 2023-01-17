@@ -40,6 +40,8 @@ public class TestDate {
 
 		assert DateUtils.parse("0000-00-00") == null;
 		assert DateUtils.parse("0000-00-00 00:00:00") == null;
+		assert DateUtils.parse(null) == null;
+		assert DateUtils.parse("1673961578").equals(DateUtils.parse("2023-01-17 21:19:38"));
 
 		for(String str : testDates) {
 			Date date = DateUtils.parse(str);
