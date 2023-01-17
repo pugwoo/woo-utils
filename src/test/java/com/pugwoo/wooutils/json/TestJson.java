@@ -13,12 +13,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -94,6 +92,14 @@ public class TestJson {
 		assert JSON.parse("", Date.class) == null;
 		assert JSON.parse("  ", Date.class) == null;
 		assert JSON.parse(" \t\n\r ", Date.class) == null;
+
+		// 解析LocalDateTime
+		assert JSON.parse("\"2022-03-04 05:06:07\"", LocalDateTime.class)
+				.equals(DateUtils.parseLocalDateTime("2022-03-04 05:06:07"));
+		assert JSON.parse("\"2022-03-04 05:06:07\"", LocalDate.class)
+				.equals(DateUtils.parseLocalDate("2022-03-04 05:06:07"));
+		assert JSON.parse("\"2022-03-04 05:06:07\"", LocalTime.class)
+				.equals(DateUtils.parseLocalTime("2022-03-04 05:06:07"));
 
 		// 测试解析日期异常的场景
 		boolean hasEx = false;
