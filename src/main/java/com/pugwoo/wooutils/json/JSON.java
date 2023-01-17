@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.pugwoo.wooutils.string.StringTools;
 
 import java.io.IOException;
 import java.util.List;
@@ -165,6 +166,9 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -{@literal >} {
 	 * @return t
 	 */
 	public static <T> T parse(String str, Class<T> clazz) {
+		if (StringTools.isBlank(str)) {
+			return null;
+		}
 		return parse(om -> om.readValue(str,clazz));
 	}
 	
@@ -178,6 +182,9 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -{@literal >} {
 	 * @return t
 	 */
 	public static <T> T parse(String str, Class<T> clazz, Class<?>... genericClasses) {
+		if (StringTools.isBlank(str)) {
+			return null;
+		}
 		return parse(om -> {
 			JavaType type =  om.getTypeFactory().constructParametricType(clazz, genericClasses);
 			return om.readValue(str, type);
@@ -191,6 +198,9 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -{@literal >} {
 	 * @return t
 	 */
 	public static <T> T parse(String str, TypeReference<T> typeReference) {
+		if (StringTools.isBlank(str)) {
+			return null;
+		}
 		return parse(om -> om.readValue(str, typeReference));
 	}
 	
@@ -218,6 +228,9 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -{@literal >} {
 	 * @return map
 	 */
 	public static <T> List<T> parseToList(String str, Class<T> itemClazz) {
+		if (StringTools.isBlank(str)) {
+			return null;
+		}
 		return parseToList(str, typeFactory ->
 				typeFactory.constructParametricType(List.class, itemClazz)
 		);
@@ -231,6 +244,9 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -{@literal >} {
 	 * @return List {@literal <} T {@literal >}
 	 */
 	public static <T> List<T> parseToList(String str, TypeReference<T> itemTypeRef) {
+		if (StringTools.isBlank(str)) {
+			return null;
+		}
 		return parseToList(str, typeFactory -> {
 			JavaType itemType = typeFactory.constructType(itemTypeRef);
 			return typeFactory.constructParametricType(List.class, itemType);
