@@ -550,7 +550,7 @@ public class ListUtils {
 	/**
 	 * 将多个数组合并成一个数组
 	 */
-	public static Object[] merge(Object[] ...objs) {
+	public static Object[] concatArray(Object[] ...objs) {
 		if (objs == null || objs.length == 0) {
 			return new Object[0];
 		}

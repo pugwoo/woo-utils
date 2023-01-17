@@ -104,6 +104,34 @@ public class StringTools {
 	}
 
 	/**
+	 * 返回str中第nth个substr的index
+	 * @param str 被查找的字符串
+	 * @param substr 要查找的字符串
+	 * @param nth 从1开始
+	 * @return index，从0开始
+	 */
+	public static int nthIndexOf(String str, String substr, int nth) {
+		int pos = str.indexOf(substr);
+		while (--nth > 0 && pos != -1)
+			pos = str.indexOf(substr, pos + 1);
+		return pos;
+	}
+
+	/**
+	 * 返回str中第nth个substr的index
+	 * @param str 被查找的字符串
+	 * @param substr 要查找的字符串
+	 * @param nth 从1开始
+	 * @return index，从0开始
+	 */
+	public static int nthLastIndexOf(String str, String substr, int nth) {
+		int pos = str.lastIndexOf(substr);
+		while (--nth > 0 && pos != -1)
+			pos = str.lastIndexOf(substr, pos - 1);
+		return pos;
+	}
+
+	/**
 	 * 返回两个字符串的共同前缀
 	 * @param str1
 	 * @param str2

@@ -1,4 +1,5 @@
-v1.1.7 - [add] ListUtils新增merge(Object[] ...objs)方法
+v1.1.7 - [add] ListUtils新增concatArray(Object[] ...objs)方法，将多个数组合并成一个数组
+       - [add] StringTools新增nthIndexOf和nthLastIndexOf方法
 
 2022年11月21日
 v1.1.6 - [fix] 修复DateUtils.format(LocalDate)抛出Unsupport field: HourOfDay的异常

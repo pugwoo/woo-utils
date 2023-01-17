@@ -122,7 +122,7 @@ public class TestListUtils {
         Object[] b = null;
         Object[] c = new Object[]{7,8,9};
 
-        Object[] merge = ListUtils.merge(a, b, c);
+        Object[] merge = ListUtils.concatArray(a, b, c);
         assert merge.length == 6;
         assert (int)merge[0] == 1;
         assert (int)merge[1] == 2;
@@ -130,7 +130,6 @@ public class TestListUtils {
         assert (int)merge[3] == 7;
         assert (int)merge[4] == 8;
         assert (int)merge[5] == 9;
-
     }
 
 }
