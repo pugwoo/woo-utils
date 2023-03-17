@@ -127,9 +127,7 @@ public class ListUtils {
 	
 	/**
 	 * 转换list为set
-	 * @param list
 	 * @param mapper 支持lambda写法
-	 * @return
 	 */
 	public static <T, R> Set<R> toSet(Collection<T> list, Function<? super T, ? extends R> mapper) {
 		if(list == null) {
@@ -140,10 +138,6 @@ public class ListUtils {
 	
 	/**
 	 * 转换list为map,返回的是LinkedHashMap，顺序和list一样。如果key相同，值会被最后一个覆盖。
-	 * @param list
-	 * @param keyMapper
-	 * @param valueMapper
-	 * @return
 	 */
 	public static <T, K, V> Map<K, V> toMap(Collection<T> list,
 			Function<? super T, ? extends K> keyMapper,
@@ -161,10 +155,6 @@ public class ListUtils {
 
 	/**
 	 * 转换list为map
-	 * @param list
-	 * @param keyMapper
-	 * @param valueMapper
-	 * @return
 	 */
 	public static <T, K, V> Map<K, List<V>> toMapList(Collection<T> list,
 			Function<? super T, ? extends K> keyMapper,
@@ -185,11 +175,6 @@ public class ListUtils {
 
 	/**
 	 *  group by （转换list为map）
-	 * @param list
-	 * @param keyMapper
-	 * @param <T>
-	 * @param <K>
-	 * @return
 	 */
 	public static <T, K> Map<K, List<T>> groupBy(Collection<T> list, Function<? super T, ? extends K> keyMapper) {
 		return toMapList(list,keyMapper,o->o);
@@ -197,8 +182,7 @@ public class ListUtils {
 
 	/**
 	 * stream按指定的数量分组，并返回stream<br/>
-	 * 代码来源：https://stackoverflow.com/questions/32434592/partition-a-java-8-stream
-	 * @param stream
+	 * 代码来源：<a href="https://stackoverflow.com/questions/32434592/partition-a-java-8-stream">...</a>
 	 * @param groupNum 分组的数量，必须大于等于1。0等价于不分组(即groupNum无限大)
 	 */
 	public static <T> Stream<List<T>> partition(Stream<T> stream, int groupNum) {
@@ -300,6 +284,12 @@ public class ListUtils {
 			for(T t : list) {
 				consumer.accept(t);
 			}
+		}
+	}
+
+	public static <T> void forEach(Stream<T> stream, Consumer<? super T> consumer) {
+		if(stream != null) {
+			stream.forEach(consumer);
 		}
 	}
 
