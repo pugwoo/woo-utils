@@ -187,7 +187,7 @@ public class ListUtils {
 	 */
 	public static <T> Stream<List<T>> partition(Stream<T> stream, int groupNum) {
 		if (stream == null) {
-			return new ArrayList<List<T>>().stream();
+			return Stream.empty();
 		}
 		List<List<T>> currentBatch = new ArrayList<>(); //just to make it mutable
 		currentBatch.add(new ArrayList<>(groupNum));
