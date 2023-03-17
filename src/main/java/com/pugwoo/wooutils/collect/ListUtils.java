@@ -251,9 +251,6 @@ public class ListUtils {
 
 	/**
 	 * filter一个list
-	 * @param list
-	 * @param predicate
-	 * @return
 	 */
 	public static <T> List<T> filter(Collection<T> list, Predicate<? super T> predicate) {
 		if(list == null) {
@@ -319,9 +316,6 @@ public class ListUtils {
 
 	/**
 	 * list中是否包含有符合条件的元素
-	 * @param list
-	 * @param predicate
-	 * @return
 	 */
 	public static <T> boolean contains(Collection<T> list, Predicate<? super T> predicate) {
 		if(list == null) return false;
@@ -335,9 +329,6 @@ public class ListUtils {
 	
 	/**
 	 * list中mapper映射的值是否有重复，【不包括null值的比较，null值不包括在重复判断中】
-	 * @param list
-	 * @param mapper
-	 * @return
 	 */
 	public static <T, R> boolean hasDuplicate(Collection<T> list,
 			Function<? super T, ? extends R> mapper) {
@@ -358,6 +349,7 @@ public class ListUtils {
 	 * list交集，返回List a和List b中都有的值，去重，不保证顺序。
 	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
 	 */
+	@SafeVarargs
 	public static <E> List<E> intersection(List<E>... lists) {
 
 		if(lists == null) {return new ArrayList<>();}
@@ -383,6 +375,7 @@ public class ListUtils {
 	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
 	 * @param mapper 实际上是以lambda表达式返回的值进行去重的
 	 */
+	@SafeVarargs
 	public static <E, R extends Comparable<?>> List<E> intersection(
 			Function<? super E, ? extends R> mapper, List<E>... lists) {
 
@@ -413,6 +406,7 @@ public class ListUtils {
 	 * list并集，返回lists中有的值，去重，不保证顺序。
 	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
 	 */
+	@SafeVarargs
 	public static <E> List<E> union(List<E>... lists) {
 
 		if(lists == null) {return new ArrayList<>();}
@@ -432,6 +426,7 @@ public class ListUtils {
 	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
 	 * @param mapper 实际上是以lambda表达式返回的值进行去重的
 	 */
+	@SafeVarargs
 	public static <E, R extends Comparable<?>> List<E> union(
 			Function<? super E, ? extends R> mapper, List<E>... lists) {
 
