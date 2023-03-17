@@ -1,3 +1,5 @@
+v1.1.8 - [del] 删除ListUtils.sub方法，改为ListUtils.subtract
+
 2023年1月17日
 v1.1.7 - [add] ListUtils新增concatArray(Object[] ...objs)方法，将多个数组合并成一个数组
        - [add] StringTools新增nthIndexOf和nthLastIndexOf方法

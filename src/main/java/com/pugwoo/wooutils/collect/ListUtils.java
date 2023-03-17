@@ -478,17 +478,7 @@ public class ListUtils {
 		Set<E> bSet = new HashSet<>(b);
 		return ListUtils.filter(a, o -> !bSet.contains(o));
 	}
-	
-	/**
-	 * list相减，返回List a中有但是List b中没有的数据，去重，不保证顺序。
-	 *
-	 * @deprecated 请使用subtract
-	 */
-	@Deprecated
-	public static <E> List<E> sub(List<E> a, List<E> b) {
-		return subtract(a, b);
-	}
-	
+
 	/**
 	 * 返回List a和List b的笛卡尔积列表
 	 */
