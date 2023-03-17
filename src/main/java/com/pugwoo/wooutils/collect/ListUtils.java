@@ -5,6 +5,7 @@ import com.pugwoo.wooutils.lang.NumberUtils;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -343,6 +344,33 @@ public class ListUtils {
 			sets.add(r);
 		}
 		return false;
+	}
+
+	/**
+	 * 按相同的key合并两个list，返回合并后的list
+	 * @param merger 第一个入参是key相同的list1的值，第二个入参是key相同的list2的值，返回值是合并后的值
+	 *               注意：merger的入参可能为null，需要判断
+	 */
+	public static <T, U, R> List<R> merge(List<T> list1, List<U> list2,
+											Function<T, String> keyMapper1,
+											Function<U, String> keyMapper2,
+	                                        BiFunction<List<T>, List<U>, R> merger) {
+		Map<String, List<T>> map1 = toMapList(list1, keyMapper1, o -> o);
+		Map<String, List<U>> map2 = toMapList(list2, keyMapper2, o -> o);
+		List<R> result = new ArrayList<>();
+		for (Entry<String, List<T>> e : map1.entrySet()) {
+			List<U> list = map2.get(e.getKey());
+			result.add(merger.apply(e.getValue(), list));
+			if (list != null) {
+				map2.remove(e.getKey());
+			}
+		}
+
+		for (Entry<String, List<U>> e : map2.entrySet()) {
+			result.add(merger.apply(null, e.getValue()));
+		}
+
+		return result;
 	}
 
 	/**
