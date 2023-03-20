@@ -222,7 +222,7 @@ public class NumberUtils {
 	 * @param mapper 转换成比较类型
 	 * @return 不存在时返回null
 	 */
-	public static <T, R extends Comparable<R>> R min(List<T> list,
+	public static <T, R extends Comparable<? super R>> R min(List<T> list,
 													 Function<? super T, R> mapper) {
 		if (list == null || list.isEmpty()) {
 			return null;
@@ -250,7 +250,7 @@ public class NumberUtils {
 	 * @param mapper 转换成比较类型
 	 * @return 不存在时返回null
 	 */
-	public static <T, R extends Comparable<R>> R max(List<T> list,
+	public static <T, R extends Comparable<? super R>> R max(List<T> list,
 													 Function<? super T, R> mapper) {
 		if (list == null || list.isEmpty()) {
 			return null;

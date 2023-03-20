@@ -5,6 +5,7 @@ import com.pugwoo.wooutils.collect.MapUtils;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -155,6 +156,19 @@ public class TestNumberUtils {
 
         assert min == 0;
         assert max == 9;
+    }
+
+    @Test
+    public void testMinMaxLocalDate() {
+        List<LocalDate> localDates = new ArrayList<>();
+        localDates.add(DateUtils.parseLocalDate("2019-01-01"));
+        localDates.add(DateUtils.parseLocalDate("2019-01-02"));
+        localDates.add(DateUtils.parseLocalDate("2019-01-03"));
+
+        LocalDate min = NumberUtils.min(localDates, o -> o);
+        LocalDate max = NumberUtils.max(localDates, o -> o);
+        assert DateUtils.format(min, "yyyy-MM-dd").equals("2019-01-01");
+        assert DateUtils.format(max, "yyyy-MM-dd").equals("2019-01-03");
     }
 
 }
