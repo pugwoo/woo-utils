@@ -9,8 +9,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.pugwoo.wooutils.collect.MapUtils;
 import com.pugwoo.wooutils.lang.DateUtils;
 import com.pugwoo.wooutils.lang.EqualUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -332,9 +332,9 @@ public class TestJson {
 		System.out.println("\n -------------------------------------------- clone 见 TestJsonClone ");
 		
 		System.out.println("\n -------------------------------------------- objectMapper ");
-		Assert.assertNotNull(JSON.getObjectMapper());
+		Assertions.assertNotNull(JSON.getObjectMapper());
 		JSON.setGlobalObjectMapper(JSON.getObjectMapper());
-		Assert.assertThrows(IllegalArgumentException.class, () -> JSON.setGlobalObjectMapper(null));
+		Assertions.assertThrows(IllegalArgumentException.class, () -> JSON.setGlobalObjectMapper(null));
 		
 		
 		

@@ -5,6 +5,7 @@ import com.pugwoo.wooutils.lang.NumberUtils;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -127,9 +128,7 @@ public class ListUtils {
 	
 	/**
 	 * 转换list为set
-	 * @param list
 	 * @param mapper 支持lambda写法
-	 * @return
 	 */
 	public static <T, R> Set<R> toSet(Collection<T> list, Function<? super T, ? extends R> mapper) {
 		if(list == null) {
@@ -140,10 +139,6 @@ public class ListUtils {
 	
 	/**
 	 * 转换list为map,返回的是LinkedHashMap，顺序和list一样。如果key相同，值会被最后一个覆盖。
-	 * @param list
-	 * @param keyMapper
-	 * @param valueMapper
-	 * @return
 	 */
 	public static <T, K, V> Map<K, V> toMap(Collection<T> list,
 			Function<? super T, ? extends K> keyMapper,
@@ -161,10 +156,6 @@ public class ListUtils {
 
 	/**
 	 * 转换list为map
-	 * @param list
-	 * @param keyMapper
-	 * @param valueMapper
-	 * @return
 	 */
 	public static <T, K, V> Map<K, List<V>> toMapList(Collection<T> list,
 			Function<? super T, ? extends K> keyMapper,
@@ -185,11 +176,6 @@ public class ListUtils {
 
 	/**
 	 *  group by （转换list为map）
-	 * @param list
-	 * @param keyMapper
-	 * @param <T>
-	 * @param <K>
-	 * @return
 	 */
 	public static <T, K> Map<K, List<T>> groupBy(Collection<T> list, Function<? super T, ? extends K> keyMapper) {
 		return toMapList(list,keyMapper,o->o);
@@ -197,13 +183,12 @@ public class ListUtils {
 
 	/**
 	 * stream按指定的数量分组，并返回stream<br/>
-	 * 代码来源：https://stackoverflow.com/questions/32434592/partition-a-java-8-stream
-	 * @param stream
+	 * 代码来源：<a href="https://stackoverflow.com/questions/32434592/partition-a-java-8-stream">...</a>
 	 * @param groupNum 分组的数量，必须大于等于1。0等价于不分组(即groupNum无限大)
 	 */
 	public static <T> Stream<List<T>> partition(Stream<T> stream, int groupNum) {
 		if (stream == null) {
-			return new ArrayList<List<T>>().stream();
+			return Stream.empty();
 		}
 		List<List<T>> currentBatch = new ArrayList<>(); //just to make it mutable
 		currentBatch.add(new ArrayList<>(groupNum));
@@ -267,9 +252,6 @@ public class ListUtils {
 
 	/**
 	 * filter一个list
-	 * @param list
-	 * @param predicate
-	 * @return
 	 */
 	public static <T> List<T> filter(Collection<T> list, Predicate<? super T> predicate) {
 		if(list == null) {
@@ -303,6 +285,12 @@ public class ListUtils {
 		}
 	}
 
+	public static <T> void forEach(Stream<T> stream, Consumer<? super T> consumer) {
+		if(stream != null) {
+			stream.forEach(consumer);
+		}
+	}
+
 	public static <T> void forEach(T[] array, Consumer<? super T> consumer) {
 		if (array != null) {
 			for (T t : array) {
@@ -329,9 +317,6 @@ public class ListUtils {
 
 	/**
 	 * list中是否包含有符合条件的元素
-	 * @param list
-	 * @param predicate
-	 * @return
 	 */
 	public static <T> boolean contains(Collection<T> list, Predicate<? super T> predicate) {
 		if(list == null) return false;
@@ -345,9 +330,6 @@ public class ListUtils {
 	
 	/**
 	 * list中mapper映射的值是否有重复，【不包括null值的比较，null值不包括在重复判断中】
-	 * @param list
-	 * @param mapper
-	 * @return
 	 */
 	public static <T, R> boolean hasDuplicate(Collection<T> list,
 			Function<? super T, ? extends R> mapper) {
@@ -365,9 +347,37 @@ public class ListUtils {
 	}
 
 	/**
+	 * 按相同的key合并两个list，返回合并后的list
+	 * @param merger 第一个入参是key相同的list1的值，第二个入参是key相同的list2的值，返回值是合并后的值
+	 *               注意：merger的入参可能为null，需要判断
+	 */
+	public static <T, U, R> List<R> merge(List<T> list1, List<U> list2,
+											Function<T, String> keyMapper1,
+											Function<U, String> keyMapper2,
+	                                        BiFunction<List<T>, List<U>, R> merger) {
+		Map<String, List<T>> map1 = toMapList(list1, keyMapper1, o -> o);
+		Map<String, List<U>> map2 = toMapList(list2, keyMapper2, o -> o);
+		List<R> result = new ArrayList<>();
+		for (Entry<String, List<T>> e : map1.entrySet()) {
+			List<U> list = map2.get(e.getKey());
+			result.add(merger.apply(e.getValue(), list));
+			if (list != null) {
+				map2.remove(e.getKey());
+			}
+		}
+
+		for (Entry<String, List<U>> e : map2.entrySet()) {
+			result.add(merger.apply(null, e.getValue()));
+		}
+
+		return result;
+	}
+
+	/**
 	 * list交集，返回List a和List b中都有的值，去重，不保证顺序。
 	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
 	 */
+	@SafeVarargs
 	public static <E> List<E> intersection(List<E>... lists) {
 
 		if(lists == null) {return new ArrayList<>();}
@@ -393,6 +403,7 @@ public class ListUtils {
 	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
 	 * @param mapper 实际上是以lambda表达式返回的值进行去重的
 	 */
+	@SafeVarargs
 	public static <E, R extends Comparable<?>> List<E> intersection(
 			Function<? super E, ? extends R> mapper, List<E>... lists) {
 
@@ -423,6 +434,7 @@ public class ListUtils {
 	 * list并集，返回lists中有的值，去重，不保证顺序。
 	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
 	 */
+	@SafeVarargs
 	public static <E> List<E> union(List<E>... lists) {
 
 		if(lists == null) {return new ArrayList<>();}
@@ -442,6 +454,7 @@ public class ListUtils {
 	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
 	 * @param mapper 实际上是以lambda表达式返回的值进行去重的
 	 */
+	@SafeVarargs
 	public static <E, R extends Comparable<?>> List<E> union(
 			Function<? super E, ? extends R> mapper, List<E>... lists) {
 
@@ -478,17 +491,7 @@ public class ListUtils {
 		Set<E> bSet = new HashSet<>(b);
 		return ListUtils.filter(a, o -> !bSet.contains(o));
 	}
-	
-	/**
-	 * list相减，返回List a中有但是List b中没有的数据，去重，不保证顺序。
-	 *
-	 * @deprecated 请使用subtract
-	 */
-	@Deprecated
-	public static <E> List<E> sub(List<E> a, List<E> b) {
-		return subtract(a, b);
-	}
-	
+
 	/**
 	 * 返回List a和List b的笛卡尔积列表
 	 */

@@ -1,7 +1,8 @@
 package com.pugwoo.wooutils.collect;
 
+import com.pugwoo.wooutils.json.JSON;
 import com.pugwoo.wooutils.lang.NumberUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -130,6 +131,123 @@ public class TestListUtils {
         assert (int)merge[3] == 7;
         assert (int)merge[4] == 8;
         assert (int)merge[5] == 9;
+    }
+
+    public static class OneDTO {
+        private String name;
+        private Integer one;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Integer getOne() {
+            return one;
+        }
+
+        public void setOne(Integer one) {
+            this.one = one;
+        }
+    }
+
+    public static class TwoDTO {
+        private String name;
+        private Integer two;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Integer getTwo() {
+            return two;
+        }
+
+        public void setTwo(Integer two) {
+            this.two = two;
+        }
+    }
+
+    public static class OneAndTwoDTO {
+        private String name;
+        private Integer one;
+        private Integer two;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Integer getOne() {
+            return one;
+        }
+
+        public void setOne(Integer one) {
+            this.one = one;
+        }
+
+        public Integer getTwo() {
+            return two;
+        }
+
+        public void setTwo(Integer two) {
+            this.two = two;
+        }
+    }
+
+    @Test
+    public void testMerge() {
+        List<OneDTO> oneDTOS = new ArrayList<>();
+        OneDTO oneDTO = new OneDTO();
+        oneDTO.setName("a");
+        oneDTO.setOne(1);
+        oneDTOS.add(oneDTO);
+
+        oneDTO = new OneDTO();
+        oneDTO.setName("b");
+        oneDTO.setOne(2);
+        oneDTOS.add(oneDTO);
+
+        List<TwoDTO> twoDTOS = new ArrayList<>();
+        TwoDTO twoDTO = new TwoDTO();
+        twoDTO.setName("a");
+        twoDTO.setTwo(3);
+        twoDTOS.add(twoDTO);
+
+        twoDTO = new TwoDTO();
+        twoDTO.setName("b");
+        twoDTO.setTwo(4);
+        twoDTOS.add(twoDTO);
+
+        List<OneAndTwoDTO> oneAndTwoDTOS = ListUtils.merge(oneDTOS, twoDTOS,
+                o -> o.getName(), o -> o.getName(),
+                (listOne, listTwo) -> {
+                    String name = ListUtils.isEmpty(listOne) ? listTwo.get(0).getName() : listOne.get(0).getName();
+                    OneAndTwoDTO oneAndTwoDTO = new OneAndTwoDTO();
+                    oneAndTwoDTO.setName(name);
+                    oneAndTwoDTO.setOne(ListUtils.isEmpty(listOne) ? null : listOne.get(0).getOne());
+                    oneAndTwoDTO.setTwo(ListUtils.isEmpty(listTwo) ? null : listTwo.get(0).getTwo());
+                    return oneAndTwoDTO;
+                });
+
+        System.out.println(JSON.toJson(oneAndTwoDTOS));
+        assert oneAndTwoDTOS.size() == 2;
+        assert oneAndTwoDTOS.get(0).getName().equals("a");
+        assert oneAndTwoDTOS.get(0).getOne() == 1;
+        assert oneAndTwoDTOS.get(0).getTwo() == 3;
+        assert oneAndTwoDTOS.get(1).getName().equals("b");
+        assert oneAndTwoDTOS.get(1).getOne() == 2;
+        assert oneAndTwoDTOS.get(1).getTwo() == 4;
     }
 
 }

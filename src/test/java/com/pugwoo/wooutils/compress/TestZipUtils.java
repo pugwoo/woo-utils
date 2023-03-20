@@ -2,9 +2,7 @@ package com.pugwoo.wooutils.compress;
 
 import com.pugwoo.wooutils.compress.ZipUtils.ZipItem;
 import com.pugwoo.wooutils.io.IOUtils;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -15,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestZipUtils {
     
     /**

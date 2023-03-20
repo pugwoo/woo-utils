@@ -1,7 +1,7 @@
 package com.pugwoo.wooutils.io;
 
 import com.pugwoo.wooutils.string.StringTools;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
