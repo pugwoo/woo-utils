@@ -2,7 +2,7 @@ package com.pugwoo.wooutils.collect;
 
 import com.pugwoo.wooutils.json.JSON;
 import com.pugwoo.wooutils.lang.NumberUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashSet;

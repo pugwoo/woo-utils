@@ -1,7 +1,7 @@
 package com.pugwoo.wooutils.yaml;
 
 import com.pugwoo.wooutils.json.JSON;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 

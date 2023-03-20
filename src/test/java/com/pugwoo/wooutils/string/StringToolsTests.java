@@ -2,7 +2,7 @@ package com.pugwoo.wooutils.string;
 
 import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.lang.EqualUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 

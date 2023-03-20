@@ -1,7 +1,7 @@
 package com.pugwoo.wooutils.thread;
 
 import com.pugwoo.wooutils.collect.ListUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.List;

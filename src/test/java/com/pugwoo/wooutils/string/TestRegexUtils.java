@@ -1,6 +1,7 @@
 package com.pugwoo.wooutils.string;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.regex.Pattern;

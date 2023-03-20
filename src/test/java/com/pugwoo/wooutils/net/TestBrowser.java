@@ -1,7 +1,7 @@
 package com.pugwoo.wooutils.net;
 
 import com.pugwoo.wooutils.collect.MapUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.util.HashMap;
