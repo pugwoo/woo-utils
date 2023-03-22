@@ -59,45 +59,53 @@ public class ListUtils {
 	/**
 	 * 排序，正序，null值在末尾
 	 * @param list
+	 * @param mapper 至少需要传递一个mapper进来
 	 * @param mappers
 	 */
 	@SafeVarargs
 	public static <T, R extends Comparable<?>> void sortAscNullLast(List<T> list,
-																	Function<? super T, ? extends R>... mappers) {
-		SortingUtils.sortAscNullLast(list, mappers);
+					Function<? super T, ? extends R> mapper,
+					Function<? super T, ? extends R>... mappers) {
+		SortingUtils.sortAscNullLast(list, mapper, mappers);
 	}
 	
 	/**
 	 * 排序，正序，null值在前面
 	 * @param list
+	 * @param mapper 至少需要传递一个mapper进来
 	 * @param mappers
 	 */
 	@SafeVarargs
 	public static <T, R extends Comparable<?>> void sortAscNullFirst(List<T> list,
+			Function<? super T, ? extends R> mapper,
 			Function<? super T, ? extends R>... mappers) {
-		SortingUtils.sortAscNullFirst(list, mappers);
+		SortingUtils.sortAscNullFirst(list, mapper, mappers);
 	}
 	
 	/**
 	 * 排序，逆序，null值在末尾
 	 * @param list
+	 * @param mapper 至少需要传递一个mapper进来
 	 * @param mappers
 	 */
 	@SafeVarargs
 	public static <T, R extends Comparable<?>> void sortDescNullLast(List<T> list,
+			Function<? super T, ? extends R> mapper,
 			Function<? super T, ? extends R>... mappers) {
-		SortingUtils.sortDescNullLast(list, mappers);
+		SortingUtils.sortDescNullLast(list, mapper, mappers);
 	}
 	
 	/**
 	 * 排序，逆序，null值在前面
 	 * @param list
+	 * @param mapper 至少需要传递一个mapper进来
 	 * @param mappers
 	 */
 	@SafeVarargs
 	public static <T, R extends Comparable<?>> void sortDescNullFirst(List<T> list,
+			Function<? super T, ? extends R> mapper,
 			Function<? super T, ? extends R>... mappers) {
-		SortingUtils.sortDescNullFirst(list, mappers);
+		SortingUtils.sortDescNullFirst(list, mapper, mappers);
 	}
 	
 	/**
