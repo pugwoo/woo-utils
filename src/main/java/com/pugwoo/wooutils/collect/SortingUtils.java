@@ -1,5 +1,8 @@
 package com.pugwoo.wooutils.collect;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,29 +15,22 @@ import java.util.function.Function;
  */
 public class SortingUtils {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(SortingUtils.class);
+
 	/**
 	 * 排序list。只需要返回一个可排序的值，例如Integer。
 	 * @param list 排序列表
-	 * @param sortingField 排序值，这里单独列出是为了让使用者至少传递一个mapper进来
-	 * @param sortingFields 排序值，支持1个或多个
+	 * @param sortingFieldList 排序值，特别说明，如果值为空，会打印warning log，但是不会抛异常，等价于没有排序
 	 */
-	@SafeVarargs
 	public static <T> void sort(List<T> list,
-								SortingField<T, ? extends Comparable<?>> sortingField,
-								SortingField<T, ? extends Comparable<?>>... sortingFields) {
-		if (sortingField == null) {
-			throw new IllegalArgumentException("sortingField can not be null");
+								final List<SortingField<T, ? extends Comparable<?>>> sortingFieldList) {
+		if (sortingFieldList == null || sortingFieldList.isEmpty()) {
+			LOGGER.warn("sortingFieldList is null or empty, do nothing");
 		}
 		if(list == null) {
 			return;
 		}
 
-		final List<SortingField<T, ? extends Comparable<?>>> sortingFieldList = new ArrayList<>();
-		sortingFieldList.add(sortingField);
-		if (sortingFields != null) {
-			Collections.addAll(sortingFieldList, sortingFields);
-		}
-		
 		list.sort((left, right) -> {
 			for (SortingField<T, ? extends Comparable<?>> sf : sortingFieldList) {
 				boolean isLeftNull = left == null;
@@ -67,6 +63,32 @@ public class SortingUtils {
 			}
 			return 0;
 		});
+	}
+
+	/**
+	 * 排序list。只需要返回一个可排序的值，例如Integer。
+	 * @param list 排序列表
+	 * @param sortingField 排序值，这里单独列出是为了让使用者至少传递一个mapper进来
+	 * @param sortingFields 排序值，支持1个或多个
+	 */
+	@SafeVarargs
+	public static <T> void sort(List<T> list,
+								SortingField<T, ? extends Comparable<?>> sortingField,
+								SortingField<T, ? extends Comparable<?>>... sortingFields) {
+		if (sortingField == null) {
+			throw new IllegalArgumentException("sortingField can not be null");
+		}
+		if(list == null) {
+			return;
+		}
+
+		final List<SortingField<T, ? extends Comparable<?>>> sortingFieldList = new ArrayList<>();
+		sortingFieldList.add(sortingField);
+		if (sortingFields != null) {
+			Collections.addAll(sortingFieldList, sortingFields);
+		}
+
+		sort(list, sortingFieldList);
 	}
 
 	/**
