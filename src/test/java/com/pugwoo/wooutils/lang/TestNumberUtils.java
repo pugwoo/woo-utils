@@ -124,16 +124,16 @@ public class TestNumberUtils {
         numbers.add("1.1");
         numbers.add("1.2");
         assert new BigDecimal("1.15").compareTo(NumberUtils.avg(numbers, 5)) == 0;
-        assert new BigDecimal("1.15").compareTo(NumberUtils.avg(numbers, null, 5)) == 0;
-        assert new BigDecimal("1.15").compareTo(NumberUtils.avg(numbers, o->o, 5)) == 0;
+        assert new BigDecimal("1.15").compareTo(NumberUtils.avg(numbers, 5, null)) == 0;
+        assert new BigDecimal("1.15").compareTo(NumberUtils.avg(numbers, 5, o -> o)) == 0;
         
         List<String> numbers2 = new ArrayList<>();
         numbers2.add("1.1");
         numbers2.add(null);
         numbers2.add("A+");
         assert new BigDecimal("0.36667").compareTo(NumberUtils.avg(numbers2, 5)) == 0;
-        assert new BigDecimal("0.36667").compareTo(NumberUtils.avg(numbers2, null, 5)) == 0;
-        assert new BigDecimal("0.36667").compareTo(NumberUtils.avg(numbers2, o->o, 5)) == 0;
+        assert new BigDecimal("0.36667").compareTo(NumberUtils.avg(numbers2, 5, null)) == 0;
+        assert new BigDecimal("0.36667").compareTo(NumberUtils.avg(numbers2,  5, o -> o)) == 0;
     
         List<Map<String, Object>> numberList = Stream.of(
                 MapUtils.of("score", "1.1   "),
@@ -142,10 +142,10 @@ public class TestNumberUtils {
                 MapUtils.of("score", "A+"),
                 MapUtils.of("name", "hello")
         ).collect(Collectors.toList());
-        assert new BigDecimal("0.46").compareTo(NumberUtils.avg(numberList, o -> o.get("score"), 5)) == 0;
-        assert new BigDecimal("0.46000").equals(NumberUtils.avg(numberList, o -> o.get("score"), 5));
+        assert new BigDecimal("0.46").compareTo(NumberUtils.avg(numberList, 5, o -> o.get("score"))) == 0;
+        assert new BigDecimal("0.46000").equals(NumberUtils.avg(numberList, 5, o -> o.get("score")));
         // 提供了错误的mapper，转换的数据无法转为BigDecimal，视为0
-        assert new BigDecimal("0").compareTo(NumberUtils.avg(numberList, o -> o, 5)) == 0;
+        assert new BigDecimal("0").compareTo(NumberUtils.avg(numberList, 5, o -> o)) == 0;
     }
 
     @Test
