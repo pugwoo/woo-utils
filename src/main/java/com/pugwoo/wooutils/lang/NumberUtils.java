@@ -98,6 +98,36 @@ public class NumberUtils {
 	/**
 	 * 计算百分比
 	 */
+	public static BigDecimal percent(Integer num, Integer total, Integer scale) {
+		if (num == null || total == null || total == 0) {
+			return BigDecimal.ZERO;
+		}
+		return percent(BigDecimal.valueOf(num), BigDecimal.valueOf(total), scale);
+	}
+
+	/**
+	 * 计算百分比
+	 */
+	public static int percent(Long num, Long total) {
+		if (num == null || total == null || total == 0) {
+			return 0;
+		}
+		return (int) (num * 100.0 / total);
+	}
+
+	/**
+	 * 计算百分比
+	 */
+	public static BigDecimal percent(Long num, Long total, Integer scale) {
+		if (num == null || total == null || total == 0) {
+			return BigDecimal.ZERO;
+		}
+		return percent(BigDecimal.valueOf(num), BigDecimal.valueOf(total), scale);
+	}
+
+	/**
+	 * 计算百分比
+	 */
 	public static int percent(BigDecimal num, BigDecimal total) {
 		if (num == null || total == null || total.compareTo(BigDecimal.ZERO) == 0) {
 			return 0;

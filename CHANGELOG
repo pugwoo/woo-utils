@@ -1,4 +1,5 @@
 v1.1.10 - [enhance] 优化NumberUtils.avg方法的参数顺序，使得IDEA的提示效果更佳
+        - [add] 增加3个计算百分比的方法
 
 2023年3月22日
 v1.1.9 - [enhance] ListUtils和SortingUtils的sortAscNullLast/sortAscNullFirst/sortDescNullLast/sortDescNullFirst要求至少传递一个比较mapper进来
