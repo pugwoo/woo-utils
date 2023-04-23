@@ -26,7 +26,7 @@ public class NumberUtils {
 		try {
 			return Integer.valueOf(obj.toString().trim().replaceAll(",", ""));
 		} catch (Exception e) {
-			LOGGER.error("parseInt fail, obj:{}", obj.toString(), e);
+			LOGGER.error("parseInt fail, obj:{}", obj, e);
 			return null;
 		}
 	}
@@ -44,7 +44,7 @@ public class NumberUtils {
 		try {
 			return Long.valueOf(obj.toString().trim().replaceAll(",", ""));
 		} catch (Exception e) {
-			LOGGER.error("parseLong fail, obj:{}", obj.toString(), e);
+			LOGGER.error("parseLong fail, obj:{}", obj, e);
 			return null;
 		}
 	}
@@ -62,7 +62,7 @@ public class NumberUtils {
 		try {
 			return Double.valueOf(obj.toString().trim().replaceAll(",", ""));
 		} catch (Exception e) {
-			LOGGER.error("parseDouble fail, obj:{}", obj.toString(), e);
+			LOGGER.error("parseDouble fail, obj:{}", obj, e);
 			return null;
 		}
 	}
@@ -80,7 +80,7 @@ public class NumberUtils {
 		try {
 			return new BigDecimal(obj.toString().trim().replaceAll(",", ""));
 		} catch (Exception e) {
-			LOGGER.error("parseBigDecimal fail, obj:{}", obj.toString(), e);
+			LOGGER.error("parseBigDecimal fail, obj:{}", obj, e);
 			return null;
 		}
 	}
@@ -317,7 +317,7 @@ public class NumberUtils {
 	 * @return 数据不存在时返回0
 	 */
 	public static <T> BigDecimal avg(Collection<T> list, int decimalPlaces) {
-		return avg(list, null, decimalPlaces);
+		return avg(list, decimalPlaces, null);
 	}
 
 	/**
