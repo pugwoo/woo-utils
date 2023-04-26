@@ -20,11 +20,11 @@ import java.util.Map;
  * 特别说明：Date是有时区的，默认使用操作系统的时区
  */
 public class DateUtils {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(DateUtils.class);
 
 	// 常用格式 //
-	
+
 	/**标准日期时间格式**/
 	public final static String FORMAT_STANDARD = "yyyy-MM-dd HH:mm:ss";
 	/**MySQL日期时间格式**/
@@ -35,7 +35,7 @@ public class DateUtils {
 	public final static String FORMAT_DATE = "yyyy-MM-dd";
 	/**时间格式**/
 	public final static String FORMAT_TIME = "HH:mm:ss";
-	
+
 	public static final Map<String, String> DATE_FORMAT_REGEXPS = new LinkedHashMap<String, String>() {{
 
 		// 最常用的
@@ -44,27 +44,27 @@ public class DateUtils {
 
 		put("^\\d{6}$", "yyyyMM"); // 201703
 		put("^\\d{8}$", "yyyyMMdd"); // 20170306
-	    put("^\\d{14}$", "yyyyMMddHHmmss"); // 20170306152356
-	    put("^\\d{8}\\s\\d{6}$", "yyyyMMdd HHmmss"); // 20170306 152356
-	    put("^\\d{4}-\\d{1,2}$", "yyyy-MM"); // 2017-03
-	    put("^\\d{4}/\\d{1,2}$", "yyyy/MM"); // 2017/03
+		put("^\\d{14}$", "yyyyMMddHHmmss"); // 20170306152356
+		put("^\\d{8}\\s\\d{6}$", "yyyyMMdd HHmmss"); // 20170306 152356
+		put("^\\d{4}-\\d{1,2}$", "yyyy-MM"); // 2017-03
+		put("^\\d{4}/\\d{1,2}$", "yyyy/MM"); // 2017/03
 
-	    put("^\\d{4}/\\d{1,2}/\\d{1,2}$", "yyyy/MM/dd"); // 2017/03/06
-	    put("^\\d{1,2}:\\d{1,2}:\\d{1,2}$", "HH:mm:ss"); // 16:34:32
-	    put("^\\d{1,2}:\\d{1,2}$", "HH:mm"); // 16:34
-	    put("^\\d{4}年\\d{1,2}月\\d{1,2}日$", "yyyy年MM月dd日"); // 2017年3月30日
-	    put("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{1,2}$", "yyyy-MM-dd HH:mm"); // 2017-03-06 15:23
-	    put("^\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{1,2}$", "yyyy/MM/dd HH:mm"); // 2017/03/06 15:23
+		put("^\\d{4}/\\d{1,2}/\\d{1,2}$", "yyyy/MM/dd"); // 2017/03/06
+		put("^\\d{1,2}:\\d{1,2}:\\d{1,2}$", "HH:mm:ss"); // 16:34:32
+		put("^\\d{1,2}:\\d{1,2}$", "HH:mm"); // 16:34
+		put("^\\d{4}年\\d{1,2}月\\d{1,2}日$", "yyyy年MM月dd日"); // 2017年3月30日
+		put("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{1,2}$", "yyyy-MM-dd HH:mm"); // 2017-03-06 15:23
+		put("^\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{1,2}$", "yyyy/MM/dd HH:mm"); // 2017/03/06 15:23
 
-	    put("^\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{1,2}:\\d{1,2}$", "yyyy/MM/dd HH:mm:ss"); // 2017/03/06 15:23:56
-	    put("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{1,2}:\\d{1,2}\\.\\d{1,3}$", "yyyy-MM-dd HH:mm:ss.SSS"); // 2017-10-18 16:00:00.000
-	    put("^\\d{4}-\\d{1,2}-\\d{1,2}T\\d{1,2}:\\d{1,2}:\\d{1,2}\\.\\d{1,3}Z$", "yyyy-MM-dd'T'HH:mm:ss.SSSX"); // 2017-10-18T16:00:00.000Z
-	    put("^\\d{4}-\\d{1,2}-\\d{1,2}T\\d{1,2}:\\d{1,2}:\\d{1,2}\\.\\d{1,3}$", "yyyy-MM-dd'T'HH:mm:ss.SSS"); // 2017-10-18T16:00:00.000
+		put("^\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{1,2}:\\d{1,2}$", "yyyy/MM/dd HH:mm:ss"); // 2017/03/06 15:23:56
+		put("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{1,2}:\\d{1,2}\\.\\d{1,3}$", "yyyy-MM-dd HH:mm:ss.SSS"); // 2017-10-18 16:00:00.000
+		put("^\\d{4}-\\d{1,2}-\\d{1,2}T\\d{1,2}:\\d{1,2}:\\d{1,2}\\.\\d{1,3}Z$", "yyyy-MM-dd'T'HH:mm:ss.SSSX"); // 2017-10-18T16:00:00.000Z
+		put("^\\d{4}-\\d{1,2}-\\d{1,2}T\\d{1,2}:\\d{1,2}:\\d{1,2}\\.\\d{1,3}$", "yyyy-MM-dd'T'HH:mm:ss.SSS"); // 2017-10-18T16:00:00.000
 		put("^\\d{4}-\\d{1,2}-\\d{1,2}T\\d{1,2}:\\d{1,2}:\\d{1,2}$", "yyyy-MM-dd'T'HH:mm:ss"); // 2017-10-18T16:00:00
 		put("^\\d{4}-\\d{1,2}-\\d{1,2}T\\d{1,2}:\\d{1,2}:\\d{1,2}\\.\\d{1,3}[+-]{1}\\d{4}$", "yyyy-MM-dd'T'HH:mm:ss.SSSZ"); // 2017-10-18T16:00:00.000+0000
 		put("^\\d{4}-\\d{1,2}-\\d{1,2}T\\d{1,2}:\\d{1,2}:\\d{1,2}\\.\\d{1,3} [+-]{1}\\d{4}$", "yyyy-MM-dd'T'HH:mm:ss.SSS Z"); // 2017-10-18T16:00:00.000 +0000
 	}};
-	
+
 	/**
 	 * @param field 对应于Calendar定义的域
 	 */
@@ -75,7 +75,7 @@ public class DateUtils {
 		cal.add(field, num);
 		return cal.getTime();
 	}
-	
+
 	/**
 	 * 自动解析各种格式的日期，不会抛出异常。<br>
 	 * <br>
@@ -199,7 +199,7 @@ public class DateUtils {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * 自动解析，失败抛出异常<br>
 	 *
@@ -239,7 +239,7 @@ public class DateUtils {
 			throw e;
 		}
 	}
-	
+
 	/**
 	 * 解析日期，失败抛出异常
 	 */
@@ -258,7 +258,7 @@ public class DateUtils {
 			throw e;
 		}
 	}
-	
+
 	/**
 	 * 转换成标准的格式 yyyy-MM-dd HH:mm:ss
 	 */
@@ -290,7 +290,7 @@ public class DateUtils {
 		}
 		return localDate.format(DateTimeFormatter.ofPattern(DateUtils.FORMAT_DATE));
 	}
-	
+
 	/**
 	 * 转换成标准的格式 yyyy-MM-dd
 	 */
@@ -322,7 +322,7 @@ public class DateUtils {
 		}
 		return localDate.format(DateTimeFormatter.ofPattern(DateUtils.FORMAT_DATE));
 	}
-	
+
 	public static String format(Date date, String pattern) {
 		if(date == null) {
 			return "";
@@ -352,16 +352,16 @@ public class DateUtils {
 		}
 		return date.format(DateTimeFormatter.ofPattern(pattern));
 	}
-	
+
 	private static String determineDateFormat(String dateString) {
-	    for (String regexp : DATE_FORMAT_REGEXPS.keySet()) {
-	        if (dateString.matches(regexp)) {
-	            return DATE_FORMAT_REGEXPS.get(regexp);
-	        }
-	    }
-	    return null; // Unknown format.
+		for (String regexp : DATE_FORMAT_REGEXPS.keySet()) {
+			if (dateString.matches(regexp)) {
+				return DATE_FORMAT_REGEXPS.get(regexp);
+			}
+		}
+		return null; // Unknown format.
 	}
-	
+
 	// ======================================
 
 	public static int getYear(Date date) {
@@ -458,6 +458,28 @@ public class DateUtils {
 	}
 
 	/**
+	 * 获得date所在月份的第一天的日期
+	 */
+	public static LocalDate getFirstDayOfMonth(Date date) {
+		if (date == null) {
+			return null;
+		}
+		LocalDate localDate = toLocalDate(date);
+		return localDate.withDayOfMonth(1);
+	}
+
+	/**
+	 * 获得date所在的月份的最后一天的日期
+	 */
+	public static LocalDate getLastDayOfMonth(Date date) {
+		if (date == null) {
+			return null;
+		}
+		LocalDate localDate = toLocalDate(date);
+		return localDate.withDayOfMonth(1).plusMonths(1).minusDays(1);
+	}
+
+	/**
 	 * 获得指定时间date的当天的开始时间。
 	 * 例如date为2019-01-02 03:04:05时，返回2019-01-02 00:00:00
 	 * 【该接口性能最佳】
@@ -496,7 +518,7 @@ public class DateUtils {
 		}
 		return (int) (Math.abs(date1.getTime() - date2.getTime()) / (24 * 3600 * 1000));
 	}
-	
+
 	/**
 	 * 计算两个日期的年份差，主要用于计算年龄。不足一年的不计，一年按365天计，不考虑闰年。
 	 * @return 返回值都大于等于0，不关心date1和date2的顺序
@@ -504,7 +526,7 @@ public class DateUtils {
 	public static int diffYears(Date date1, Date date2) {
 		return diffDays(date1, date2) / 365;
 	}
-	
+
 	/**
 	 * 显示日期date到现在的时间差的字符串友好形式:
 	 * 1. 10秒内，显示刚刚
@@ -524,18 +546,18 @@ public class DateUtils {
             if (seconds < 10) {
                 interval = "刚刚";
             } else if (seconds < 60) {
-            	interval = seconds + "秒前";
+				interval = seconds + "秒前";
             } else if (seconds < 3600) {
-            	interval = (seconds / 60) + "分钟前";
+				interval = (seconds / 60) + "分钟前";
             } else if (seconds < 3600 * 24) {
-            	interval = (seconds / 3600) + "小时前";
+				interval = (seconds / 3600) + "小时前";
             } else if (seconds < 3600 * 24 * 10) {
-            	interval = (seconds / 3600 / 24) + "天前";
+				interval = (seconds / 3600 / 24) + "天前";
             } else {
-            	interval = format(date, "yyyy-MM-dd HH:mm");
+				interval = format(date, "yyyy-MM-dd HH:mm");
             }
         } else {
-        	interval = format(date, "yyyy-MM-dd HH:mm");
+			interval = format(date, "yyyy-MM-dd HH:mm");
         }
         return interval;
     }
