@@ -146,15 +146,15 @@ public class ListUtils {
 	}
 	
 	/**
-	 * 转换list为map,返回的是LinkedHashMap，顺序和list一样。如果key相同，值会被最后一个覆盖。
+	 * 转换list为map
 	 */
 	public static <T, K, V> Map<K, V> toMap(Collection<T> list,
 			Function<? super T, ? extends K> keyMapper,
 			Function<? super T, ? extends V> valueMapper) {
 		if(list == null) {
-			return new LinkedHashMap<>();
+			return new HashMap<>();
 		}
-		Map<K, V> map = new LinkedHashMap<>();
+		Map<K, V> map = new HashMap<>();
 		for(T t : list) {
 			if(t == null) {continue;}
 			map.put(keyMapper.apply(t), valueMapper.apply(t));
