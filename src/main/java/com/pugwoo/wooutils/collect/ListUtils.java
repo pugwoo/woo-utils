@@ -146,15 +146,15 @@ public class ListUtils {
 	}
 	
 	/**
-	 * 转换list为map,返回的是LinkedHashMap，顺序和list一样。如果key相同，值会被最后一个覆盖。
+	 * 转换list为map
 	 */
 	public static <T, K, V> Map<K, V> toMap(Collection<T> list,
 			Function<? super T, ? extends K> keyMapper,
 			Function<? super T, ? extends V> valueMapper) {
 		if(list == null) {
-			return new LinkedHashMap<>();
+			return new HashMap<>();
 		}
-		Map<K, V> map = new LinkedHashMap<>();
+		Map<K, V> map = new HashMap<>();
 		for(T t : list) {
 			if(t == null) {continue;}
 			map.put(keyMapper.apply(t), valueMapper.apply(t));
@@ -580,6 +580,18 @@ public class ListUtils {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * 将多个list合并成一个list，并以Stream的方式返回。
+	 * 这里用Stream的考虑是，本来这种写法就是为了避免创建新的list，如果返回的是一个新的list，那么就没有意义了。
+	 */
+	@SafeVarargs
+	public static <T> Stream<T> concat(List<T> ...list) {
+		if (list == null || list.length == 0) {
+			return Stream.empty();
+		}
+		return Stream.of(list).flatMap(Collection::stream);
 	}
 
 	/**

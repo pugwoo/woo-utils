@@ -26,7 +26,7 @@ public class NumberUtils {
 		try {
 			return Integer.valueOf(obj.toString().trim().replaceAll(",", ""));
 		} catch (Exception e) {
-			LOGGER.error("parseInt fail, obj:{}", obj.toString(), e);
+			LOGGER.error("parseInt fail, obj:{}", obj, e);
 			return null;
 		}
 	}
@@ -44,7 +44,7 @@ public class NumberUtils {
 		try {
 			return Long.valueOf(obj.toString().trim().replaceAll(",", ""));
 		} catch (Exception e) {
-			LOGGER.error("parseLong fail, obj:{}", obj.toString(), e);
+			LOGGER.error("parseLong fail, obj:{}", obj, e);
 			return null;
 		}
 	}
@@ -62,7 +62,7 @@ public class NumberUtils {
 		try {
 			return Double.valueOf(obj.toString().trim().replaceAll(",", ""));
 		} catch (Exception e) {
-			LOGGER.error("parseDouble fail, obj:{}", obj.toString(), e);
+			LOGGER.error("parseDouble fail, obj:{}", obj, e);
 			return null;
 		}
 	}
@@ -80,7 +80,7 @@ public class NumberUtils {
 		try {
 			return new BigDecimal(obj.toString().trim().replaceAll(",", ""));
 		} catch (Exception e) {
-			LOGGER.error("parseBigDecimal fail, obj:{}", obj.toString(), e);
+			LOGGER.error("parseBigDecimal fail, obj:{}", obj, e);
 			return null;
 		}
 	}
@@ -93,6 +93,36 @@ public class NumberUtils {
 			return 0;
 		}
 		return (int) (num * 100.0 / total);
+	}
+
+	/**
+	 * 计算百分比
+	 */
+	public static BigDecimal percent(Integer num, Integer total, Integer scale) {
+		if (num == null || total == null || total == 0) {
+			return BigDecimal.ZERO;
+		}
+		return percent(BigDecimal.valueOf(num), BigDecimal.valueOf(total), scale);
+	}
+
+	/**
+	 * 计算百分比
+	 */
+	public static int percent(Long num, Long total) {
+		if (num == null || total == null || total == 0) {
+			return 0;
+		}
+		return (int) (num * 100.0 / total);
+	}
+
+	/**
+	 * 计算百分比
+	 */
+	public static BigDecimal percent(Long num, Long total, Integer scale) {
+		if (num == null || total == null || total == 0) {
+			return BigDecimal.ZERO;
+		}
+		return percent(BigDecimal.valueOf(num), BigDecimal.valueOf(total), scale);
 	}
 
 	/**
@@ -317,9 +347,9 @@ public class NumberUtils {
 	 * @return 数据不存在时返回0
 	 */
 	public static <T> BigDecimal avg(Collection<T> list, int decimalPlaces) {
-		return avg(list, null, decimalPlaces);
+		return avg(list, decimalPlaces, null);
 	}
-	
+
 	/**
 	 * 数值求平均值
 	 * @param list   待计算的list
@@ -328,7 +358,7 @@ public class NumberUtils {
 	 *                      计算平均值出现无限循环小数而不指定保留小数位数会抛ArithmeticException
 	 * @return 数据不存在时返回0
 	 */
-	public static <T> BigDecimal avg(Collection<T> list, Function<? super T, ?> mapper, int decimalPlaces) {
+	public static <T> BigDecimal avg(Collection<T> list, int decimalPlaces, Function<? super T, ?> mapper) {
 		if(list == null || list.isEmpty()) {
 			return BigDecimal.ZERO;
 		}
@@ -337,6 +367,19 @@ public class NumberUtils {
 		}
 		BigDecimal sum = sum(list, mapper);
 		return sum.divide(new BigDecimal(list.size()), decimalPlaces, RoundingMode.HALF_UP);
+	}
+
+	/**
+	 * 数值求平均值
+	 * @param list   待计算的list
+	 * @param mapper item 可以转为BigDecimal，如果转不了视为0
+	 * @param decimalPlaces 保留小数点数，四舍五入
+	 *                      计算平均值出现无限循环小数而不指定保留小数位数会抛ArithmeticException
+	 * @return 数据不存在时返回0
+	 */
+	@Deprecated
+	public static <T> BigDecimal avg(Collection<T> list, Function<? super T, ?> mapper, int decimalPlaces) {
+		return avg(list, decimalPlaces, mapper);
 	}
 	
 }

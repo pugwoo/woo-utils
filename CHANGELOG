@@ -1,3 +1,11 @@
+2023年5月5日
+v1.1.10 - [enhance] 优化NumberUtils.avg方法的参数顺序，使得IDEA的提示效果更佳
+        - [add] 增加3个计算百分比的方法
+        - [add] DateUtils新增getFirstDayOfMonth和getLastDayOfMonth两个方法
+        - [enhance] ListUtils.toMap方法返回的Map类型不再限定是LinkedHashMap，此变化将影响返回map元素的顺序，但不影响元素值
+                    如有排序需求，请使用MapUtils.sortByKey/MapUtils.sortByValue方法
+        - [add] 新增ListUtils.concat方法，将多个list合并成一个list
+
 2023年3月22日
 v1.1.9 - [enhance] ListUtils和SortingUtils的sortAscNullLast/sortAscNullFirst/sortDescNullLast/sortDescNullFirst要求至少传递一个比较mapper进来
        - [add] 增加SortingUtilssort(List<T> list, List<SortingField<T, ? extends Comparable<?>>> sortingFieldList)方法
