@@ -583,6 +583,20 @@ public class ListUtils {
 	}
 
 	/**
+	 * 将多个list合并成一个list，并以Stream的方式返回。
+	 * 这里用Stream的考虑是，本来这种写法就是为了避免创建新的list，如果返回的是一个新的list，那么就没有意义了。
+	 */
+	public static <T> Stream<T> concat(List<T> a, List<T> b) {
+		if (isEmpty(a)) {
+			return b == null ? Stream.empty() : b.stream();
+		}
+		if (isEmpty(b)) {
+			return a.stream();
+		}
+		return Stream.concat(a.stream(), b.stream());
+	}
+
+	/**
 	 * 数值求和
 	 * @param list
 	 * @param mapper
