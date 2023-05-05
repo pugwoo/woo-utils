@@ -250,4 +250,24 @@ public class TestListUtils {
         assert oneAndTwoDTOS.get(1).getTwo() == 4;
     }
 
+    @Test
+    public void testConcat() {
+        List<Integer> list1 = ListUtils.newArrayList(1,2,3);
+        List<Integer> list2 = ListUtils.newArrayList(4,5,6);
+        List<Integer> list3 = ListUtils.newArrayList(7,8,9);
+
+        Stream<Integer> stream = ListUtils.concat(list1, list2, list3);
+        List<Integer> list = ListUtils.toList(stream);
+        assert list.size() == 9;
+        assert list.get(0) == 1;
+        assert list.get(1) == 2;
+        assert list.get(2) == 3;
+        assert list.get(3) == 4;
+        assert list.get(4) == 5;
+        assert list.get(5) == 6;
+        assert list.get(6) == 7;
+        assert list.get(7) == 8;
+        assert list.get(8) == 9;
+    }
+
 }

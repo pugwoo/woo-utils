@@ -84,5 +84,13 @@ public class TestDate {
 
 	}
 
+	@Test
+	public void test2() {
+		Date date = DateUtils.parse("2023-05-04");
+		LocalDate firstDayOfMonth = DateUtils.getFirstDayOfMonth(date);
+		assert DateUtils.formatDate(firstDayOfMonth).equals("2023-05-01");
+		LocalDate lastDayOfMonth = DateUtils.getLastDayOfMonth(date);
+		assert DateUtils.formatDate(lastDayOfMonth).equals("2023-05-31");
+	}
 	
 }
