@@ -86,11 +86,18 @@ public class TestDate {
 
 	@Test
 	public void test2() {
+		// 测试获取月初和月末
 		Date date = DateUtils.parse("2023-05-04");
 		LocalDate firstDayOfMonth = DateUtils.getFirstDayOfMonth(date);
 		assert DateUtils.formatDate(firstDayOfMonth).equals("2023-05-01");
 		LocalDate lastDayOfMonth = DateUtils.getLastDayOfMonth(date);
 		assert DateUtils.formatDate(lastDayOfMonth).equals("2023-05-31");
+
+		// 测试获取LocalDate的年月日
+		assert DateUtils.getYear(DateUtils.parseLocalDate("2023-04-05")) == 2023;
+		assert DateUtils.getMonth(DateUtils.parseLocalDate("2023-04-05")) == 4;
+		assert DateUtils.getDay(DateUtils.parseLocalDate("2023-04-05")) == 5;
+
 	}
 	
 }
