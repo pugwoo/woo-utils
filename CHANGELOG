@@ -1,4 +1,5 @@
 v1.1.11 - [add] 新增DateUtils的getYear/getMonth/getDay方法，入参是LocalDate
+        - [add] 新增ListUtils的getDuplicates方法，获取list中重复的元素及个数
 
 2023年5月5日
 v1.1.10 - [enhance] 优化NumberUtils.avg方法的参数顺序，使得IDEA的提示效果更佳

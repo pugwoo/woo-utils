@@ -335,12 +335,19 @@ public class ListUtils {
 		}
 		return false;
 	}
+
+	public static <T> boolean hasDuplicate(Collection<T> list) {
+		return hasDuplicate(list, Function.identity());
+	}
 	
 	/**
 	 * list中mapper映射的值是否有重复，【不包括null值的比较，null值不包括在重复判断中】
 	 */
 	public static <T, R> boolean hasDuplicate(Collection<T> list,
 			Function<? super T, ? extends R> mapper) {
+		if (list == null) {
+			return false;
+		}
 		Set<R> sets = new HashSet<>();
 		for(T t : list) {
 			if(t == null) continue;
@@ -352,6 +359,37 @@ public class ListUtils {
 			sets.add(r);
 		}
 		return false;
+	}
+
+	public static <T> Map<T, Integer> getDuplicates(Collection<T> list) {
+		return getDuplicates(list, Function.identity());
+	}
+
+	/**
+	 * 获得list中mapper映射的值的重复次数【不包括null值的比较，null值不包括在重复判断中】
+	 */
+	public static <T, R> Map<R, Integer> getDuplicates(Collection<T> list,
+		    Function<? super T, ? extends R> mapper) {
+		if (list == null) {
+			return new HashMap<>();
+		}
+
+		Map<R, Integer> map = new HashMap<>();
+		for(T t : list) {
+			if(t == null) continue;
+			R r = mapper.apply(t);
+			if(r == null) continue;
+			Integer count = map.get(r);
+			if(count == null) {
+				count = 0;
+			}
+			map.put(r, count + 1);
+		}
+
+		// 去掉重复次数为1的
+		map.entrySet().removeIf(entry -> entry.getValue() <= 1);
+
+		return map;
 	}
 
 	/**
