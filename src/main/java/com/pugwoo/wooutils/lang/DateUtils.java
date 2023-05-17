@@ -373,6 +373,13 @@ public class DateUtils {
 		return cal.get(Calendar.YEAR);
 	}
 
+	public static int getYear(LocalDate localDate) {
+		if (localDate == null) {
+			return 0;
+		}
+		return localDate.getYear();
+	}
+
 	/**
 	 * 获得日期的月份值，从1开始，1到12
 	 */
@@ -385,6 +392,17 @@ public class DateUtils {
 		return cal.get(Calendar.MONTH) + 1;
 	}
 
+
+	/**
+	 * 获得日期的月份值，从1开始，1到12
+	 */
+	public static int getMonth(LocalDate localDate) {
+		if (localDate == null) {
+			return 0;
+		}
+		return localDate.getMonthValue();
+	}
+
 	public static int getDay(Date date) {
 		if (date == null) {
 			return 0;
@@ -392,6 +410,13 @@ public class DateUtils {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
 		return cal.get(Calendar.DATE);
+	}
+
+	public static int getDay(LocalDate localDate) {
+		if (localDate == null) {
+			return 0;
+		}
+		return localDate.getDayOfMonth();
 	}
 
 	/**

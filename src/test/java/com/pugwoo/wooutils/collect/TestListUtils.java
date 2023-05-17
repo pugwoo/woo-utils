@@ -270,4 +270,17 @@ public class TestListUtils {
         assert list.get(8) == 9;
     }
 
+    @Test
+    public void testDup() {
+        List<Integer> list1 = ListUtils.newList(1,2,3,4);
+        List<Integer> list2 = ListUtils.newList(1,2,3,2);
+
+        assert !ListUtils.hasDuplicate(list1, o -> o);
+        assert ListUtils.hasDuplicate(list2, o -> o);
+
+        assert ListUtils.getDuplicates(list1, o -> o).size() == 0;
+        assert ListUtils.getDuplicates(list2, o -> o).size() == 1;
+        assert ListUtils.getDuplicates(list2, o -> o).get(2) == 2;
+    }
+
 }
