@@ -4,10 +4,7 @@ import com.pugwoo.wooutils.json.JSON;
 import com.pugwoo.wooutils.lang.NumberUtils;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -281,6 +278,16 @@ public class TestListUtils {
         assert ListUtils.getDuplicates(list1, o -> o).size() == 0;
         assert ListUtils.getDuplicates(list2, o -> o).size() == 1;
         assert ListUtils.getDuplicates(list2, o -> o).get(2) == 2;
+
+        assert !ListUtils.hasDuplicateNotBlank(ListUtils.newList("", "", ""));
+        assert ListUtils.hasDuplicateNotBlank(ListUtils.newList("", "a", "", "a"));
+
+        Map<String, Integer> map2 = ListUtils.getDuplicatesNotBlank(ListUtils.newList("", "", ""));
+        assert map2.size() == 0;
+
+        Map<String, Integer> map1 = ListUtils.getDuplicatesNotBlank(ListUtils.newList("", "a", "", "a"));
+        assert map1.size() == 1;
+        assert map1.get("a") == 2;
     }
 
 }

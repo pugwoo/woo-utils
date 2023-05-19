@@ -1,6 +1,7 @@
 package com.pugwoo.wooutils.collect;
 
 import com.pugwoo.wooutils.lang.NumberUtils;
+import com.pugwoo.wooutils.string.StringTools;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -341,7 +342,8 @@ public class ListUtils {
 	}
 	
 	/**
-	 * list中mapper映射的值是否有重复，【不包括null值的比较，null值不包括在重复判断中】
+	 * list中mapper映射的值是否有重复，【不包括null值的比较，null值不包括在重复判断中，
+	 * 如果是字符串，推荐用hasDuplicateNotBlank，判断非空白的字符串trim后是否有重复】
 	 */
 	public static <T, R> boolean hasDuplicate(Collection<T> list,
 			Function<? super T, ? extends R> mapper) {
@@ -361,12 +363,44 @@ public class ListUtils {
 		return false;
 	}
 
+	/**
+	 * 判断list中通过mapper映射后的字符串是否有重复值，字符串只看非空白的
+	 */
+	public static <T> boolean hasDuplicateNotBlank(Collection<T> list, Function<? super T, String> mapper) {
+		if (list == null) {
+			return false;
+		}
+		Set<String> sets = new HashSet<>();
+		for(T t : list) {
+			if(t == null) continue;
+			String r = mapper.apply(t);
+			if(StringTools.isBlank(r)) continue;
+			if(sets.contains(r)) {
+				return true;
+			}
+			sets.add(r);
+		}
+		return false;
+	}
+
+	/**
+	 * 判断list中的字符串是否有重复值，字符串只看非空白的
+	 */
+	public static boolean hasDuplicateNotBlank(Collection<String> list) {
+		return hasDuplicateNotBlank(list, Function.identity());
+	}
+
+	/**
+	 * 获得list中mapper映射的值的重复次数【不包括null值的比较，null值不包括在重复判断中】
+	 * 不重复的不会返回，也就是如果返回是空的，表示没有重复
+	 */
 	public static <T> Map<T, Integer> getDuplicates(Collection<T> list) {
 		return getDuplicates(list, Function.identity());
 	}
 
 	/**
 	 * 获得list中mapper映射的值的重复次数【不包括null值的比较，null值不包括在重复判断中】
+	 * 不重复的不会返回，也就是如果返回是空的，表示没有重复
 	 */
 	public static <T, R> Map<R, Integer> getDuplicates(Collection<T> list,
 		    Function<? super T, ? extends R> mapper) {
@@ -390,6 +424,42 @@ public class ListUtils {
 		map.entrySet().removeIf(entry -> entry.getValue() <= 1);
 
 		return map;
+	}
+
+	/**
+	 * 获得list中mapper映射的值的重复次数【不包括null值的比较，null值不包括在重复判断中】
+	 * 不重复的不会返回，也就是如果返回是空的，表示没有重复
+	 */
+	public static <T> Map<String, Integer> getDuplicatesNotBlank(Collection<T> list,
+													   Function<? super T, String> mapper) {
+		if (list == null) {
+			return new HashMap<>();
+		}
+
+		Map<String, Integer> map = new HashMap<>();
+		for(T t : list) {
+			if(t == null) continue;
+			String r = mapper.apply(t);
+			if(StringTools.isBlank(r)) continue;
+			Integer count = map.get(r);
+			if(count == null) {
+				count = 0;
+			}
+			map.put(r, count + 1);
+		}
+
+		// 去掉重复次数为1的
+		map.entrySet().removeIf(entry -> entry.getValue() <= 1);
+
+		return map;
+	}
+
+	/**
+	 * 获得list中mapper映射的值的重复次数【不包括null值的比较，null值不包括在重复判断中】
+	 * 不重复的不会返回，也就是如果返回是空的，表示没有重复
+	 */
+	public static Map<String, Integer> getDuplicatesNotBlank(Collection<String> list) {
+		return getDuplicatesNotBlank(list, Function.identity());
 	}
 
 	/**
