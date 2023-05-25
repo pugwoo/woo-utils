@@ -290,4 +290,12 @@ public class TestListUtils {
         assert map1.get("a") == 2;
     }
 
+    @Test
+    public void testReplace() {
+        List<Integer> list1 = ListUtils.newList(1,2,3,4,3);
+        ListUtils.replaceAll(list1, 3, 5);
+        assert list1.get(2).equals(5);
+        assert list1.get(4).equals(5);
+    }
+
 }

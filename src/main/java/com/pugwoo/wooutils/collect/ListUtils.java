@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 public class ListUtils {
 
 	/**
-	 * 将数组转换成list，不同于Arrays.asList(array)，这个方法返回的数组可以对其进行修改操作
+	 * 创建一个List，不同于Arrays.asList(array)，这个方法返回的数组可以对其进行修改操作
 	 * @param elements 数组
 	 */
 	@SafeVarargs
@@ -32,11 +32,20 @@ public class ListUtils {
 	}
 
 	/**
-	 * 将数组转换成list，不同于Arrays.asList(array)，这个方法返回的数组可以对其进行修改操作
+	 * 创建一个List，不同于Arrays.asList(array)，这个方法返回的数组可以对其进行修改操作
 	 * @param elements 数组
 	 */
 	@SafeVarargs
 	public static <E> List<E> newList(E... elements) {
+		return newArrayList(elements);
+	}
+
+	/**
+	 * 创建一个List，不同于Arrays.asList(array)，这个方法返回的数组可以对其进行修改操作
+	 * @param elements 数组
+	 */
+	@SafeVarargs
+	public static <E> List<E> of(E... elements) {
 		return newArrayList(elements);
 	}
 
@@ -322,6 +331,13 @@ public class ListUtils {
 
 	public static boolean isNotEmpty(Map<?, ?> map) {
 		return !isEmpty(map);
+	}
+
+	public static <T> boolean replaceAll(List<T> list, T oldValue, T newValue) {
+		if (list != null) {
+			return Collections.replaceAll(list, oldValue, newValue);
+		}
+		return false;
 	}
 
 	/**
