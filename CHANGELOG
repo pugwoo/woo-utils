@@ -1,5 +1,6 @@
 v1.1.12 - [add] 新增ListUtils的hasDuplicateNotBlank和getDuplicatesNotBlank方法
         - [add] 新增ListUtils的of方法，等价于newList；新增replaceAll方法
+        - [add] 新增ListUtils的toMapSet方法
 
 2023年5月17日
 v1.1.11 - [add] 新增DateUtils的getYear/getMonth/getDay方法，入参是LocalDate
