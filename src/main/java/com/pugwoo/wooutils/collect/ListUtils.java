@@ -193,6 +193,27 @@ public class ListUtils {
 	}
 
 	/**
+	 * 转换list为map，且对map的values进行去重
+	 */
+	public static <T, K, V> Map<K, Set<V>> toMapSet(Collection<T> list,
+													Function<? super T, ? extends K> keyMapper,
+													Function<? super T, ? extends V> valueMapper) {
+		if(list == null) {
+			return new HashMap<>();
+		}
+		Map<K, Set<V>> map = new HashMap<>();
+		for(T t : list) {
+			if(t == null) {continue;}
+			K key = keyMapper.apply(t);
+			Set<V> values = map.computeIfAbsent(key, k -> new HashSet<>());
+			V value = valueMapper.apply(t);
+			values.add(value);
+		}
+		return map;
+	}
+
+
+	/**
 	 *  group by （转换list为map）
 	 */
 	public static <T, K> Map<K, List<T>> groupBy(Collection<T> list, Function<? super T, ? extends K> keyMapper) {

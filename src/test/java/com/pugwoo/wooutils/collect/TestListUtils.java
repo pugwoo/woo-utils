@@ -298,4 +298,45 @@ public class TestListUtils {
         assert list1.get(4).equals(5);
     }
 
+    @Test
+    public void testToMapSet(){
+        List<OneDTO> oneDTOS = new ArrayList<>();
+        OneDTO oneDTO = new OneDTO();
+        oneDTO.setName("a");
+        oneDTO.setOne(1);
+        oneDTOS.add(oneDTO);
+
+
+        oneDTO = new OneDTO();
+        oneDTO.setName("a");
+        oneDTO.setOne(1);
+        oneDTOS.add(oneDTO);
+
+        oneDTO = new OneDTO();
+        oneDTO.setName("a");
+        oneDTO.setOne(2);
+        oneDTOS.add(oneDTO);
+
+        oneDTO = new OneDTO();
+        oneDTO.setName("b");
+        oneDTO.setOne(3);
+        oneDTOS.add(oneDTO);
+
+        Map<String, Set<Integer>> rzt = ListUtils.toMapSet(oneDTOS, o -> o.getName(), o -> o.getOne());
+
+
+        HashMap<Object, Integer> map = new HashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+
+        Integer putIfAbsent = map.putIfAbsent("a", 1);
+
+        Integer computeIfAbsent = map.computeIfAbsent("c", o -> 5);
+
+        System.out.println(map.entrySet());
+
+    }
+
+
+
 }
