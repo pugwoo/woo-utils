@@ -324,16 +324,12 @@ public class TestListUtils {
 
         Map<String, Set<Integer>> rzt = ListUtils.toMapSet(oneDTOS, o -> o.getName(), o -> o.getOne());
 
-
-        HashMap<Object, Integer> map = new HashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-
-        Integer putIfAbsent = map.putIfAbsent("a", 1);
-
-        Integer computeIfAbsent = map.computeIfAbsent("c", o -> 5);
-
-        System.out.println(map.entrySet());
+        assert rzt.size() == 2;
+        assert rzt.get("a").size() == 2;
+        assert rzt.get("a").contains(1);
+        assert rzt.get("a").contains(2);
+        assert rzt.get("b").size() == 1;
+        assert rzt.get("b").contains(3);
 
     }
 
