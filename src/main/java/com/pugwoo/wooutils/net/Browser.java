@@ -20,7 +20,7 @@ import java.util.zip.GZIPInputStream;
 /**
  * 2016年2月4日 15:16:42 
  * 模拟一个浏览器发HTTP请求，不包括页面处理。默认编码是utf8，可以全局指定编码
- * 
+ * <br>
  * 计划支持的特性：
  * 1. 支持指定为输出流 【done】
  * 2. 支持cookie,不支持过期特性 【done】
@@ -33,7 +33,8 @@ import java.util.zip.GZIPInputStream;
 public class Browser {
 
 	/** mock 浏览器userAgent: Chrome Win10*/
-	public static final String WIN_CHROME_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.1.7845.22 Safari/537.36 Core/1.72.5673.400";
+	public static final String WIN_CHROME_AGENT =
+			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36";
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(Browser.class);
 
@@ -200,9 +201,7 @@ public class Browser {
 	 * @param value cookie值
 	 */
 	public void addCookie(String domain, String key, String value) {
-		if(cookies.get(domain) == null) {
-			cookies.put(domain, new HashMap<>());
-		}
+		cookies.computeIfAbsent(domain, k -> new HashMap<>());
 		cookies.get(domain).put(key, value);
 	}
 	
@@ -225,7 +224,7 @@ public class Browser {
 	 *
 	 * @param httpUrl 请求的url地址，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
 	 * @param params post的参数，以queryString或formdata形式（取决于是否上传文件）编码到post body中（params中的参数会被编码处理）
-	 * @return 请求返回数据
+	 * @return 请求返回数据，请注意通过http状态码判断请求是否成功
 	 * @throws IOException 当请求处理网络异常时抛出IOException
 	 */
 	public HttpResponse post(String httpUrl, Map<String, Object> params) throws IOException {
@@ -251,7 +250,7 @@ public class Browser {
 	 * @param httpUrl 请求的url地址，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
 	 * @param params post的参数，以queryString或formdata形式（取决于是否上传文件）编码到post body中（params中的参数会被编码处理）
 	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
-	 * @return 请求返回数据
+	 * @return 请求返回数据，请注意通过http状态码判断请求是否成功
 	 * @throws IOException 当请求处理网络异常时抛出IOException
 	 */
 	public HttpResponse post(String httpUrl, Map<String, Object> params, OutputStream outputStream) throws IOException {
@@ -274,7 +273,7 @@ public class Browser {
 	 *
      * @param httpUrl 请求的url地址，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
      * @param toJson 请求的数据对象，会被转换为json字符串
-     * @return 请求返回数据
+     * @return 请求返回数据，请注意通过http状态码判断请求是否成功
      */
     public HttpResponse postJson(String httpUrl, Object toJson) throws IOException {
 		Map<String, String> header = new HashMap<>();
@@ -289,7 +288,7 @@ public class Browser {
      * @param httpUrl 请求的url地址，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
      * @param toJson 请求的数据对象，会被转换为json字符串
      * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
-     * @return 请求返回数据
+     * @return 请求返回数据，请注意通过http状态码判断请求是否成功
      */
 	public HttpResponse postJson(String httpUrl, Object toJson, OutputStream outputStream) throws IOException {
         Map<String, String> header = new HashMap<>();
@@ -303,7 +302,7 @@ public class Browser {
      * @param httpUrl 请求的url地址，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
      * @param toJson 请求的数据对象，会被转换为json字符串
      * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
-     * @return 请求返回数据对象，异步的，支持获取当前请求状态
+     * @return 请求返回数据对象，异步的，支持获取当前请求状态，请注意通过http状态码判断请求是否成功
      */
     public HttpResponse postJsonAsync(String httpUrl, Object toJson, OutputStream outputStream) throws IOException {
         Map<String, String> header = new HashMap<>();
@@ -317,7 +316,7 @@ public class Browser {
 	 * @param httpUrl 请求的url地址，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
 	 * @param params post的参数，以queryString或formdata形式（取决于是否上传文件）编码到post body中（params中的参数会被编码处理）
 	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
-	 * @return 请求返回数据对象，异步的，支持获取当前请求状态
+	 * @return 请求返回数据对象，异步的，支持获取当前请求状态，请注意通过http状态码判断请求是否成功
 	 */
 	public HttpResponse postAsync(String httpUrl, Map<String, Object> params, OutputStream outputStream) throws IOException {
 		if(isWithBrowserPostFile(params)) {
@@ -338,7 +337,7 @@ public class Browser {
 	 * post方式请求HTTP
 	 * @param httpUrl 请求的url地址，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
 	 * @param postData post的二进制数据，该数据不会作任何处理
-	 * @return 请求返回数据
+	 * @return 请求返回数据，请注意通过http状态码判断请求是否成功
 	 */
 	public HttpResponse post(String httpUrl, byte[] postData) throws IOException {
 		Map<String, String> header = new HashMap<>();
@@ -353,7 +352,7 @@ public class Browser {
 	 * @param httpUrl 请求的url地址，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
 	 * @param postData post的二进制数据，该数据不会作任何处理
 	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
-	 * @return 请求返回数据
+	 * @return 请求返回数据，请注意通过http状态码判断请求是否成功
 	 */
 	public HttpResponse post(String httpUrl, byte[] postData, OutputStream outputStream) throws IOException {
 		Map<String, String> header = new HashMap<>();
@@ -367,7 +366,7 @@ public class Browser {
 	 * post方式请求HTTP
 	 * @param httpUrl 请求的url地址，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
 	 * @param inputStream post的二进制数据，以inputStream的形式提供
-	 * @return 请求返回数据
+	 * @return 请求返回数据，请注意通过http状态码判断请求是否成功
 	 */
 	public HttpResponse post(String httpUrl, InputStream inputStream) throws IOException {
 		Map<String, String> header = new HashMap<>();
@@ -382,7 +381,7 @@ public class Browser {
 	 * @param httpUrl 请求的url地址，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
 	 * @param inputStream post的二进制数据，以inputStream的形式提供
 	 * @param outputStream 如果指定了输出流，则输出到指定的输出流，此时返回的值没有html正文bytes; outputStream会自动close掉
-	 * @return 请求返回数据
+	 * @return 请求返回数据，请注意通过http状态码判断请求是否成功
 	 */
 	public HttpResponse post(String httpUrl, InputStream inputStream, OutputStream outputStream)
 			throws IOException {
@@ -397,7 +396,7 @@ public class Browser {
 	 * post方式请求HTTP
 	 * @param httpUrl 请求的url地址，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
 	 * @param postData post的二进制数据，该数据不会作任何处理
-	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
+	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉，请注意通过http状态码判断请求是否成功
 	 */
 	public HttpResponse postAsync(String httpUrl, byte[] postData, OutputStream outputStream) throws IOException {
 		Map<String, String> header = new HashMap<>();
@@ -412,7 +411,7 @@ public class Browser {
 	 * @param httpUrl 请求的url，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
 	 * @param inputStream post的二进制数据，以inputStream的形式提供
 	 * @param outputStream 如果指定了输出流，则输出到指定的输出流，此时返回的值没有html正文bytes; outputStream会自动close掉
-	 * @return HttpResponse
+	 * @return HttpResponse 请注意通过http状态码判断请求是否成功
 	 * @throws IOException IOException
 	 */
 	public HttpResponse postAsync(String httpUrl, InputStream inputStream, OutputStream outputStream)
@@ -484,7 +483,7 @@ public class Browser {
 	 * 1. 如果是301或302跳转，且跳转链接不同于当前链接，则会再请求跳转的URL
 	 * 
 	 * @param httpUrl 请求的url，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
-	 * @return 请求返回的数据
+	 * @return 请求返回的数据，请注意通过http状态码判断请求是否成功
 	 */
 	public HttpResponse get(String httpUrl) throws IOException {
 		return get(httpUrl, null, null);
@@ -496,7 +495,7 @@ public class Browser {
 	 * 
 	 * @param httpUrl 请求的url，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
 	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
-	 * @return 请求返回的数据
+	 * @return 请求返回的数据，请注意通过http状态码判断请求是否成功
 	 */
 	public HttpResponse get(String httpUrl, OutputStream outputStream) throws IOException {
 		return get(httpUrl, null, outputStream);
@@ -508,7 +507,7 @@ public class Browser {
 	 * 
 	 * @param httpUrl 请求的url，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
 	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
-	 * @return 请求返回的数据
+	 * @return 请求返回的数据，请注意通过http状态码判断请求是否成功
 	 */
 	public HttpResponse getAsync(String httpUrl, OutputStream outputStream) throws IOException {
 		return getAsync(httpUrl, null, outputStream);
@@ -520,7 +519,7 @@ public class Browser {
 	 * 
 	 * @param httpUrl 请求的url，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
 	 * @param params get请求的参数，以queryString编码到url中（params中的参数会被编码处理）
-	 * @return 请求返回的数据
+	 * @return 请求返回的数据，请注意通过http状态码判断请求是否成功
 	 */
 	public HttpResponse get(String httpUrl, Map<String, Object> params) throws IOException {
 		return _get(httpUrl, params, null, false);
@@ -533,7 +532,7 @@ public class Browser {
 	 * @param httpUrl 请求的url，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
 	 * @param params get请求的参数，以queryString编码到url中（params中的参数会被编码处理）
 	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
-	 * @return 请求返回的数据
+	 * @return 请求返回的数据，请注意通过http状态码判断请求是否成功
 	 */
 	public HttpResponse get(String httpUrl, Map<String, Object> params, OutputStream outputStream)
 	        throws IOException {
@@ -547,7 +546,7 @@ public class Browser {
 	 * @param httpUrl 请求的url，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
 	 * @param params get请求的参数，以queryString编码到url中（params中的参数会被编码处理）
 	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
-	 * @return 请求返回的数据
+	 * @return 请求返回的数据，请注意通过http状态码判断请求是否成功
 	 */
 	public HttpResponse getAsync(String httpUrl, Map<String, Object> params, OutputStream outputStream) 
 	        throws IOException {
@@ -724,9 +723,15 @@ public class Browser {
 			isGzip = contentEncoding != null && !contentEncoding.isEmpty()
 					&& "gzip".equals(contentEncoding.get(0));
 		}
+
+		InputStream connectionIn;
+		if (httpResponse.getResponseCode() >= 400) {
+			connectionIn = urlConnection.getErrorStream();
+		} else {
+			connectionIn = urlConnection.getInputStream();
+		}
 		
-		final InputStream in = isGzip ? new GZIPInputStream(urlConnection.getInputStream()) :
-				urlConnection.getInputStream();
+		final InputStream in = isGzip ? new GZIPInputStream(connectionIn) : connectionIn;
 		byte[] buf = new byte[4096];
 		int len;
 		if(outputStream != null) {

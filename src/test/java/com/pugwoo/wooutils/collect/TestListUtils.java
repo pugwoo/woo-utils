@@ -4,10 +4,7 @@ import com.pugwoo.wooutils.json.JSON;
 import com.pugwoo.wooutils.lang.NumberUtils;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -281,6 +278,61 @@ public class TestListUtils {
         assert ListUtils.getDuplicates(list1, o -> o).size() == 0;
         assert ListUtils.getDuplicates(list2, o -> o).size() == 1;
         assert ListUtils.getDuplicates(list2, o -> o).get(2) == 2;
+
+        assert !ListUtils.hasDuplicateNotBlank(ListUtils.newList("", "", ""));
+        assert ListUtils.hasDuplicateNotBlank(ListUtils.newList("", "a", "", "a"));
+
+        Map<String, Integer> map2 = ListUtils.getDuplicatesNotBlank(ListUtils.newList("", "", ""));
+        assert map2.size() == 0;
+
+        Map<String, Integer> map1 = ListUtils.getDuplicatesNotBlank(ListUtils.newList("", "a", "", "a"));
+        assert map1.size() == 1;
+        assert map1.get("a") == 2;
     }
+
+    @Test
+    public void testReplace() {
+        List<Integer> list1 = ListUtils.newList(1,2,3,4,3);
+        ListUtils.replaceAll(list1, 3, 5);
+        assert list1.get(2).equals(5);
+        assert list1.get(4).equals(5);
+    }
+
+    @Test
+    public void testToMapSet(){
+        List<OneDTO> oneDTOS = new ArrayList<>();
+        OneDTO oneDTO = new OneDTO();
+        oneDTO.setName("a");
+        oneDTO.setOne(1);
+        oneDTOS.add(oneDTO);
+
+
+        oneDTO = new OneDTO();
+        oneDTO.setName("a");
+        oneDTO.setOne(1);
+        oneDTOS.add(oneDTO);
+
+        oneDTO = new OneDTO();
+        oneDTO.setName("a");
+        oneDTO.setOne(2);
+        oneDTOS.add(oneDTO);
+
+        oneDTO = new OneDTO();
+        oneDTO.setName("b");
+        oneDTO.setOne(3);
+        oneDTOS.add(oneDTO);
+
+        Map<String, Set<Integer>> rzt = ListUtils.toMapSet(oneDTOS, o -> o.getName(), o -> o.getOne());
+
+        assert rzt.size() == 2;
+        assert rzt.get("a").size() == 2;
+        assert rzt.get("a").contains(1);
+        assert rzt.get("a").contains(2);
+        assert rzt.get("b").size() == 1;
+        assert rzt.get("b").contains(3);
+
+    }
+
+
 
 }

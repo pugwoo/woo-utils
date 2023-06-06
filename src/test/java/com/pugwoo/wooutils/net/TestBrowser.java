@@ -1,9 +1,11 @@
 package com.pugwoo.wooutils.net;
 
 import com.pugwoo.wooutils.collect.MapUtils;
+import com.pugwoo.wooutils.lang.DateUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +16,7 @@ public class TestBrowser {
 		Browser browser = new Browser();
 		HttpResponse resp = browser.get("http://www.baidu.com");
 		System.out.println(resp.getContentString());
+		assert resp.getContentString().contains("百度一下");
 	}
 
 	@Test
@@ -65,17 +68,27 @@ public class TestBrowser {
 			Thread.sleep(100);
 		}
 	}
-	
-	public static void main(String[] args) throws Exception {
-		OutputStream out = new FileOutputStream("g:/a.iso");
-		HttpResponse resp = new Browser().getAsync("http://mirrors.163.com/centos/7/isos/x86_64/CentOS-7-x86_64-NetInstall-1908.iso",
+
+	/**
+	 * 下载一个将近1G的文件
+	 * @throws Exception
+	 */
+	@Test
+	public void  testDownload() throws Exception {
+		OutputStream out = new FileOutputStream("d:/a.iso");
+		HttpResponse resp = new Browser().getAsync(
+				"https://mirrors.163.com/centos/8-stream/isos/x86_64/CentOS-Stream-8-20230523.0-x86_64-boot.iso",
 				out);
 		while(!resp.isDownloadFinished()) {
-			System.out.println(resp.getDownloadedBytes());
-			Thread.sleep(100);
+			System.out.println(DateUtils.format(new Date()) + " 已下载:" + resp.getDownloadedBytes());
+			Thread.sleep(1000);
 		}
 
-		if(true) System.exit(0);
+		System.out.println("下载完成");
+	}
+
+	public static void main(String[] args) throws Exception {
+
 		/////////////////////////// 把远程的下载转输的outputStream出到下载的InputStream，使用pipe的方式
 		
 		final String downUrl = "http://下载链接";
