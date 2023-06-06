@@ -20,7 +20,7 @@ import java.util.zip.GZIPInputStream;
 /**
  * 2016年2月4日 15:16:42 
  * 模拟一个浏览器发HTTP请求，不包括页面处理。默认编码是utf8，可以全局指定编码
- * 
+ * <br>
  * 计划支持的特性：
  * 1. 支持指定为输出流 【done】
  * 2. 支持cookie,不支持过期特性 【done】
@@ -33,7 +33,8 @@ import java.util.zip.GZIPInputStream;
 public class Browser {
 
 	/** mock 浏览器userAgent: Chrome Win10*/
-	public static final String WIN_CHROME_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.1.7845.22 Safari/537.36 Core/1.72.5673.400";
+	public static final String WIN_CHROME_AGENT =
+			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36";
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(Browser.class);
 
@@ -200,9 +201,7 @@ public class Browser {
 	 * @param value cookie值
 	 */
 	public void addCookie(String domain, String key, String value) {
-		if(cookies.get(domain) == null) {
-			cookies.put(domain, new HashMap<>());
-		}
+		cookies.computeIfAbsent(domain, k -> new HashMap<>());
 		cookies.get(domain).put(key, value);
 	}
 	
@@ -724,9 +723,15 @@ public class Browser {
 			isGzip = contentEncoding != null && !contentEncoding.isEmpty()
 					&& "gzip".equals(contentEncoding.get(0));
 		}
+
+		InputStream connectionIn;
+		if (httpResponse.getResponseCode() >= 400) {
+			connectionIn = urlConnection.getErrorStream();
+		} else {
+			connectionIn = urlConnection.getInputStream();
+		}
 		
-		final InputStream in = isGzip ? new GZIPInputStream(urlConnection.getInputStream()) :
-				urlConnection.getInputStream();
+		final InputStream in = isGzip ? new GZIPInputStream(connectionIn) : connectionIn;
 		byte[] buf = new byte[4096];
 		int len;
 		if(outputStream != null) {
