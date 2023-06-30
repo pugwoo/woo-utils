@@ -587,4 +587,61 @@ public class DateUtils {
         return interval;
     }
 
+	/**
+	 * 获取当天的LocalDate格式
+	 */
+	public static LocalDate today(){
+		return DateUtils.toLocalDate(new Date());
+	}
+
+	/**
+	 * 昨天
+	 */
+	public static LocalDate yesterday(){
+		Date date = new Date();
+		return DateUtils.toLocalDate(DateUtils.addTime(date, Calendar.DATE, -1));
+	}
+
+	/**
+	 * 明天
+	 */
+	public static LocalDate tomorrow(){
+		Date date = new Date();
+		return DateUtils.toLocalDate(DateUtils.addTime(date, Calendar.DATE, 1));
+	}
+
+	/**
+	 * 上周(当天-7的日期)
+	 */
+	public static LocalDate lastWeek(){
+		Date date = new Date();
+		return DateUtils.toLocalDate(DateUtils.addTime(date, Calendar.DATE, -7));
+	}
+
+	/**
+	 * 下周(当天+7的日期)
+	 */
+	public static LocalDate nextWeek(){
+		Date date = new Date();
+		return DateUtils.toLocalDate(DateUtils.addTime(date, Calendar.DATE, 7));
+	}
+
+	/**
+	 * 上月
+	 * @return	如当日是2023-06-26，返回结果为2023-05-26
+	 */
+	public static LocalDate lastMonth(){
+		Date date = new Date();
+		return DateUtils.toLocalDate(DateUtils.addTime(date, Calendar.MONTH, -1));
+	}
+
+	/**
+	 * 下月
+	 * @return	如当日是2023-06-26，返回结果为2023-07-26
+	 */
+	public static LocalDate nextMonth(){
+		Date date = new Date();
+		return DateUtils.toLocalDate(DateUtils.addTime(date, Calendar.MONTH, 1));
+	}
+
 }
