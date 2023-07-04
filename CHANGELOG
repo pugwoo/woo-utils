@@ -1,3 +1,5 @@
+v1.2.0 - [add] 新增algorithm包，增加DynamicBaseNumber，动态进制的数字
+
 2023年6月6日
 v1.1.12 - [add] 新增ListUtils的hasDuplicateNotBlank和getDuplicatesNotBlank方法
         - [add] 新增ListUtils的of方法，等价于newList；新增replaceAll方法
