@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 默认线程池大小为10个，可以修改。
  *
  * 使用方式：
- * 1. new一个ExecuteTime对象，然后把要执行的Runnable或Callable对象放入executeTime对象中
+ * 1. new一个ExecuteThem对象，然后把要执行的Runnable或Callable对象放入executeTime对象中
  * 2. 调用waitAllTerminate方法等待所有任务执行完成
  * 
  * 【注】每个ExecuteThem调用waitAllTerminate之后，就不能再add增加任务了。
@@ -26,9 +26,7 @@ public class ExecuteThem {
      * 所以任务堆积几百万本身产生的问题就要大于内存问题，所以这里仍然使用Executors.newFixedThreadPool，不会有问题。
      */
 	private final ThreadPoolExecutor executorService;
-	
-	private final List<Future<?>> futures = new ArrayList<>();
-	
+
 	private final List<Exception> exceptions = new ArrayList<>();
 
 	public ExecuteThem() {
@@ -95,16 +93,25 @@ public class ExecuteThem {
 	/**
 	 * callable任务加入执行，返回本次加入的future对象
 	 */
-	public List<Future<?>> add(Callable<?>... callables) {
-		List<Future<?>> curFutures = new ArrayList<>();
-		for(Callable<?> callable : callables) {
-			Future<?> future = executorService.submit(callable);
-			futures.add(future);
-			curFutures.add(future);
+	public <T> Future<T> add(Callable<T> callable) {
+		return executorService.submit(callable);
+	}
+
+	/**
+	 * callable任务加入执行，返回本次加入的future对象
+	 */
+	public <T> List<Future<T>> add(Callable<T> callable, Callable<T>... callables) {
+		List<Future<T>> curFutures = new ArrayList<>();
+		curFutures.add(add(callable));
+		if (callables != null) {
+			for(Callable<T> call : callables) {
+				Future<T> future = executorService.submit(call);
+				curFutures.add(future);
+			}
 		}
 		return curFutures;
 	}
-	
+
 	/**
 	 * 等待所有的任务执行结束并返回结果
 	 * 对于Runnable没有返回值所以不会在这里面；
@@ -113,11 +120,11 @@ public class ExecuteThem {
 	 * 
 	 * 注意：如果线程池被interrupted，那么线程池会放弃后面未执行的任务。
 	 */
-	public List<Object> waitAllTerminate() {
-		return waitAllTerminate(Long.MAX_VALUE);
+	public void waitAllTerminate() {
+		waitAllTerminate(Long.MAX_VALUE);
 	}
 	
-	public List<Object> waitAllTerminate(long waitSeconds) {
+	public void waitAllTerminate(long waitSeconds) {
 		executorService.shutdown();
 		try {
 			executorService.awaitTermination(waitSeconds, TimeUnit.SECONDS);
@@ -126,18 +133,6 @@ public class ExecuteThem {
 		} finally {
 			executorService.shutdownNow();
 		}
-		
-		List<Object> results = new ArrayList<>();
-		for(Future<?> future : futures) {
-			try {
-				results.add(future.get());
-			} catch (InterruptedException | ExecutionException e) {
-				results.add(null);
-				exceptions.add(e);
-			}
-		}
-		
-		return results;
 	}
 
 	/**
