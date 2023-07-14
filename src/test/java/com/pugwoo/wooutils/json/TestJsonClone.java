@@ -3,6 +3,7 @@ package com.pugwoo.wooutils.json;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 public class TestJsonClone {
@@ -97,5 +98,55 @@ public class TestJsonClone {
         List<DateDTO> clonedList = JSON.clone(list, DateDTO.class);
         assert clonedList.get(0).getBirth().getTime() == dateDTO.getBirth().getTime();
 
+    }
+
+    public static class DateNumDTO {
+        String date;
+        BigDecimal value;
+
+        public String getDate() {
+            return date;
+        }
+
+        public void setDate(String date) {
+            this.date = date;
+        }
+
+        public BigDecimal getValue() {
+            return value;
+        }
+
+        public void setValue(BigDecimal value) {
+            this.value = value;
+        }
+    }
+
+    @Test
+    public void testSubListClone() {
+        List<DateNumDTO> data = new ArrayList<>();
+
+        DateNumDTO d1 = new DateNumDTO();
+        d1.setDate("2020-01-01");
+        d1.setValue(new BigDecimal(1));
+
+        data.add(d1);
+
+        DateNumDTO d2 = new DateNumDTO();
+        d2.setDate("2020-01-02");
+        d2.setValue(new BigDecimal(2));
+
+        data.add(d2);
+
+        DateNumDTO d3 = new DateNumDTO();
+        d3.setDate("2020-01-03");
+        d3.setValue(new BigDecimal(3));
+        data.add(d3);
+
+        List<DateNumDTO> dateNumDTOS = data.subList(1, 2);
+
+        List<DateNumDTO> clone = JSON.clone(dateNumDTOS, DateNumDTO.class);
+        assert clone.size() == 1;
+        assert clone.get(0).getDate().equals("2020-01-02");
+        assert clone.get(0).getValue().compareTo(new BigDecimal(2)) == 0;
     }
 }

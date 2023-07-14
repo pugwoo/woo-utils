@@ -311,7 +311,7 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -{@literal >} {
 	 * @return 对象
 	 */
 	public static <T> T clone(T t) {
-		return clone(t, typeFactory -> typeFactory.constructType(t.getClass()));
+		return clone(t, typeFactory -> typeFactory.constructType(getClassFromT(t)));
 	}
 	
 	/**
@@ -322,7 +322,7 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -{@literal >} {
 	 * @return 对象
 	 */
 	public static <T> T clone(T t, Class<?>... genericClasses) {
-		return clone(t, typeFactory -> typeFactory.constructParametricType(t.getClass(), genericClasses));
+		return clone(t, typeFactory -> typeFactory.constructParametricType(getClassFromT(t), genericClasses));
 	}
 	
 	/**
@@ -330,6 +330,18 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -{@literal >} {
 	 */
 	public static <T> T clone(T t, TypeReference<T> typeReference) {
 		return clone(t, typeFactory -> typeFactory.constructType(typeReference));
+	}
+
+	private static <T> Class<?> getClassFromT(T t) {
+		if (t == null) {
+			return null;
+		}
+        Class<?> clazz = t.getClass();
+		// 特别处理一些类型
+		if ("java.util.ArrayList$SubList".equals(clazz.getName())) { // 这个SubList jackson处理不了
+			return List.class;
+		}
+		return clazz;
 	}
 	
 	// -------------------------------------------------------------- private
