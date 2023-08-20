@@ -1,7 +1,8 @@
+2023年8月20日
 v1.2.0 - [add] 新增algorithm包，增加DynamicBaseNumber，动态进制的数字
        - [add] ListUtils增加distinct方法，去重
        - [modify] ExecuteThem的waitAllTerminate方法不再返回数据，改为返回void，请用add方法返回的future来获取
-       - [enhance] 处理JSON.clone对ArrayList的SubList进行clone时报错的问题
+       - [fix] 处理JSON.clone对ArrayList的SubList进行clone时报错的问题
 
 2023年6月6日
 v1.1.12 - [add] 新增ListUtils的hasDuplicateNotBlank和getDuplicatesNotBlank方法
