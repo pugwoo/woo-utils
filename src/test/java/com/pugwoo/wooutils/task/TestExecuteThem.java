@@ -1,10 +1,13 @@
 package com.pugwoo.wooutils.task;
 
+import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.lang.NumberUtils;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
 public class TestExecuteThem {
 
@@ -12,24 +15,31 @@ public class TestExecuteThem {
 	public void testBasic() {
 		// 默认10个线程
 		ExecuteThem executeThem = new ExecuteThem();
+		List<Future<Integer>> futures = new ArrayList<>();
 
 		// 10个线程，100个任务，每个3秒，那么一共30秒可以执行完
 		for(int i = 0; i < 100; i++) {
 			final int fi = i;
-			executeThem.add(() -> {
+			futures.add(executeThem.add(() -> {
 				Thread.sleep(3000);
 				return fi;
-			});
+			}));
 		}
 
 		long start = System.currentTimeMillis();
-		List<Object> results = executeThem.waitAllTerminate();
+		executeThem.waitAllTerminate();
 		long end = System.currentTimeMillis();
 
 		long cost = end - start;
 		assert cost > 30_000 && cost < 30_100;
 
-		BigDecimal sum = NumberUtils.sum(results);
+		BigDecimal sum = NumberUtils.sum(ListUtils.transform(futures, o -> {
+			try {
+				return o.get();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}));
 		assert sum.intValue() == 4950;
 	}
 

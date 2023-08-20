@@ -154,7 +154,15 @@ public class ListUtils {
 		}
 		return list.stream().map(mapper).collect(Collectors.toSet());
 	}
-	
+
+	/**
+	 * list按指定的属性进行去重
+	 */
+	public static <T, K> List<T> distinct(Collection<T> list, Function<? super T, ? extends K> distinctMapper) {
+		Map<? extends K, T> map = toMap(list, distinctMapper, Function.identity());
+		return new ArrayList<>(map.values());
+	}
+
 	/**
 	 * 转换list为map
 	 */
@@ -354,6 +362,12 @@ public class ListUtils {
 		return !isEmpty(map);
 	}
 
+	/**
+	 * 等同于{@code Collections.replaceAll}
+	 * @return {@code true} if {@code list} contained one or more elements
+	 *         {@code e} such that
+	 *         {@code (oldVal==null ?  e==null : oldVal.equals(e))}.
+	 */
 	public static <T> boolean replaceAll(List<T> list, T oldValue, T newValue) {
 		if (list != null) {
 			return Collections.replaceAll(list, oldValue, newValue);

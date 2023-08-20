@@ -293,7 +293,7 @@ public class TestListUtils {
     @Test
     public void testReplace() {
         List<Integer> list1 = ListUtils.newList(1,2,3,4,3);
-        ListUtils.replaceAll(list1, 3, 5);
+        assert ListUtils.replaceAll(list1, 3, 5);
         assert list1.get(2).equals(5);
         assert list1.get(4).equals(5);
     }
@@ -333,6 +333,31 @@ public class TestListUtils {
 
     }
 
+    @Test
+    public void testDistinct() {
+        List<OneDTO> oneDTOS = new ArrayList<>();
+        OneDTO oneDTO = new OneDTO();
+        oneDTO.setName("a");
+        oneDTO.setOne(1);
+        oneDTOS.add(oneDTO);
 
+        oneDTO = new OneDTO();
+        oneDTO.setName("a");
+        oneDTO.setOne(1);
+        oneDTOS.add(oneDTO);
+
+        oneDTO = new OneDTO();
+        oneDTO.setName("a");
+        oneDTO.setOne(2);
+        oneDTOS.add(oneDTO);
+
+        oneDTO = new OneDTO();
+        oneDTO.setName("b");
+        oneDTO.setOne(3);
+        oneDTOS.add(oneDTO);
+
+        List<OneDTO> distinct = ListUtils.distinct(oneDTOS, o -> o.getName());
+        assert distinct.size() == 2;
+    }
 
 }
