@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -542,6 +543,15 @@ public class DateUtils {
 			return 0;
 		}
 		return (int) (Math.abs(date1.getTime() - date2.getTime()) / (24 * 3600 * 1000));
+	}
+
+	/**
+	 * 计算两个日期的天数差。同一天返回0，相隔1天返回1，以此类推。
+	 * @return 返回值都大于等于0，不关心date1和date2的顺序
+	 */
+	public static int diffDays(LocalDate date1, LocalDate date2) {
+		long between = ChronoUnit.DAYS.between(date1, date2);
+		return between >= 0 ? ((int) between) : (-(int) between);
 	}
 
 	/**

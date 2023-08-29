@@ -99,5 +99,37 @@ public class TestDate {
 		assert DateUtils.getDay(DateUtils.parseLocalDate("2023-04-05")) == 5;
 
 	}
-	
+
+    @Test
+	public void testDiffDays() {
+		{
+			LocalDate date1 = LocalDate.of(2019, 1, 1);
+			LocalDate date2 = LocalDate.of(2019, 1, 1);
+			assert DateUtils.diffDays(date1, date2) == 0;
+			assert DateUtils.diffDays(date2, date1) == 0;
+		}
+
+		{
+			LocalDate date1 = LocalDate.of(2019, 1, 1);
+			LocalDate date2 = LocalDate.of(2019, 1, 2);
+			assert DateUtils.diffDays(date1, date2) == 1;
+			assert DateUtils.diffDays(date2, date1) == 1;
+		}
+
+		{
+			LocalDate date1 = LocalDate.of(2019, 1, 1);
+			LocalDate date2 = LocalDate.of(2019, 2, 2);
+			assert DateUtils.diffDays(date1, date2) == 32;
+			assert DateUtils.diffDays(date2, date1) == 32;
+		}
+
+		{
+			LocalDate date1 = LocalDate.of(2019, 1, 1);
+			LocalDate date2 = LocalDate.of(2020, 2, 2);
+			assert DateUtils.diffDays(date1, date2) == 397;
+			assert DateUtils.diffDays(date2, date1) == 397;
+		}
+
+	}
+
 }
