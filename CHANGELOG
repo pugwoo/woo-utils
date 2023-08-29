@@ -1,4 +1,5 @@
 v1.2.1 - [add] 新增DateUtils.diffDays(LocalDate,LocalDate)方法
+       - [fix] 修复IOUtils.readAll(InputStream, String)方法读取文件时，trim掉最后一个回车符的问题
 
 2023年8月20日
 v1.2.0 - [add] 新增algorithm包，增加DynamicBaseNumber，动态进制的数字
