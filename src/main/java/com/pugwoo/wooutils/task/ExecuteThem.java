@@ -16,7 +16,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 2. 调用waitAllTerminate方法等待所有任务执行完成
  * 
  * 【注】每个ExecuteThem调用waitAllTerminate之后，就不能再add增加任务了。
+ *
+ * @deprecated 请使用ThreadPoolUtils代替
  */
+@Deprecated
 public class ExecuteThem {
 
     /**

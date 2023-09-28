@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
 import java.util.regex.Pattern;
 
 /**
@@ -83,15 +81,26 @@ public class IOUtils {
 	 * @return
 	 */
 	public static String readAll(InputStream in, String charset) {
-		Scanner scanner = new Scanner(in, charset);
-
+		BufferedReader reader = null;
 		try {
-			String content = scanner.useDelimiter("\\Z").next();
-			return content;
-		} catch (NoSuchElementException e) {
-			return ""; // file is empty, ignore exception
+			InputStreamReader inputStreamReader = new InputStreamReader(in, charset);
+			reader = new BufferedReader(inputStreamReader);
+			StringBuilder stringBuilder = new StringBuilder();
+			String line;
+			while ((line = reader.readLine()) != null) {
+				stringBuilder.append(line);
+				stringBuilder.append("\n");
+			}
+			return stringBuilder.toString();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		} finally {
-			scanner.close();
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException ignored) {
+				}
+			}
 		}
 	}
 
@@ -154,7 +163,7 @@ public class IOUtils {
 		if (StringTools.isEmpty(path)) {
 			return null;
 		}
-		// 分为以/开头和没有以/开头的path进行尝试，优先没有/开头的，以为classLoader的方式不需要/开头
+		// 分为以/开头和没有以/开头的path进行尝试，优先没有/开头的，因为classLoader的方式不需要/开头
 		boolean beginWithSlash = path.startsWith("/");
 		String noSlash = beginWithSlash ? path.substring(1) : path;
 		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(noSlash);

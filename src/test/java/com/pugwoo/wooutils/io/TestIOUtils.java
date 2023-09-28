@@ -23,8 +23,9 @@ public class TestIOUtils {
 
     @Test
     public void testGetClasspathFile() throws IOException {
-        String content = IOUtils.readClasspathResourceAsString("applicationContext-context.xml");
+        String content = IOUtils.readClasspathResourceAsString("sql/my.sql");
         assert StringTools.isNotBlank(content);
+        assert content.equals("select *\nfrom dual\n");
     }
 
 }
