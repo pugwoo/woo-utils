@@ -25,7 +25,11 @@ public class TestIOUtils {
     public void testGetClasspathFile() throws IOException {
         String content = IOUtils.readClasspathResourceAsString("sql/my.sql");
         assert StringTools.isNotBlank(content);
-        assert content.equals("select *\nfrom dual\n");
+        assert content.equals("select *\r\nfrom dual\r\n");
+
+        content = IOUtils.readClasspathResourceAsString("sql/my-no-new-line.sql");
+        assert StringTools.isNotBlank(content);
+        assert content.equals("select *\r\nfrom dual");
     }
 
 }

@@ -81,26 +81,17 @@ public class IOUtils {
 	 * @return
 	 */
 	public static String readAll(InputStream in, String charset) {
-		BufferedReader reader = null;
 		try {
-			InputStreamReader inputStreamReader = new InputStreamReader(in, charset);
-			reader = new BufferedReader(inputStreamReader);
-			StringBuilder stringBuilder = new StringBuilder();
-			String line;
-			while ((line = reader.readLine()) != null) {
-				stringBuilder.append(line);
-				stringBuilder.append("\n");
-			}
-			return stringBuilder.toString();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (IOException ignored) {
+			StringBuilder textBuilder = new StringBuilder();
+			try (Reader reader = new BufferedReader(new InputStreamReader(in, charset))) {
+				int c;
+				while ((c = reader.read()) != -1) {
+					textBuilder.append((char) c);
 				}
 			}
+			return textBuilder.toString();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
