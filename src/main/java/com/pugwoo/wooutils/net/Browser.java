@@ -194,6 +194,18 @@ public class Browser {
 		}
 	}
 
+	/**设置请求时的头部，该设置是Browser实例全局的。<br>
+	 * 设置HttpServletRequest的所有头部信息
+	 * @param request HttpServletRequest
+	 */
+	public void addRequestHeader(jakarta.servlet.http.HttpServletRequest request) {
+		Enumeration<String> headerNames = request.getHeaderNames();
+		while(headerNames.hasMoreElements()) {
+			String headerName = headerNames.nextElement();
+			addRequestHeader(headerName, request.getHeader(headerName));
+		}
+	}
+
 	/**
 	 * 自行添加cookie
 	 * @param domain 域名，例如abc.com

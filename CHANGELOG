@@ -1,4 +1,5 @@
 v1.2.2 - [fix] 修复IOUtils.readAll(InputStream, String)方法读取文件时，最后一行没有回车符却加上回车符的问题
+       - [enhance] 增加jakarta.servlet-api，同时支持jakarta.servlet-api和javax.servlet-api
 
 2023年9月28日
 v1.2.1 - [add] 新增DateUtils.diffDays(LocalDate,LocalDate)方法

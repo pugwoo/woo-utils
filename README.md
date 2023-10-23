@@ -20,15 +20,3 @@
 </dependency>
 ```
 
-### 2. 需要使用者根据实际使用的功能自行导入的jar包：
-
-servlet一般由运行容器提供，实际项目中也不用特别提供，所以使用provided方式引入：
-
-```xml
-<dependency>
-    <groupId>javax.servlet</groupId>
-    <artifactId>javax.servlet-api</artifactId>
-    <version>4.0.1</version>
-    <scope>provided</scope>
-</dependency>
-```
