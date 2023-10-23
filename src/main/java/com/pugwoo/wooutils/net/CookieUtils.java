@@ -1,17 +1,16 @@
 package com.pugwoo.wooutils.net;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * cookie相关功能，cookie默认都用URLEncode编码和解码。
@@ -49,6 +48,32 @@ public class CookieUtils {
 		}
 		return null;
 	}
+
+	/**
+	 * 根据name读取cookie的值
+	 * @param request
+	 * @param name
+	 * @return
+	 */
+	public static String getCookieValue(jakarta.servlet.http.HttpServletRequest request, String name) {
+		if(name == null) {
+			return null;
+		}
+		jakarta.servlet.http.Cookie[] cookies = request.getCookies();
+		if (null != cookies) {
+			for (jakarta.servlet.http.Cookie cookie : cookies) {
+				if(name.equals(cookie.getName())) {
+					try {
+						return URLDecoder.decode(cookie.getValue(), "UTF-8");
+					} catch (UnsupportedEncodingException e) {
+						LOGGER.error("URLEncoder.decode fail, value:{}", cookie.getValue(), e);
+						return cookie.getValue();
+					}
+				}
+			}
+		}
+		return null;
+	}
 	
 	/**
 	 * 根据name读取cookie的值，支持多个相同cookie name的情况
@@ -64,6 +89,33 @@ public class CookieUtils {
 		Cookie[] cookies = request.getCookies();
 		if (null != cookies) {
 			for (Cookie cookie : cookies) {
+				if(name.equals(cookie.getName())) {
+					try {
+						cookieList.add(URLDecoder.decode(cookie.getValue(), "UTF-8"));
+					} catch (UnsupportedEncodingException e) {
+						LOGGER.error("URLEncoder.decode fail, value:{}", cookie.getValue(), e);
+						cookieList.add(cookie.getValue());
+					}
+				}
+			}
+		}
+		return cookieList;
+	}
+
+	/**
+	 * 根据name读取cookie的值，支持多个相同cookie name的情况
+	 * @param request
+	 * @param name
+	 * @return
+	 */
+	public static List<String> getCookieValues(jakarta.servlet.http.HttpServletRequest request, String name) {
+		if(name == null) {
+			return null;
+		}
+		List<String> cookieList = new ArrayList<String>();
+		jakarta.servlet.http.Cookie[] cookies = request.getCookies();
+		if (null != cookies) {
+			for (jakarta.servlet.http.Cookie cookie : cookies) {
 				if(name.equals(cookie.getName())) {
 					try {
 						cookieList.add(URLDecoder.decode(cookie.getValue(), "UTF-8"));
@@ -105,6 +157,35 @@ public class CookieUtils {
 		}
 		response.addCookie(cookie);
 	}
+
+	/**
+	 * 增加cookie，如果name相同的话，浏览器会把cookie值追加要已有的之上
+	 *
+	 * @param response
+	 * @param name cookie名字
+	 * @param value cookie值，不建议为null值
+	 * @param domain 指定域名，null表示不指定
+	 * @param expireSeconds cookie生命周期 以秒为单位，当设置为0时，cookie默认有效期10年；如果删除，请用removeCookie方法
+	 */
+	public static void addCookie(jakarta.servlet.http.HttpServletResponse response, String name, String value,
+								 String domain, int expireSeconds) {
+		try {
+			value = value == null ? null : URLEncoder.encode(value, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.error("URLEncoder.encode fail, value:{}", value, e);
+		}
+		jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(name, value);
+		cookie.setPath("/");
+		if(domain != null) {
+			cookie.setDomain(domain);
+		}
+		if (expireSeconds == 0) {
+			cookie.setMaxAge(10 * 365 * 24 * 3600);
+		} else {
+			cookie.setMaxAge(expireSeconds);
+		}
+		response.addCookie(cookie);
+	}
 	
 	/**
 	 * 增加cookie，如果name相同的话，浏览器会把cookie值追加要已有的之上。有效期100年。
@@ -120,6 +201,19 @@ public class CookieUtils {
 	}
 
 	/**
+	 * 增加cookie，如果name相同的话，浏览器会把cookie值追加要已有的之上。有效期100年。
+	 *
+	 * @param response
+	 * @param name
+	 * @param value
+	 * @param domain
+	 */
+	public static void addCookie(jakarta.servlet.http.HttpServletResponse response, String name, String value,
+								 String domain) {
+		addCookie(response, name, value, domain, 0);
+	}
+
+	/**
 	 * 删除cookie
 	 * @param response
 	 * @param name
@@ -127,6 +221,22 @@ public class CookieUtils {
 	 */
 	public static void removeCookie(HttpServletResponse response, String name, String domain) {
 		Cookie cookie = new Cookie(name, "");
+		cookie.setPath("/");
+		if(domain != null) {
+			cookie.setDomain(domain);
+		}
+		cookie.setMaxAge(0); // delete
+		response.addCookie(cookie);
+	}
+
+	/**
+	 * 删除cookie
+	 * @param response
+	 * @param name
+	 * @param domain 当为null时表示不指定
+	 */
+	public static void removeCookie(jakarta.servlet.http.HttpServletResponse response, String name, String domain) {
+		jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(name, "");
 		cookie.setPath("/");
 		if(domain != null) {
 			cookie.setDomain(domain);

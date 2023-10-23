@@ -6,7 +6,7 @@
 	<groupId>com.pugwoo</groupId>
 	<artifactId>woo-utils</artifactId>
 	<packaging>jar</packaging>
-	<version>1.2.1</version>
+	<version>1.2.2</version>
 
 	<name>woo-utils</name>
 	<description>the common utils</description>
@@ -72,6 +72,12 @@
             <version>4.0.1</version>
             <scope>provided</scope>
 		</dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>

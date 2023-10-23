@@ -57,13 +57,51 @@ public class NetUtils {
 
 		return ip;
 	}
-	
+
+	/**
+	 * 获得客户端的ip地址，请配合nginx配置使用
+	 * @return 可能返回多个ip，以逗号分隔
+	 */
+	public static String getRemoteIp(jakarta.servlet.http.HttpServletRequest request) {
+		String ip = request.getHeader("X-Forwarded-For");
+		if(StringTools.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("Proxy-Client-IP");
+		}
+		if(StringTools.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("WL-Proxy-Client-IP");
+		}
+		if(StringTools.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("HTTP_CLIENT_IP");
+		}
+		if(StringTools.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+		}
+		if(StringTools.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getRemoteAddr();
+		}
+
+		return ip;
+	}
+
 	/**
 	 * 判断是否在微信浏览器访问
 	 * @param request
 	 * @return
 	 */
 	public static boolean isWeixinBrowser(HttpServletRequest request) {
+		String userAgent = request.getHeader("user-agent");
+		if(userAgent != null && userAgent.toLowerCase().contains("micromessenger")) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 判断是否在微信浏览器访问
+	 * @param request
+	 * @return
+	 */
+	public static boolean isWeixinBrowser(jakarta.servlet.http.HttpServletRequest request) {
 		String userAgent = request.getHeader("user-agent");
 		if(userAgent != null && userAgent.toLowerCase().contains("micromessenger")) {
 			return true;
@@ -83,6 +121,19 @@ public class NetUtils {
 		}
 		return false;
 	}
+
+	/**
+	 * 判断是否是移动端浏览器
+	 * @param request
+	 * @return
+	 */
+	public static boolean isMobileBrowser(jakarta.servlet.http.HttpServletRequest request) {
+		String userAgent = request.getHeader("user-agent");
+		if(userAgent != null && userAgent.contains("Mobile")) {
+			return true;
+		}
+		return false;
+	}
 	
 	/**
 	 * 获得访问的url的域名部分
@@ -95,13 +146,34 @@ public class NetUtils {
 				|| "https".equalsIgnoreCase(request.getScheme()) && request.getServerPort() == 443 ? ""
 					: ":" + request.getServerPort());
 	}
-	
+
+	/**
+	 * 获得访问的url的域名部分
+	 * @param request
+	 * @return 例如http://www.abc.com，不带根/
+	 */
+	public static String getHttpRootURL(jakarta.servlet.http.HttpServletRequest request) {
+		return request.getScheme() + "://" + request.getServerName()
+				+ ("http".equalsIgnoreCase(request.getScheme()) && request.getServerPort() == 80
+				|| "https".equalsIgnoreCase(request.getScheme()) && request.getServerPort() == 443 ? ""
+				: ":" + request.getServerPort());
+	}
+
 	/**
 	 * 获得当前域名，不带端口，例如www.abc.com
 	 * @param request
 	 * @return
 	 */
 	public static String getHostname(HttpServletRequest request) {
+		return request.getServerName();
+	}
+
+	/**
+	 * 获得当前域名，不带端口，例如www.abc.com
+	 * @param request
+	 * @return
+	 */
+	public static String getHostname(jakarta.servlet.http.HttpServletRequest request) {
 		return request.getServerName();
 	}
 	
@@ -112,6 +184,16 @@ public class NetUtils {
 	 * @return
 	 */
 	public static String getHostnameWithPort(HttpServletRequest request) {
+		return request.getServerName() + ":" + request.getServerPort();
+	}
+
+	/**
+	 * 获得当前域名和端口，如果是http协议，返回www.abc.com:80，如果是https协议，返回www.abc.com:443
+	 * 其它端口正常带上，例如www.abc.com:8080
+	 * @param request
+	 * @return
+	 */
+	public static String getHostnameWithPort(jakarta.servlet.http.HttpServletRequest request) {
 		return request.getServerName() + ":" + request.getServerPort();
 	}
 	
@@ -126,6 +208,18 @@ public class NetUtils {
 		String queryString = request.getQueryString();
 		return domain + path + (queryString == null ? "" : "?" + queryString);
 	}
+
+	/**
+	 * 获得当前请求的完整地址
+	 * @param request
+	 * @return
+	 */
+	public static String getFullUrlWithParam(jakarta.servlet.http.HttpServletRequest request) {
+		String domain = getHttpRootURL(request);
+		String path = request.getRequestURI();
+		String queryString = request.getQueryString();
+		return domain + path + (queryString == null ? "" : "?" + queryString);
+	}
 	
 	/**
 	 * 获得url的路径，例如访问url是http://www.abc.com/is/a/apple?id=3，则返回/is/a/apple
@@ -133,6 +227,15 @@ public class NetUtils {
 	 * @return
 	 */
 	public static String getUrlPath(HttpServletRequest request) {
+		return request.getRequestURI();
+	}
+
+	/**
+	 * 获得url的路径，例如访问url是http://www.abc.com/is/a/apple?id=3，则返回/is/a/apple
+	 * @param request
+	 * @return
+	 */
+	public static String getUrlPath(jakarta.servlet.http.HttpServletRequest request) {
 		return request.getRequestURI();
 	}
 	
@@ -198,4 +301,12 @@ public class NetUtils {
 		return request.getContextPath();
 	}
 
+	/**
+	 * 获得servlet应用的contextPath，即tomcat部署的应用名称的根目录，如admin.war部署之后返回 /admin
+	 * @param request
+	 * @return
+	 */
+	public static String getContextPath(jakarta.servlet.http.HttpServletRequest request) {
+		return request.getContextPath();
+	}
 }
