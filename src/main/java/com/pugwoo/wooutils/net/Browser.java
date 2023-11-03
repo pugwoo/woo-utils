@@ -198,7 +198,7 @@ public class Browser {
 	 * 设置HttpServletRequest的所有头部信息
 	 * @param request HttpServletRequest
 	 */
-	public void addRequestHeader(jakarta.servlet.http.HttpServletRequest request) {
+	public void addRequestHeaderForJakarta(jakarta.servlet.http.HttpServletRequest request) {
 		Enumeration<String> headerNames = request.getHeaderNames();
 		while(headerNames.hasMoreElements()) {
 			String headerName = headerNames.nextElement();

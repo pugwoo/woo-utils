@@ -55,7 +55,7 @@ public class CookieUtils {
 	 * @param name
 	 * @return
 	 */
-	public static String getCookieValue(jakarta.servlet.http.HttpServletRequest request, String name) {
+	public static String getCookieValueForJakarta(jakarta.servlet.http.HttpServletRequest request, String name) {
 		if(name == null) {
 			return null;
 		}
@@ -108,7 +108,7 @@ public class CookieUtils {
 	 * @param name
 	 * @return
 	 */
-	public static List<String> getCookieValues(jakarta.servlet.http.HttpServletRequest request, String name) {
+	public static List<String> getCookieValuesForJakarta(jakarta.servlet.http.HttpServletRequest request, String name) {
 		if(name == null) {
 			return null;
 		}
@@ -167,7 +167,7 @@ public class CookieUtils {
 	 * @param domain 指定域名，null表示不指定
 	 * @param expireSeconds cookie生命周期 以秒为单位，当设置为0时，cookie默认有效期10年；如果删除，请用removeCookie方法
 	 */
-	public static void addCookie(jakarta.servlet.http.HttpServletResponse response, String name, String value,
+	public static void addCookieForJakarta(jakarta.servlet.http.HttpServletResponse response, String name, String value,
 								 String domain, int expireSeconds) {
 		try {
 			value = value == null ? null : URLEncoder.encode(value, "UTF-8");
@@ -208,9 +208,9 @@ public class CookieUtils {
 	 * @param value
 	 * @param domain
 	 */
-	public static void addCookie(jakarta.servlet.http.HttpServletResponse response, String name, String value,
+	public static void addCookieForJakarta(jakarta.servlet.http.HttpServletResponse response, String name, String value,
 								 String domain) {
-		addCookie(response, name, value, domain, 0);
+		addCookieForJakarta(response, name, value, domain, 0);
 	}
 
 	/**
@@ -235,7 +235,7 @@ public class CookieUtils {
 	 * @param name
 	 * @param domain 当为null时表示不指定
 	 */
-	public static void removeCookie(jakarta.servlet.http.HttpServletResponse response, String name, String domain) {
+	public static void removeCookieForJakarta(jakarta.servlet.http.HttpServletResponse response, String name, String domain) {
 		jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(name, "");
 		cookie.setPath("/");
 		if(domain != null) {

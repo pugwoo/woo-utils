@@ -62,7 +62,7 @@ public class NetUtils {
 	 * 获得客户端的ip地址，请配合nginx配置使用
 	 * @return 可能返回多个ip，以逗号分隔
 	 */
-	public static String getRemoteIp(jakarta.servlet.http.HttpServletRequest request) {
+	public static String getRemoteIpForJakarta(jakarta.servlet.http.HttpServletRequest request) {
 		String ip = request.getHeader("X-Forwarded-For");
 		if(StringTools.isBlank(ip) || "unknown".equalsIgnoreCase(ip)) {
 			ip = request.getHeader("Proxy-Client-IP");
@@ -101,7 +101,7 @@ public class NetUtils {
 	 * @param request
 	 * @return
 	 */
-	public static boolean isWeixinBrowser(jakarta.servlet.http.HttpServletRequest request) {
+	public static boolean isWeixinBrowserForJakarta(jakarta.servlet.http.HttpServletRequest request) {
 		String userAgent = request.getHeader("user-agent");
 		if(userAgent != null && userAgent.toLowerCase().contains("micromessenger")) {
 			return true;
@@ -127,7 +127,7 @@ public class NetUtils {
 	 * @param request
 	 * @return
 	 */
-	public static boolean isMobileBrowser(jakarta.servlet.http.HttpServletRequest request) {
+	public static boolean isMobileBrowserForJakarta(jakarta.servlet.http.HttpServletRequest request) {
 		String userAgent = request.getHeader("user-agent");
 		if(userAgent != null && userAgent.contains("Mobile")) {
 			return true;
@@ -152,7 +152,7 @@ public class NetUtils {
 	 * @param request
 	 * @return 例如http://www.abc.com，不带根/
 	 */
-	public static String getHttpRootURL(jakarta.servlet.http.HttpServletRequest request) {
+	public static String getHttpRootURLForJakarta(jakarta.servlet.http.HttpServletRequest request) {
 		return request.getScheme() + "://" + request.getServerName()
 				+ ("http".equalsIgnoreCase(request.getScheme()) && request.getServerPort() == 80
 				|| "https".equalsIgnoreCase(request.getScheme()) && request.getServerPort() == 443 ? ""
@@ -173,7 +173,7 @@ public class NetUtils {
 	 * @param request
 	 * @return
 	 */
-	public static String getHostname(jakarta.servlet.http.HttpServletRequest request) {
+	public static String getHostnameForJakarta(jakarta.servlet.http.HttpServletRequest request) {
 		return request.getServerName();
 	}
 	
@@ -193,7 +193,7 @@ public class NetUtils {
 	 * @param request
 	 * @return
 	 */
-	public static String getHostnameWithPort(jakarta.servlet.http.HttpServletRequest request) {
+	public static String getHostnameWithPortForJakarta(jakarta.servlet.http.HttpServletRequest request) {
 		return request.getServerName() + ":" + request.getServerPort();
 	}
 	
@@ -214,8 +214,8 @@ public class NetUtils {
 	 * @param request
 	 * @return
 	 */
-	public static String getFullUrlWithParam(jakarta.servlet.http.HttpServletRequest request) {
-		String domain = getHttpRootURL(request);
+	public static String getFullUrlWithParamForJakarta(jakarta.servlet.http.HttpServletRequest request) {
+		String domain = getHttpRootURLForJakarta(request);
 		String path = request.getRequestURI();
 		String queryString = request.getQueryString();
 		return domain + path + (queryString == null ? "" : "?" + queryString);
@@ -235,7 +235,7 @@ public class NetUtils {
 	 * @param request
 	 * @return
 	 */
-	public static String getUrlPath(jakarta.servlet.http.HttpServletRequest request) {
+	public static String getUrlPathForJakarta(jakarta.servlet.http.HttpServletRequest request) {
 		return request.getRequestURI();
 	}
 	
@@ -306,7 +306,7 @@ public class NetUtils {
 	 * @param request
 	 * @return
 	 */
-	public static String getContextPath(jakarta.servlet.http.HttpServletRequest request) {
+	public static String getContextPathForJakarta(jakarta.servlet.http.HttpServletRequest request) {
 		return request.getContextPath();
 	}
 }

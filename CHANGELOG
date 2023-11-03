@@ -1,3 +1,6 @@
+2023年11月3日
+v1.2.4 - [fix] 修复因同时支持javax.servlet-api和jakarta.servlet-api而导致方法使用时，缺少任何一个包会编译报错的问题
+
 2023年11月2日
 v1.2.3 - [enhance] 因为同时需要支持javax.servlet-api和jakarta.servlet-api，故引入两者api
 
