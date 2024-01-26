@@ -1,3 +1,5 @@
+v1.2.5 - [enhance] 修改NumberUtils.sum对mapper的校验，当提供为null时抛出异常，而不是默认指定o->o
+
 2023年11月3日
 v1.2.4 - [fix] 修复因同时支持javax.servlet-api和jakarta.servlet-api而导致方法使用时，缺少任何一个包会编译报错的问题
 

@@ -308,7 +308,7 @@ public class NumberUtils {
 	 * @return 数据不存在时返回0
 	 */
 	public static <T> BigDecimal sum(Collection<T> list) {
-		return sum(list, null);
+		return sum(list, o -> o);
 	}
 	
 	/**
@@ -319,12 +319,13 @@ public class NumberUtils {
 	 * @return 数据不存在时返回0
 	 */
 	public static <T> BigDecimal sum(Collection<T> list, Function<? super T, ?> mapper) {
+		if (mapper == null) {
+			throw new RuntimeException("mapper can not be null");
+		}
+
 		BigDecimal sum = BigDecimal.ZERO;
 		if(list == null || list.isEmpty()) {
 			return sum;
-		}
-		if (mapper == null) {
-			mapper = o -> o;
 		}
 		for(T t : list) {
 			if(t == null) {
