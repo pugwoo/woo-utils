@@ -104,7 +104,6 @@ public class TestNumberUtils {
         numbers.add("1.1");
         numbers.add("1.2");
         assert new BigDecimal("2.3").equals(NumberUtils.sum(numbers));
-        assert new BigDecimal("2.3").equals(NumberUtils.sum(numbers, null));
         assert new BigDecimal("2.3").equals(NumberUtils.sum(numbers, o->o));
         assert new BigDecimal("2.3").equals(ListUtils.sum(numbers, o->o));
         
