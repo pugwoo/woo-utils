@@ -13,12 +13,12 @@ public class TestMyTaskImpl {
 		easyRunTask.start(); // 启动任务框架，任务开始执行
 		
 		Thread.sleep(10000); // 等待10秒后
-		System.out.println(easyRunTask);
+		System.out.println(easyRunTask.getStatus());
 		
 		easyRunTask.stop(); // 控制任务框架停止
-		System.out.println(easyRunTask);
+		System.out.println(easyRunTask.getStatus());
 		
 		Thread.sleep(2000); // 等待框架结束
-		System.out.println(easyRunTask);
+		System.out.println(easyRunTask.getStatus());
 	}
 }

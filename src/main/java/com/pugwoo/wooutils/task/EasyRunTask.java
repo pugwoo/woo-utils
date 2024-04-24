@@ -1,5 +1,7 @@
 package com.pugwoo.wooutils.task;
 
+import com.pugwoo.wooutils.log.MDCUtils;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
@@ -8,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 2015年7月21日 11:17:16
  * 简单的可以控制开始、停止、恢复或重新开始的任务控制框架。
- * 
+ * <br>
  * 关于暂停：等价于 start - stop - resume
  * 重新开始：等价于 start - stop - start
  * 
@@ -109,7 +111,7 @@ public class EasyRunTask {
 		}
 		status = TaskStatusEnum.RUNNING;
 		
-		new Thread(() -> {
+		new Thread(MDCUtils.withMdc(() -> {
 			while(true) {
 				synchronized (that) { // 请求停止
 					if(status == TaskStatusEnum.STOPPING) {
@@ -132,29 +134,26 @@ public class EasyRunTask {
 				int nThreads = Math.min(restCount, concurrentNum);
 				ExecuteThem executeThem = new ExecuteThem(nThreads);
 				for(int i = 0; i < nThreads; i++) {
-					executeThem.add(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								TaskResult result = task.runStep();
-								if(result == null || !result.isSuccess()) {
-									fail.incrementAndGet();
-								} else {
-									success.incrementAndGet();
-								}
-							} catch (Throwable e) {
-								exceptions.add(e);
-								fail.incrementAndGet();
-							} finally {
-								processed.incrementAndGet();
-							}
-						}
-					});
+					executeThem.add(MDCUtils.withMdc(() -> {
+                        try {
+                            TaskResult result = task.runStep();
+                            if(result == null || !result.isSuccess()) {
+                                fail.incrementAndGet();
+                            } else {
+                                success.incrementAndGet();
+                            }
+                        } catch (Throwable e) {
+                            exceptions.add(e);
+                            fail.incrementAndGet();
+                        } finally {
+                            processed.incrementAndGet();
+                        }
+                    }));
 				}
 				executeThem.waitAllTerminate();
 				total.set(processed.get() + getRestCount());
 			}
-		}, "EasyRunTaskExecute").start();
+		}), "EasyRunTaskExecute").start();
 
 		return new TaskResult(true);
 	}
