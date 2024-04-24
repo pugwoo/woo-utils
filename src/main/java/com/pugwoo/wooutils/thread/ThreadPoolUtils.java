@@ -1,5 +1,7 @@
 package com.pugwoo.wooutils.thread;
 
+import com.pugwoo.wooutils.log.MDCUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -55,7 +57,7 @@ public class ThreadPoolUtils {
 
         @Override
         public Thread newThread(Runnable r) {
-            return new Thread(r, threadNamePrefix + "-" + count.getAndIncrement());
+            return new Thread(MDCUtils.withMdc(r), threadNamePrefix + "-" + count.getAndIncrement());
         }
     }
 
