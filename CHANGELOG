@@ -1,3 +1,5 @@
+v1.2.6 - [add] 新增MDCUtils工具，支持将父类线程的MDC上下文带到子线程
+
 2024年2月5日
 v1.2.5 - [enhance] 修改NumberUtils.sum对mapper的校验，当提供为null时抛出异常，而不是默认指定o->o
 
