@@ -636,6 +636,11 @@ public class Browser {
 		} else {
 			urlConnection = (HttpURLConnection) url.openConnection(proxy);
 		}
+
+		if ("POST".equals(method)) {
+			urlConnection.setChunkedStreamingMode(8192);
+		}
+
 		urlConnection.setConnectTimeout(connectTimeoutSeconds * 1000);
 		urlConnection.setReadTimeout(readTimeoutSeconds * 1000);
 		urlConnection.setRequestMethod(method);
