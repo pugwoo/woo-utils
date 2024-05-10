@@ -10,10 +10,7 @@ import javax.net.ssl.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.net.*;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.zip.GZIPInputStream;
 
@@ -270,7 +267,7 @@ public class Browser {
 			String boundary = "----WebKitFormBoundaryYp0ZBDEHwALiqVW5";
 			Map<String, String> header = new HashMap<>();
 			header.put("Content-Type", "multipart/form-data; boundary=" + boundary);
-			return _post(httpUrl, new ByteArrayInputStream(buildPostString(params, boundary)),
+			return _post(httpUrl, buildPostString(params, boundary),
 					outputStream, false, header);
 		} else {
 			Map<String, String> header = new HashMap<>();
@@ -335,7 +332,7 @@ public class Browser {
 			String boundary = "----WebKitFormBoundaryYp0ZBDEHwALiqVW5";
 			Map<String, String> header = new HashMap<>();
 			header.put("Content-Type", "multipart/form-data; boundary=" + boundary);
-			return _post(httpUrl, new ByteArrayInputStream(buildPostString(params, boundary)),
+			return _post(httpUrl, buildPostString(params, boundary),
 					outputStream, true, header);
 		} else {
 			Map<String, String> header = new HashMap<>();
@@ -803,13 +800,15 @@ public class Browser {
 	
 	/**multipart/form-data编码方式
 	 * @throws IOException */
-	private byte[] buildPostString(Map<String, Object> params, String boundary)
+	private InputStream buildPostString(Map<String, Object> params, String boundary)
 			throws IOException {
 		if(params == null || params.isEmpty()) {
-			return new byte[0];
+			return new ByteArrayInputStream(new byte[0]);
 		}
+
+		List<InputStream> inputStreams = new ArrayList<>();
+
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		
 		for(Entry<String, Object> entry : params.entrySet()) {
 			baos.write(toBytes("--" + boundary + "\r\n"));
 			String str = "Content-Disposition: form-data; name=\"" + 
@@ -828,18 +827,12 @@ public class Browser {
 				BrowserPostFile file = (BrowserPostFile) entry.getValue();
 				if(file.getBytes() != null) {
 					baos.write(file.getBytes());
+				} else if (file.getIn() != null) {
+					inputStreams.add(new ByteArrayInputStream(baos.toByteArray()));
+					baos.reset();
+					inputStreams.add(file.getIn());
 				} else {
-					byte[] buff = new byte[4096];
-					int len = 0;
-					while((len = file.getIn().read(buff)) != -1) {
-						baos.write(buff, 0, len);
-					}
-					try {
-						if(file.getIn() != null) {
-							file.getIn().close();
-						}
-					} catch (Exception e) {
-					}
+					baos.write(new byte[0]);
 				}
 			} else {
 				Object value = entry.getValue();
@@ -852,8 +845,9 @@ public class Browser {
 		if(!params.isEmpty()) {
 			baos.write(toBytes(("--" + boundary + "--")));
 		}
-		
-		return baos.toByteArray();
+
+		inputStreams.add(new ByteArrayInputStream(baos.toByteArray()));
+		return new SequenceInputStream(Collections.enumeration(inputStreams));
 	}
 
 	/**转换成json格式*/
