@@ -64,6 +64,9 @@ public class Browser {
     /**支持禁止gzip压缩*/
 	private boolean disableGzip = false;
 
+	/**是否禁用ChunkedStreamingMode模式*/
+	private boolean disableChunkedStreamingMode = false;
+
     /**禁用跳转，转为手工处理模式*/
 	public void disableRedirect() {
 		this.enableRedirect = false;
@@ -82,6 +85,16 @@ public class Browser {
 	/**启用gzip*/
 	public void enableGzip() {
 		this.disableGzip = false;
+	}
+
+	/**禁用ChunkedStreamingMode，默认是启用状态*/
+	public void disableChunkedStreamingMode() {
+		this.disableChunkedStreamingMode = true;
+	}
+
+	/**启用ChunkedStreamingMode，默认是启用状态*/
+	public void enableChunkedStreamingMode() {
+		this.disableChunkedStreamingMode = false;
 	}
 
 	/**
@@ -281,13 +294,13 @@ public class Browser {
      * post方式请求HTTP，转换成json形式提交
 	 *
      * @param httpUrl 请求的url地址，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
-     * @param toJson 请求的数据对象，会被转换为json字符串
+     * @param paramObject 请求的数据对象，会被转换为json字符串
      * @return 请求返回数据，请注意通过http状态码判断请求是否成功
      */
-    public HttpResponse postJson(String httpUrl, Object toJson) throws IOException {
+    public HttpResponse postJson(String httpUrl, Object paramObject) throws IOException {
 		Map<String, String> header = new HashMap<>();
 		header.put("Content-Type", "application/json");
-		return _post(httpUrl, new ByteArrayInputStream(buildPostJson(toJson)),
+		return _post(httpUrl, new ByteArrayInputStream(buildPostJson(paramObject)),
 				null, false, header);
     }
 
@@ -295,14 +308,14 @@ public class Browser {
      * post方式请求HTTP，转换成json形式提交
 	 *
      * @param httpUrl 请求的url地址，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
-     * @param toJson 请求的数据对象，会被转换为json字符串
+     * @param paramObject 请求的数据对象，会被转换为json字符串
      * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
      * @return 请求返回数据，请注意通过http状态码判断请求是否成功
      */
-	public HttpResponse postJson(String httpUrl, Object toJson, OutputStream outputStream) throws IOException {
+	public HttpResponse postJson(String httpUrl, Object paramObject, OutputStream outputStream) throws IOException {
         Map<String, String> header = new HashMap<>();
         header.put("Content-Type", "application/json");
-        return _post(httpUrl, new ByteArrayInputStream(buildPostJson(toJson)),
+        return _post(httpUrl, new ByteArrayInputStream(buildPostJson(paramObject)),
                 outputStream, false, header);
     }
 
@@ -637,7 +650,7 @@ public class Browser {
 			urlConnection = (HttpURLConnection) url.openConnection(proxy);
 		}
 
-		if ("POST".equals(method)) {
+		if ("POST".equals(method) && !disableChunkedStreamingMode) {
 			urlConnection.setChunkedStreamingMode(8192);
 		}
 
