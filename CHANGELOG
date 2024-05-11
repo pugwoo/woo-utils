@@ -1,3 +1,4 @@
+2024年5月11日
 v1.2.6 - [add] 新增MDCUtils工具，支持将父类线程的MDC上下文带到子线程
        - [enhance] ThreadPoolUtils和EasyRunTask增加支持将父线程的MDC上下文带到子线程
        - [enhance] 减少browser工具上传大文件时的内存占用
