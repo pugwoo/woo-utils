@@ -468,7 +468,9 @@ public class Browser {
 			        	os.write(buf, 0, readBytes);
 			        }
 			        os.flush();
-			        os.close();
+
+					IOUtils.close(os);
+					IOUtils.close(inputStream);
 				}
 		        
 				return makeHttpResponse(httpUrl, urlConnection, outputStream, isAsync);
