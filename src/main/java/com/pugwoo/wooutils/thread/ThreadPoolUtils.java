@@ -7,15 +7,35 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * 该工具类创建的线程池可以自动继承父线程的MDC上下文。
+ */
 public class ThreadPoolUtils {
+
+    public static class BlockingRejectedExecutionHandler implements RejectedExecutionHandler {
+        @Override
+        public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+            try {
+                // 将任务重新放入队列中
+                executor.getQueue().put(r);
+            } catch (InterruptedException e) {
+                // 线程被中断的处理
+                Thread.currentThread().interrupt();
+                throw new RejectedExecutionException("Interrupted while submitting task", e);
+            }
+        }
+    }
 
     /**
      * 创建一个线程池，一些默认配置：
      * 1）空闲线程存活时间为60秒
      * 2）拒绝策略：用默认，抛出RejectedExecutionException异常
-     * @param coreSize
+     * <br>
+     * 说明：该工具类创建的线程池可以自动继承父线程的MDC上下文。
+     * <br>
+     * @param coreSize 核心线程数，可以理解为线程池在开始排队时，达到的最大线程数
      * @param queueSize 任务排队队列最大长度
-     * @param maxSize
+     * @param maxSize 最大线程数，当等待队列满了之后，线程数会继续加大到该值
      * @param threadNamePrefix 线程前缀名称
      */
     public static ThreadPoolExecutor createThreadPool(int coreSize, int queueSize, int maxSize, String threadNamePrefix) {
@@ -29,14 +49,50 @@ public class ThreadPoolUtils {
     }
 
     /**
+     * 创建一个线程池，一些默认配置：
+     * 1）空闲线程存活时间为60秒
+     * 2）拒绝策略：用默认，抛出RejectedExecutionException异常
+     * <br>
+     * 说明：该工具类创建的线程池可以自动继承父线程的MDC上下文。
+     * <br>
+     * @param coreSize 核心线程数，可以理解为线程池在开始排队时，达到的最大线程数
+     * @param queueSize 任务排队队列最大长度
+     * @param maxSize 最大线程数，当等待队列满了之后，线程数会继续加大到该值
+     * @param threadNamePrefix 线程前缀名称
+     * @param isBlockingWhenQueueFull 当队列满了之后，是否阻塞等待，true时等待，false则抛出RejectedExecutionException异常
+     */
+    public static ThreadPoolExecutor createThreadPool(int coreSize, int queueSize, int maxSize, String threadNamePrefix,
+                                                      boolean isBlockingWhenQueueFull) {
+        if (isBlockingWhenQueueFull) {
+            RejectedExecutionHandler handler = new BlockingRejectedExecutionHandler();
+            return new ThreadPoolExecutor(
+                    coreSize, maxSize,
+                    60, // 空闲线程存活时间
+                    TimeUnit.SECONDS, // 存活时间单位
+                    queueSize <= 0 ? new SynchronousQueue<>() : new LinkedBlockingQueue<>(queueSize),
+                    new MyThreadFactory(threadNamePrefix),
+                    handler
+            );
+        } else {
+            return new ThreadPoolExecutor(
+                    coreSize, maxSize,
+                    60, // 空闲线程存活时间
+                    TimeUnit.SECONDS, // 存活时间单位
+                    queueSize <= 0 ? new SynchronousQueue<>() : new LinkedBlockingQueue<>(queueSize),
+                    new MyThreadFactory(threadNamePrefix)
+            );
+        }
+    }
+
+    /**
      * 等待所有的future调用完成
      */
-    public static List<?> waitAllFuturesDone(List<Future<?>> futures) {
+    public static <T> List<T> waitAllFuturesDone(List<Future<T>> futures) {
         if (futures == null) {
             return new ArrayList<>();
         }
-        List<Object> result = new ArrayList<>();
-        for (Future<?> future : futures) {
+        List<T> result = new ArrayList<>();
+        for (Future<T> future : futures) {
             try {
                 result.add(future.get());
             } catch (InterruptedException | ExecutionException e) {

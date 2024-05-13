@@ -1,10 +1,14 @@
 package com.pugwoo.wooutils.task;
 
 import com.pugwoo.wooutils.log.MDCUtils;
+import com.pugwoo.wooutils.thread.ThreadPoolUtils;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -132,9 +136,12 @@ public class EasyRunTask {
 
 				// 多线程执行任务，实际上，是一批一批地去执行，这样才能中途控制其停下
 				int nThreads = Math.min(restCount, concurrentNum);
-				ExecuteThem executeThem = new ExecuteThem(nThreads);
+				ThreadPoolExecutor executeThem = ThreadPoolUtils.createThreadPool(nThreads, 10000,
+						nThreads, "easyRunTask");
+
+				List<Future<String>> futures = new ArrayList<>();
 				for(int i = 0; i < nThreads; i++) {
-					executeThem.add(MDCUtils.withMdc(() -> {
+					futures.add(executeThem.submit(MDCUtils.withMdcCallable(() -> {
                         try {
                             TaskResult result = task.runStep();
                             if(result == null || !result.isSuccess()) {
@@ -148,9 +155,10 @@ public class EasyRunTask {
                         } finally {
                             processed.incrementAndGet();
                         }
-                    }));
+						return "done";
+                    })));
 				}
-				executeThem.waitAllTerminate();
+				ThreadPoolUtils.waitAllFuturesDone(futures);
 				total.set(processed.get() + getRestCount());
 			}
 		}), "EasyRunTaskExecute").start();

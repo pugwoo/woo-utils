@@ -1,7 +1,11 @@
 package com.pugwoo.wooutils.net;
 
-import com.pugwoo.wooutils.task.ExecuteThem;
+import com.pugwoo.wooutils.thread.ThreadPoolUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BenchmarkBrowser {
@@ -12,23 +16,22 @@ public class BenchmarkBrowser {
         AtomicInteger total = new AtomicInteger();
         AtomicInteger fail = new AtomicInteger();
 
-        ExecuteThem executeThem = new ExecuteThem(100);
+        ThreadPoolExecutor executeThem = ThreadPoolUtils.createThreadPool(100, 10000, 100, "test");
 
+        List<Future<String>> futures = new ArrayList<>();
         for(int i = 0; i < 100; i++) {
-            executeThem.add(new Runnable() {
-                @Override
-                public void run() {
-                    for(int i = 0; i < 10000; i++) {
-                        try {
-                            HttpResponse resp = browser.get("http://10.100.99.41:38667/");
-                            total.incrementAndGet();
-                        } catch (Exception e) {
-                            fail.incrementAndGet();
-                            e.printStackTrace();
-                        }
+            futures.add(executeThem.submit(() -> {
+                for(int i1 = 0; i1 < 10000; i1++) {
+                    try {
+                        HttpResponse resp = browser.get("http://10.100.99.41:38667/");
+                        total.incrementAndGet();
+                    } catch (Exception e) {
+                        fail.incrementAndGet();
+                        e.printStackTrace();
                     }
                 }
-            });
+                return "done";
+            }));
         }
 
         final AtomicInteger last = new AtomicInteger();
@@ -49,7 +52,7 @@ public class BenchmarkBrowser {
         log.setDaemon(true);
         log.start();
 
-        executeThem.waitAllTerminate();
+        ThreadPoolUtils.waitAllFuturesDone(futures);
 
         System.out.println("fail:" + fail.get());
 

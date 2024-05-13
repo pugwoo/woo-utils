@@ -752,17 +752,5 @@ public class ListUtils {
 		}
 		return Stream.of(list).flatMap(Collection::stream);
 	}
-
-	/**
-	 * 数值求和
-	 * @param list
-	 * @param mapper
-	 * @return
-	 * @deprecated 请使用NumberUtils.sum，该接口将在高版本中删除
-	 */
-	@Deprecated
-	public static <T, R> BigDecimal sum(Collection<T> list, Function<? super T, ? extends R> mapper) {
-		return NumberUtils.sum(list, mapper);
-	}
 	
 }

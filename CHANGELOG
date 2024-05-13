@@ -1,7 +1,8 @@
-2024年5月11日
-v1.2.6 - [add] 新增MDCUtils工具，支持将父类线程的MDC上下文带到子线程
+2024年5月12日
+v1.3.0 - [add] 新增MDCUtils工具，支持将父类线程的MDC上下文带到子线程
        - [enhance] ThreadPoolUtils和EasyRunTask增加支持将父线程的MDC上下文带到子线程
        - [enhance] 减少browser工具上传大文件时的内存占用
+       - [del] 移除ExecuteThem工具类，ListUtils的sum方法，Hash的sha1方法
 
 2024年2月5日
 v1.2.5 - [enhance] 修改NumberUtils.sum对mapper的校验，当提供为null时抛出异常，而不是默认指定o->o

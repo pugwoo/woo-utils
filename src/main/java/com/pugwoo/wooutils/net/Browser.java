@@ -2,7 +2,7 @@ package com.pugwoo.wooutils.net;
 
 import com.pugwoo.wooutils.io.IOUtils;
 import com.pugwoo.wooutils.json.JSON;
-import com.pugwoo.wooutils.task.ExecuteThem;
+import com.pugwoo.wooutils.thread.ThreadPoolUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +12,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -35,8 +36,9 @@ public class Browser {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(Browser.class);
 
-	private static final ExecuteThem EXECUTE_THEM = new ExecuteThem(10); // 异步下载共用线程池
-	
+	private static final ThreadPoolExecutor asyncDownloadThreadPool =
+			ThreadPoolUtils.createThreadPool(10, 100, 20, "asyncDownloadThreadPool"); // 异步下载共用线程池
+
 	public static class HttpResponseFuture {
 		/**已经下载的字节数*/
 		public long downloadedBytes;
@@ -768,30 +770,27 @@ public class Browser {
 				final HttpResponseFuture future = new HttpResponseFuture();
 				httpResponse.setFuture(future);
 
-				EXECUTE_THEM.add(new Runnable() {
-					@Override
-					public void run() {
-						byte[] buf = new byte[4096];
-						int len;
-						try {
-							while((len = in.read(buf)) != -1) {
-								future.downloadedBytes += len;
-								outputStream.write(buf, 0, len);
-							}
-							future.isFinished = true;
-						} catch (IOException e) {
-							LOGGER.error("outputStream write error", e);
-						} finally {
-							IOUtils.close(outputStream);
-							IOUtils.close(in);
-							try {
-								urlConnection.disconnect();
-							} catch (Exception e) {
-								LOGGER.error("disconnect urlConnection fail", e);
-							}
-						}
-					}
-				});
+				asyncDownloadThreadPool.submit(() -> {
+                    byte[] buf1 = new byte[4096];
+                    int len1;
+                    try {
+                        while((len1 = in.read(buf1)) != -1) {
+                            future.downloadedBytes += len1;
+                            outputStream.write(buf1, 0, len1);
+                        }
+                        future.isFinished = true;
+                    } catch (IOException e) {
+                        LOGGER.error("outputStream write error", e);
+                    } finally {
+                        IOUtils.close(outputStream);
+                        IOUtils.close(in);
+                        try {
+                            urlConnection.disconnect();
+                        } catch (Exception e) {
+                            LOGGER.error("disconnect urlConnection fail", e);
+                        }
+                    }
+                });
 
 			} else {
 				try {
