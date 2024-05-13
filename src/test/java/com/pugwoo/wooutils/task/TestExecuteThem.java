@@ -2,32 +2,35 @@ package com.pugwoo.wooutils.task;
 
 import com.pugwoo.wooutils.collect.ListUtils;
 import com.pugwoo.wooutils.lang.NumberUtils;
+import com.pugwoo.wooutils.thread.ThreadPoolUtils;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class TestExecuteThem {
 
 	@Test
 	public void testBasic() {
 		// 默认10个线程
-		ExecuteThem executeThem = new ExecuteThem();
+		ThreadPoolExecutor executeThem = ThreadPoolUtils.createThreadPool(10, 100, 10, "test");
 		List<Future<Integer>> futures = new ArrayList<>();
 
 		// 10个线程，100个任务，每个3秒，那么一共30秒可以执行完
 		for(int i = 0; i < 100; i++) {
 			final int fi = i;
-			futures.add(executeThem.add(() -> {
+			futures.add(executeThem.submit(() -> {
 				Thread.sleep(3000);
 				return fi;
 			}));
 		}
 
 		long start = System.currentTimeMillis();
-		executeThem.waitAllTerminate();
+		ThreadPoolUtils.waitAllFuturesDone(futures);
+
 		long end = System.currentTimeMillis();
 
 		long cost = end - start;
@@ -46,7 +49,10 @@ public class TestExecuteThem {
 	@Test
 	public void testBlock() {
 		// 默认10个线程，最长等待队列长度是5
-		ExecuteThem executeThem = new ExecuteThem(10, 5);
+		ThreadPoolExecutor executeThem = ThreadPoolUtils.createThreadPool(10, 5, 10,
+				"test", true);
+
+		List<Future<Integer>> futures = new ArrayList<>();
 
 		// 30个任务，每个3秒
 		// 添加了15个之后（10个执行5个等待中）等待3秒
@@ -56,10 +62,10 @@ public class TestExecuteThem {
 
 		for(int i = 0; i < 30; i++) {
 			final int fi = i;
-			executeThem.add(() -> {
+			futures.add(executeThem.submit(() -> {
 				Thread.sleep(3000);
 				return fi;
-			});
+			}));
 		}
 
 		long end = System.currentTimeMillis();
@@ -69,9 +75,10 @@ public class TestExecuteThem {
 
 		// 这个最后最后一批执行，3秒完成
 		start = System.currentTimeMillis();
-		executeThem.waitAllTerminate();
+		ThreadPoolUtils.waitAllFuturesDone(futures);
 		end = System.currentTimeMillis();
 		cost = end - start;
+		System.out.println(cost);
 		assert cost > 3000 && cost < 3020;
 
 	}

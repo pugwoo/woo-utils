@@ -105,8 +105,7 @@ public class TestNumberUtils {
         numbers.add("1.2");
         assert new BigDecimal("2.3").equals(NumberUtils.sum(numbers));
         assert new BigDecimal("2.3").equals(NumberUtils.sum(numbers, o->o));
-        assert new BigDecimal("2.3").equals(ListUtils.sum(numbers, o->o));
-        
+
         List<Map<String, Object>> numberList = Stream.of(
                 MapUtils.of("score", "1.1   "),
                 MapUtils.of("score", "1.2   "),

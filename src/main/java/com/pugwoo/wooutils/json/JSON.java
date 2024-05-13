@@ -56,18 +56,7 @@ public class JSON {
 	public static ObjectMapper getObjectMapper() {
 		return objectMapper;
 	}
-	
-	/**
-	 * 允许重新设置objectMapper <br>
-	 *     建议全项目在初始化阶段配置一次<br>
-	 * use {@link #setGlobalObjectMapper(ObjectMapper)}
-	 * @param objectMapper objectMapper
-	 */
-	@Deprecated
-	public static void setObjectMapper(ObjectMapper objectMapper) {
-		setGlobalObjectMapper(objectMapper);
-	}
-	
+
 	/**
 	 * 允许重新设置objectMapper <br>
 	 *     建议全项目在初始化阶段配置一次<br>

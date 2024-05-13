@@ -2,7 +2,7 @@ package com.pugwoo.wooutils.net;
 
 import com.pugwoo.wooutils.io.IOUtils;
 import com.pugwoo.wooutils.json.JSON;
-import com.pugwoo.wooutils.task.ExecuteThem;
+import com.pugwoo.wooutils.thread.ThreadPoolUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,11 +10,9 @@ import javax.net.ssl.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.net.*;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -38,8 +36,9 @@ public class Browser {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(Browser.class);
 
-	private static final ExecuteThem EXECUTE_THEM = new ExecuteThem(10); // 异步下载共用线程池
-	
+	private static final ThreadPoolExecutor asyncDownloadThreadPool =
+			ThreadPoolUtils.createThreadPool(10, 100, 20, "asyncDownloadThreadPool"); // 异步下载共用线程池
+
 	public static class HttpResponseFuture {
 		/**已经下载的字节数*/
 		public long downloadedBytes;
@@ -67,6 +66,9 @@ public class Browser {
     /**支持禁止gzip压缩*/
 	private boolean disableGzip = false;
 
+	/**是否禁用ChunkedStreamingMode模式*/
+	private boolean disableChunkedStreamingMode = false;
+
     /**禁用跳转，转为手工处理模式*/
 	public void disableRedirect() {
 		this.enableRedirect = false;
@@ -85,6 +87,16 @@ public class Browser {
 	/**启用gzip*/
 	public void enableGzip() {
 		this.disableGzip = false;
+	}
+
+	/**禁用ChunkedStreamingMode，默认是启用状态*/
+	public void disableChunkedStreamingMode() {
+		this.disableChunkedStreamingMode = true;
+	}
+
+	/**启用ChunkedStreamingMode，默认是启用状态*/
+	public void enableChunkedStreamingMode() {
+		this.disableChunkedStreamingMode = false;
 	}
 
 	/**
@@ -270,7 +282,7 @@ public class Browser {
 			String boundary = "----WebKitFormBoundaryYp0ZBDEHwALiqVW5";
 			Map<String, String> header = new HashMap<>();
 			header.put("Content-Type", "multipart/form-data; boundary=" + boundary);
-			return _post(httpUrl, new ByteArrayInputStream(buildPostString(params, boundary)),
+			return _post(httpUrl, buildPostString(params, boundary),
 					outputStream, false, header);
 		} else {
 			Map<String, String> header = new HashMap<>();
@@ -284,13 +296,13 @@ public class Browser {
      * post方式请求HTTP，转换成json形式提交
 	 *
      * @param httpUrl 请求的url地址，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
-     * @param toJson 请求的数据对象，会被转换为json字符串
+     * @param paramObject 请求的数据对象，会被转换为json字符串
      * @return 请求返回数据，请注意通过http状态码判断请求是否成功
      */
-    public HttpResponse postJson(String httpUrl, Object toJson) throws IOException {
+    public HttpResponse postJson(String httpUrl, Object paramObject) throws IOException {
 		Map<String, String> header = new HashMap<>();
 		header.put("Content-Type", "application/json");
-		return _post(httpUrl, new ByteArrayInputStream(buildPostJson(toJson)),
+		return _post(httpUrl, new ByteArrayInputStream(buildPostJson(paramObject)),
 				null, false, header);
     }
 
@@ -298,14 +310,14 @@ public class Browser {
      * post方式请求HTTP，转换成json形式提交
 	 *
      * @param httpUrl 请求的url地址，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
-     * @param toJson 请求的数据对象，会被转换为json字符串
+     * @param paramObject 请求的数据对象，会被转换为json字符串
      * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉
      * @return 请求返回数据，请注意通过http状态码判断请求是否成功
      */
-	public HttpResponse postJson(String httpUrl, Object toJson, OutputStream outputStream) throws IOException {
+	public HttpResponse postJson(String httpUrl, Object paramObject, OutputStream outputStream) throws IOException {
         Map<String, String> header = new HashMap<>();
         header.put("Content-Type", "application/json");
-        return _post(httpUrl, new ByteArrayInputStream(buildPostJson(toJson)),
+        return _post(httpUrl, new ByteArrayInputStream(buildPostJson(paramObject)),
                 outputStream, false, header);
     }
 
@@ -335,7 +347,7 @@ public class Browser {
 			String boundary = "----WebKitFormBoundaryYp0ZBDEHwALiqVW5";
 			Map<String, String> header = new HashMap<>();
 			header.put("Content-Type", "multipart/form-data; boundary=" + boundary);
-			return _post(httpUrl, new ByteArrayInputStream(buildPostString(params, boundary)),
+			return _post(httpUrl, buildPostString(params, boundary),
 					outputStream, true, header);
 		} else {
 			Map<String, String> header = new HashMap<>();
@@ -458,7 +470,9 @@ public class Browser {
 			        	os.write(buf, 0, readBytes);
 			        }
 			        os.flush();
-			        os.close();
+
+					IOUtils.close(os);
+					IOUtils.close(inputStream);
 				}
 		        
 				return makeHttpResponse(httpUrl, urlConnection, outputStream, isAsync);
@@ -639,6 +653,11 @@ public class Browser {
 		} else {
 			urlConnection = (HttpURLConnection) url.openConnection(proxy);
 		}
+
+		if ("POST".equals(method) && !disableChunkedStreamingMode) {
+			urlConnection.setChunkedStreamingMode(8192);
+		}
+
 		urlConnection.setConnectTimeout(connectTimeoutSeconds * 1000);
 		urlConnection.setReadTimeout(readTimeoutSeconds * 1000);
 		urlConnection.setRequestMethod(method);
@@ -751,30 +770,27 @@ public class Browser {
 				final HttpResponseFuture future = new HttpResponseFuture();
 				httpResponse.setFuture(future);
 
-				EXECUTE_THEM.add(new Runnable() {
-					@Override
-					public void run() {
-						byte[] buf = new byte[4096];
-						int len;
-						try {
-							while((len = in.read(buf)) != -1) {
-								future.downloadedBytes += len;
-								outputStream.write(buf, 0, len);
-							}
-							future.isFinished = true;
-						} catch (IOException e) {
-							LOGGER.error("outputStream write error", e);
-						} finally {
-							IOUtils.close(outputStream);
-							IOUtils.close(in);
-							try {
-								urlConnection.disconnect();
-							} catch (Exception e) {
-								LOGGER.error("disconnect urlConnection fail", e);
-							}
-						}
-					}
-				});
+				asyncDownloadThreadPool.submit(() -> {
+                    byte[] buf1 = new byte[4096];
+                    int len1;
+                    try {
+                        while((len1 = in.read(buf1)) != -1) {
+                            future.downloadedBytes += len1;
+                            outputStream.write(buf1, 0, len1);
+                        }
+                        future.isFinished = true;
+                    } catch (IOException e) {
+                        LOGGER.error("outputStream write error", e);
+                    } finally {
+                        IOUtils.close(outputStream);
+                        IOUtils.close(in);
+                        try {
+                            urlConnection.disconnect();
+                        } catch (Exception e) {
+                            LOGGER.error("disconnect urlConnection fail", e);
+                        }
+                    }
+                });
 
 			} else {
 				try {
@@ -803,13 +819,15 @@ public class Browser {
 	
 	/**multipart/form-data编码方式
 	 * @throws IOException */
-	private byte[] buildPostString(Map<String, Object> params, String boundary)
+	private InputStream buildPostString(Map<String, Object> params, String boundary)
 			throws IOException {
 		if(params == null || params.isEmpty()) {
-			return new byte[0];
+			return new ByteArrayInputStream(new byte[0]);
 		}
+
+		List<InputStream> inputStreams = new ArrayList<>();
+
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		
 		for(Entry<String, Object> entry : params.entrySet()) {
 			baos.write(toBytes("--" + boundary + "\r\n"));
 			String str = "Content-Disposition: form-data; name=\"" + 
@@ -828,18 +846,12 @@ public class Browser {
 				BrowserPostFile file = (BrowserPostFile) entry.getValue();
 				if(file.getBytes() != null) {
 					baos.write(file.getBytes());
+				} else if (file.getIn() != null) {
+					inputStreams.add(new ByteArrayInputStream(baos.toByteArray()));
+					baos.reset();
+					inputStreams.add(file.getIn());
 				} else {
-					byte[] buff = new byte[4096];
-					int len = 0;
-					while((len = file.getIn().read(buff)) != -1) {
-						baos.write(buff, 0, len);
-					}
-					try {
-						if(file.getIn() != null) {
-							file.getIn().close();
-						}
-					} catch (Exception e) {
-					}
+					baos.write(new byte[0]);
 				}
 			} else {
 				Object value = entry.getValue();
@@ -852,8 +864,9 @@ public class Browser {
 		if(!params.isEmpty()) {
 			baos.write(toBytes(("--" + boundary + "--")));
 		}
-		
-		return baos.toByteArray();
+
+		inputStreams.add(new ByteArrayInputStream(baos.toByteArray()));
+		return new SequenceInputStream(Collections.enumeration(inputStreams));
 	}
 
 	/**转换成json格式*/

@@ -1,5 +1,8 @@
 package com.pugwoo.wooutils.task;
 
+import com.pugwoo.wooutils.lang.DateUtils;
+
+import java.util.Date;
 import java.util.Random;
 
 /**
@@ -32,7 +35,7 @@ public class MyTaskImpl implements ITask {
 		}
 		
 		// 任务框架调用这个一次相当于执行一次任务
-		System.out.println("system is handle task " + mycount);
+		System.out.println(DateUtils.format(new Date()) + " system is handle task " + mycount);
 		
 		try {
 			Thread.sleep(1000);
