@@ -21,7 +21,7 @@ public class IOUtils {
 
 	/**
 	 * 从inputstream读取字节并输出到to中，直到inputstream EOF
-	 * @param from 输入流
+	 * @param from 输入流，特别注意：该方法不会关闭输入流，请自行关闭
 	 * @param to 需要自行关闭输出流
 	 */
 	public static long copy(InputStream from, OutputStream to) throws IOException {
@@ -41,7 +41,6 @@ public class IOUtils {
 	/**
 	 * 读取所有的输入流数据为byte[]
 	 * @param in 读取完后in不会关闭
-	 * @return
 	 */
 	public static byte[] readAll(InputStream in) throws IOException {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -58,7 +57,6 @@ public class IOUtils {
 	/**
 	 * 读取所有的输入流数据为byte[]
 	 * @param in 自动关闭
-	 * @return
 	 */
 	public static byte[] readAllAndClose(InputStream in) throws IOException {
 		try {
@@ -77,8 +75,6 @@ public class IOUtils {
 	/**
 	 * 读取input所有数据到String中，可用于读取文件内容到String。
 	 * @param in 读取完后in不会关闭
-	 * @param charset
-	 * @return
 	 */
 	public static String readAll(InputStream in, String charset) {
 		try {
@@ -98,8 +94,6 @@ public class IOUtils {
 	/**
 	 * 读取input所有数据到String中，可用于读取文件内容到String。
 	 * @param in 读取完后in自动关闭
-	 * @param charset
-	 * @return
 	 */
 	public static String readAllAndClose(InputStream in, String charset) {
 		try {
@@ -127,7 +121,7 @@ public class IOUtils {
 		if (in == null) {
 			return null;
 		}
-		return readAll(in, "UTF-8");
+		return readAllAndClose(in, "UTF-8");
 	}
 
 	/**
@@ -141,14 +135,14 @@ public class IOUtils {
 		if (in == null) {
 			return null;
 		}
-		return readAll(in);
+		return readAllAndClose(in);
 	}
 
 	/**
 	 * 读取classpath目录下的资源，返回为InputStream。
 	 * 说明：当有多个同名的资源时，会返回第一个加载到jvm的资源内容，因此这里具有随机性。
 	 * @param path 路径，例如：abc.txt
-	 * @return 文件不存在返回null
+	 * @return 文件不存在返回null，【注意】inputStream资源使用后请自行关闭
 	 */
 	public static InputStream readClasspathResourceInputStream(String path) {
 		if (StringTools.isEmpty(path)) {
