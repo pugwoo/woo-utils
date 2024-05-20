@@ -1,3 +1,5 @@
+v1.3.1 - [fix] 修复EasyRunTask中创建线程池没有shutdown而导致内存泄漏的问题
+
 2024年5月12日
 v1.3.0 - [add] 新增MDCUtils工具，支持将父类线程的MDC上下文带到子线程
        - [enhance] ThreadPoolUtils和EasyRunTask增加支持将父线程的MDC上下文带到子线程
