@@ -136,29 +136,48 @@ public class EasyRunTask {
 
 				// 多线程执行任务，实际上，是一批一批地去执行，这样才能中途控制其停下
 				int nThreads = Math.min(restCount, concurrentNum);
-				ThreadPoolExecutor executeThem = ThreadPoolUtils.createThreadPool(nThreads, 10000,
-						nThreads, "easyRunTask");
-
-				List<Future<String>> futures = new ArrayList<>();
-				for(int i = 0; i < nThreads; i++) {
-					futures.add(executeThem.submit(MDCUtils.withMdcCallable(() -> {
-                        try {
-                            TaskResult result = task.runStep();
-                            if(result == null || !result.isSuccess()) {
-                                fail.incrementAndGet();
-                            } else {
-                                success.incrementAndGet();
-                            }
-                        } catch (Throwable e) {
-                            exceptions.add(e);
-                            fail.incrementAndGet();
-                        } finally {
-                            processed.incrementAndGet();
-                        }
-						return "done";
-                    })));
+				if (nThreads < 1) {
+					nThreads = 1;
 				}
-				ThreadPoolUtils.waitAllFuturesDone(futures);
+				if (nThreads == 1) { // 如果是1个线程，则直接执行，不用多线程，节省资源
+					try {
+						TaskResult result = task.runStep();
+						if(result == null || !result.isSuccess()) {
+							fail.incrementAndGet();
+						} else {
+							success.incrementAndGet();
+						}
+					} catch (Throwable e) {
+						exceptions.add(e);
+						fail.incrementAndGet();
+					} finally {
+						processed.incrementAndGet();
+					}
+				} else {
+					ThreadPoolExecutor executeThem = ThreadPoolUtils.createThreadPool(nThreads, 0,
+							nThreads, "easyRunTask");
+					List<Future<String>> futures = new ArrayList<>();
+					for(int i = 0; i < nThreads; i++) {
+						futures.add(executeThem.submit(() -> {
+							try {
+								TaskResult result = task.runStep();
+								if(result == null || !result.isSuccess()) {
+									fail.incrementAndGet();
+								} else {
+									success.incrementAndGet();
+								}
+							} catch (Throwable e) {
+								exceptions.add(e);
+								fail.incrementAndGet();
+							} finally {
+								processed.incrementAndGet();
+							}
+						}, ""));
+					}
+					ThreadPoolUtils.waitAllFuturesDone(futures);
+					executeThem.shutdown();
+				}
+
 				total.set(processed.get() + getRestCount());
 			}
 		}), "EasyRunTaskExecute").start();
