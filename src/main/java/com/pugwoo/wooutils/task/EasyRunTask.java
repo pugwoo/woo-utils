@@ -116,69 +116,73 @@ public class EasyRunTask {
 		status = TaskStatusEnum.RUNNING;
 		
 		new Thread(MDCUtils.withMdc(() -> {
-			while(true) {
-				synchronized (that) { // 请求停止
-					if(status == TaskStatusEnum.STOPPING) {
-						status = TaskStatusEnum.STOPPED;
-						endTime = new Date();
+			ThreadPoolExecutor executeThem = concurrentNum == 1 ? null :
+					ThreadPoolUtils.createThreadPool(concurrentNum, 0,
+					concurrentNum, "easyRunTask", true);
+
+			try {
+				while(true) {
+					synchronized (that) { // 请求停止
+						if(status == TaskStatusEnum.STOPPING) {
+							status = TaskStatusEnum.STOPPED;
+							endTime = new Date();
+							return;
+						}
+					}
+
+					int restCount = getRestCount();
+					if(getRestCount() <= 0) {
+						synchronized (that) { // 结束任务
+							status = TaskStatusEnum.FINISHED;
+							endTime = new Date();
+						}
 						return;
 					}
-				}
 
-				int restCount = getRestCount();
-				if(getRestCount() <= 0) {
-					synchronized (that) { // 结束任务
-						status = TaskStatusEnum.FINISHED;
-						endTime = new Date();
-					}
-					return;
-				}
-
-				// 多线程执行任务，实际上，是一批一批地去执行，这样才能中途控制其停下
-				int nThreads = Math.min(restCount, concurrentNum);
-				if (nThreads < 1) {
-					nThreads = 1;
-				}
-				if (nThreads == 1) { // 如果是1个线程，则直接执行，不用多线程，节省资源
-					try {
-						TaskResult result = task.runStep();
-						if(result == null || !result.isSuccess()) {
-							fail.incrementAndGet();
-						} else {
-							success.incrementAndGet();
-						}
-					} catch (Throwable e) {
-						exceptions.add(e);
-						fail.incrementAndGet();
-					} finally {
-						processed.incrementAndGet();
-					}
-				} else {
-					ThreadPoolExecutor executeThem = ThreadPoolUtils.createThreadPool(nThreads, 0,
-							nThreads, "easyRunTask");
-					List<Future<String>> futures = new ArrayList<>();
-					for(int i = 0; i < nThreads; i++) {
-						futures.add(executeThem.submit(() -> {
-							try {
-								TaskResult result = task.runStep();
-								if(result == null || !result.isSuccess()) {
-									fail.incrementAndGet();
-								} else {
-									success.incrementAndGet();
-								}
-							} catch (Throwable e) {
-								exceptions.add(e);
+					if (executeThem == null) { // 如果是1个线程，则直接执行，不用多线程，节省资源
+						try {
+							TaskResult result = task.runStep();
+							if(result == null || !result.isSuccess()) {
 								fail.incrementAndGet();
-							} finally {
-								processed.incrementAndGet();
+							} else {
+								success.incrementAndGet();
 							}
-						}, ""));
+						} catch (Throwable e) {
+							exceptions.add(e);
+							fail.incrementAndGet();
+						} finally {
+							processed.incrementAndGet();
+						}
+					} else {
+						// 多线程执行任务，实际上，是一批一批地去执行，这样才能中途控制其停下
+						int nThreads = Math.min(restCount, concurrentNum);
+						List<Future<String>> futures = new ArrayList<>();
+						for(int i = 0; i < nThreads; i++) {
+							futures.add(executeThem.submit(() -> {
+								try {
+									TaskResult result = task.runStep();
+									if(result == null || !result.isSuccess()) {
+										fail.incrementAndGet();
+									} else {
+										success.incrementAndGet();
+									}
+								} catch (Throwable e) {
+									exceptions.add(e);
+									fail.incrementAndGet();
+								} finally {
+									processed.incrementAndGet();
+								}
+							}, ""));
+						}
+						ThreadPoolUtils.waitAllFuturesDone(futures);
 					}
-					ThreadPoolUtils.waitAllFuturesDone(futures);
-					executeThem.shutdown();
-				}
 
-				total.set(processed.get() + getRestCount());
+					total.set(processed.get() + getRestCount());
+				}
+			} finally {
+				if (executeThem != null) {
+					executeThem.shutdown(); // 线程池一定要释放掉
+				}
 			}
 		}), "EasyRunTaskExecute").start();
 
