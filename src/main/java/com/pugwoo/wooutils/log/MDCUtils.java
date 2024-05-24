@@ -14,7 +14,12 @@ public class MDCUtils {
     public static Runnable withMdc(Runnable runnable) {
         Map<String, String> mdc = MDC.getCopyOfContextMap();
         return () -> {
-            MDC.setContextMap(mdc);
+            if (mdc != null) {
+                try {
+                    MDC.setContextMap(mdc);
+                } catch (Throwable ignored) {
+                }
+            }
             runnable.run();
         };
     }
@@ -22,7 +27,12 @@ public class MDCUtils {
     public static <U> Supplier<U> withMdcSupplier(Supplier<U> supplier) {
         Map<String, String> mdc = MDC.getCopyOfContextMap();
         return () -> {
-            MDC.setContextMap(mdc);
+            if (mdc != null) {
+                try {
+                    MDC.setContextMap(mdc);
+                } catch (Throwable ignored) {
+                }
+            }
             return supplier.get();
         };
     }
@@ -30,7 +40,12 @@ public class MDCUtils {
     public static <U> Callable<U> withMdcCallable(Callable<U> callable) {
         Map<String, String> mdc = MDC.getCopyOfContextMap();
         return () -> {
-            MDC.setContextMap(mdc);
+            if (mdc != null) {
+                try {
+                    MDC.setContextMap(mdc);
+                } catch (Throwable ignored) {
+                }
+            }
             return callable.call();
         };
     }
