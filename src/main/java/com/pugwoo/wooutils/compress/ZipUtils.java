@@ -3,10 +3,7 @@ package com.pugwoo.wooutils.compress;
 import com.pugwoo.wooutils.io.IOUtils;
 import com.pugwoo.wooutils.string.StringTools;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -17,11 +14,34 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 /**
- * 压缩工具
+ * 压缩工具 2013年12月1日 下午12:55:17
  * @author nick
  */
 public class ZipUtils {
-    
+
+
+    /**
+     * 压缩文件
+     * @param file 支持文件或文件夹
+     * @param out 输出流
+     */
+    public static void zip(File file, OutputStream out) throws IOException {
+        zip(file, out, null);
+    }
+
+    /**
+     * 压缩文件
+     * @param file 支持文件或文件夹
+     * @param out 输出流
+     * @param charsetNullable 制定压缩文件的编码，null则使用默认编码
+     */
+    public static void zip(File file, OutputStream out, Charset charsetNullable) throws IOException {
+        try (ZipOutputStream o = charsetNullable == null ?
+                new ZipOutputStream(out) : new ZipOutputStream(out, charsetNullable)) {
+            zip(o, file, file.getName());
+        }
+    }
+
     public static class ZipItem {
         /** 文件名，包含目录形式：用/隔开，例如a/b/c.txt */
         public String fileName;
@@ -173,4 +193,30 @@ public class ZipUtils {
         }
         return zipFile;
     }
+
+    private static void zip(ZipOutputStream out, File f, String base)
+            throws IOException {
+        if (f.isDirectory()) {
+            // 获取f目录下所有文件及目录,作为一个File数组返回
+            File[] fl = f.listFiles();
+            if (fl == null) {
+                return;
+            }
+            out.putNextEntry(new ZipEntry(base + "/"));
+            base = base.isEmpty() ? "" : base + "/";
+            for (File file : fl) {
+                zip(out, file, base + file.getName());
+            }
+        } else {
+            out.putNextEntry(new ZipEntry(base));
+            try (FileInputStream in = new FileInputStream(f)) {
+                int len;
+                byte[] buff = new byte[4096];
+                while ((len = in.read(buff)) != -1) {
+                    out.write(buff, 0, len);
+                }
+            }
+        }
+    }
+
 }
