@@ -2,10 +2,7 @@ package com.pugwoo.wooutils.json;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -29,6 +26,7 @@ public class JSON {
 
 	/** 只用于克隆对象用，因此不需要过多的额外的配置 */
 	private static final ObjectMapper OBJECT_MAPPER_FOR_CLONE = new ObjectMapper() {{
+		configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); //属性不存在的兼容处理
 		registerModule(new JavaTimeModule());
 	}};
 	

@@ -12,6 +12,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class TestZipUtils {
     
@@ -39,7 +40,23 @@ public class TestZipUtils {
         }
         ZipUtils.zip(items, new FileOutputStream(testPath));
     }
-    
+
+    @Test
+    public void test01_zipUtf8ByDir() throws IOException {
+        System.out.println(" ================================= 使用默认编码(UTF-8)进行打包 ZipUtils.zip : " + testPath);
+        String str = "hello";
+        for (int i = 0; i < 16; i++) {
+            FileOutputStream out = new FileOutputStream("/tmp/" + UUID.randomUUID() + ".txt");
+            out.write(UUID.randomUUID().toString().getBytes());
+            out.close();
+        }
+        String fileName = "/tmp/" + UUID.randomUUID().toString() + ".zip";
+        FileOutputStream out = new FileOutputStream(fileName);
+        ZipUtils.zip(new File("/tmp"), out);
+        System.out.println("zip文件生成完毕：" + fileName);
+        out.close();
+    }
+
     @Test
     public void test02_zipGbk() throws IOException {
         System.out.println(" ================================= 指定使用GBK进行打包 ZipUtils.zip : " + testPathGbk);
