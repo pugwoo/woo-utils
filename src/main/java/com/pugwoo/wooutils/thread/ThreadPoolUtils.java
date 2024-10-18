@@ -102,6 +102,21 @@ public class ThreadPoolUtils {
         return result;
     }
 
+    /**
+     * 关闭线程池并等待所有的线程执行完毕（包括在队列中排队的任务）
+     */
+    public static void shutdownAndWaitAllTermination(ThreadPoolExecutor threadPoolExecutor) {
+        threadPoolExecutor.shutdown();
+        while(true) {
+            try {
+                if (threadPoolExecutor.awaitTermination(24, TimeUnit.HOURS)) {
+                    break;
+                }
+            } catch (InterruptedException ignored) {
+            }
+        }
+    }
+
     private static class MyThreadFactory implements ThreadFactory {
 
         private final AtomicInteger count = new AtomicInteger(1);
