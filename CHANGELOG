@@ -1,3 +1,5 @@
+v1.3.4 - [add] ThreadPoolUtils增加等待所有线程结束并关闭的方法
+
 2024年6月24日
 v1.3.3 - [enhance] 优化JSON.clone对于只有getter没有setter字段的处理
        - [add] 增加压缩工具，支持制定目录进行压缩
