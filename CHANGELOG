@@ -1,3 +1,6 @@
+2024年11月25日
+v1.3.5 - [add] 重写了DateUtils对LocalDateTime和LocalDate、LocalTime的解析，覆盖ISO 8601所有格式
+
 2024年10月18日
 v1.3.4 - [add] ThreadPoolUtils增加等待所有线程结束并关闭的方法
 
