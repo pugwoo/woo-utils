@@ -1,3 +1,6 @@
+
+v1.3.6 - [fix] 修复Browser工具当retry请求时，inputStream读取数据不完整的问题
+
 2024年11月25日
 v1.3.5 - [add] 重写了DateUtils对LocalDateTime和LocalDate、LocalTime的解析，覆盖ISO 8601所有格式
 

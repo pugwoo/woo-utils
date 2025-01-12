@@ -10,6 +10,7 @@ import javax.net.ssl.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.net.*;
+import java.nio.channels.FileChannel;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -451,6 +452,30 @@ public class Browser {
 			boolean isAsync, Map<String, String> requestHeader) throws IOException {
 		IOException ie = null;
 		for(int i = -1; i < postRetryTimes; i++) { // 0表示不重试，即只请求1次
+
+			if (i >= 0 && inputStream != null) {
+				if (inputStream instanceof FileInputStream) {
+					FileChannel fileChannel = ((FileInputStream) inputStream).getChannel();
+					fileChannel.position(0);
+				} else if (inputStream.markSupported()) {
+					inputStream.reset();
+				} else {
+					LOGGER.error("inputStream is not support reset, do not support retry");
+					throw ie;
+				}
+			}
+
+			if (i >= 0 && outputStream != null) {
+				if (outputStream instanceof FileOutputStream) {
+					FileChannel channel = ((FileOutputStream) outputStream).getChannel();
+					channel.position(0);
+					channel.truncate(0);
+				} else {
+					LOGGER.error("outputStream is not FileOutputStream, do not support retry");
+					throw ie;
+				}
+			}
+
 			HttpURLConnection urlConnection = null;
 			try {
 				urlConnection = getUrlConnection(httpUrl, "POST");
@@ -588,6 +613,18 @@ public class Browser {
 		httpUrl = appendParamToUrl(httpUrl, params);
 		IOException ie = null;
 		for(int i = -1; i < getRetryTimes; i++) { // 0表示不重试，即只请求1次
+			// 如果是重试，那么需要特别处理一下输出流，因为上一次的失败可能已经写入了部分数据，这部分数据是属于上一次的，应该清空
+			if (i >= 0 && outputStream != null) {
+				if (outputStream instanceof FileOutputStream) {
+					FileChannel channel = ((FileOutputStream) outputStream).getChannel();
+					channel.position(0);
+					channel.truncate(0);
+				} else {
+					LOGGER.error("outputStream is not FileOutputStream, do not support retry");
+					throw ie;
+				}
+			}
+
 			HttpURLConnection urlConnection = null;
 			try {
 				urlConnection = getUrlConnection(httpUrl, "GET");
@@ -603,7 +640,6 @@ public class Browser {
 							if(!httpUrl.equals(location.get(0))) { // 避免死循环
 								// 跳转之前处理cookie
 								handleCookies(urlConnection.getHeaderFields());
-
 								return _get(location.get(0), params, outputStream, isAsync);
 							}
 						}
