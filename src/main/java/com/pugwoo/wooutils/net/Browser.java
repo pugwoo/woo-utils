@@ -390,7 +390,7 @@ public class Browser {
 	/**
 	 * post方式请求HTTP
 	 * @param httpUrl 请求的url地址，可以带queryString参数（此处的queryString参数【不会】被编解码处理）
-	 * @param inputStream post的二进制数据，以inputStream的形式提供
+	 * @param inputStream post的二进制数据，以inputStream的形式提供，请自行设置Content-Type，默认为text/plain
 	 * @return 请求返回数据，请注意通过http状态码判断请求是否成功
 	 */
 	public HttpResponse post(String httpUrl, InputStream inputStream) throws IOException {
@@ -484,7 +484,7 @@ public class Browser {
 						urlConnection.setRequestProperty(entry.getKey(), entry.getValue());
 					}
 				}
-				
+
 				// POST 数据
 				if(inputStream != null) {
 					urlConnection.setDoOutput(true);
@@ -497,10 +497,13 @@ public class Browser {
 			        os.flush();
 
 					IOUtils.close(os);
-					IOUtils.close(inputStream);
 				}
-		        
-				return makeHttpResponse(httpUrl, urlConnection, outputStream, isAsync);
+
+				HttpResponse resp = makeHttpResponse(urlConnection, outputStream, isAsync);
+				if (resp.getResponseCode() >= 500 && i < postRetryTimes - 1) {
+					continue; // 状态码500及以上，有机会重试的情况下，重试
+				}
+				return resp;
 			} catch (IOException e) {
 				LOGGER.error("post url:{} exception msg:{}", httpUrl, e.getMessage());
 				ie = e;
@@ -523,8 +526,8 @@ public class Browser {
 				}
 			}
 		}
+		IOUtils.close(inputStream);
 		throw ie;
-
 	}
 	
 	// ================================= GET BEGIN ================================
@@ -646,7 +649,11 @@ public class Browser {
 					}
 				}
 
-				return makeHttpResponse(httpUrl, urlConnection, outputStream, isAsync);
+				HttpResponse resp = makeHttpResponse(urlConnection, outputStream, isAsync);
+				if (resp.getResponseCode() >= 500 && i < getRetryTimes - 1) {
+					continue; // 状态码500及以上，有机会重试的情况下，重试
+				}
+				return resp;
 			} catch (IOException e) {
 				LOGGER.error("get url:{} error msg:{}", httpUrl, e.getMessage());
 				ie = e;
@@ -773,7 +780,7 @@ public class Browser {
 	 *        当isAsync为true时，HttpResponse可以获得已下载的字节数。
 	 * @throws IOException 
 	 */
-	private HttpResponse makeHttpResponse(String httpUrl, HttpURLConnection urlConnection,
+	private HttpResponse makeHttpResponse(HttpURLConnection urlConnection,
 			final OutputStream outputStream, boolean isAsync) throws IOException {
 		HttpResponse httpResponse = new HttpResponse();
 		httpResponse.setCharset(charset);
@@ -798,7 +805,7 @@ public class Browser {
 			connectionIn = urlConnection.getInputStream();
 		}
 		
-		final InputStream in = isGzip ? new GZIPInputStream(connectionIn) : connectionIn;
+		final InputStream in = connectionIn == null ? null : (isGzip ? new GZIPInputStream(connectionIn) : connectionIn);
 		byte[] buf = new byte[4096];
 		int len;
 		if(outputStream != null) {
@@ -810,10 +817,12 @@ public class Browser {
                     byte[] buf1 = new byte[4096];
                     int len1;
                     try {
-                        while((len1 = in.read(buf1)) != -1) {
-                            future.downloadedBytes += len1;
-                            outputStream.write(buf1, 0, len1);
-                        }
+						if (in != null) {
+							while((len1 = in.read(buf1)) != -1) {
+								future.downloadedBytes += len1;
+								outputStream.write(buf1, 0, len1);
+							}
+						}
                         future.isFinished = true;
                     } catch (IOException e) {
                         LOGGER.error("outputStream write error", e);
@@ -830,8 +839,10 @@ public class Browser {
 
 			} else {
 				try {
-					while((len = in.read(buf)) != -1) {
-						outputStream.write(buf, 0, len);
+					if (in != null) {
+						while((len = in.read(buf)) != -1) {
+							outputStream.write(buf, 0, len);
+						}
 					}
 				} finally {
 					IOUtils.close(outputStream);
@@ -841,8 +852,10 @@ public class Browser {
 		} else {
 			try {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				while((len = in.read(buf)) != -1) {
-					baos.write(buf, 0, len);
+				if (in != null) {
+					while((len = in.read(buf)) != -1) {
+						baos.write(buf, 0, len);
+					}
 				}
 				httpResponse.setContentBytes(baos.toByteArray());
 			} finally {
