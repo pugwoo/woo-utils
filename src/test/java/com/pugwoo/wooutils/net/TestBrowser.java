@@ -111,5 +111,31 @@ public class TestBrowser {
 //    	return new StreamDownloadBean("sample-" + sampleNumber + ".pdf", in, headers);
 
 	}
+
+
+	/**
+	 * 测试重试场景下的inputstream和outputstream是否完整，请先准备一个接口，它会随机成功或失败
+	 */
+	@Test
+	public void testRetryWithStream() throws IOException {
+		Browser browser = new Browser();
+
+		browser.setRetryTimes(100);
+
+		for (int i = 0; i < 100; i++) {
+			HttpResponse resp = browser.get("http://127.0.0.1:8080/admin-demo/random_fail", MapUtils.of("name", "nick3"));
+			System.out.println("get status code:" + resp.getResponseCode() + "," + resp.getContentString());
+
+			resp = browser.post("http://127.0.0.1:8080/admin-demo/random_fail", MapUtils.of("name", "nick7"));
+			System.out.println("post status code:" + resp.getResponseCode() + "," + resp.getContentString());
+		}
+
+		for (int i = 0; i < 100; i++) {
+			FileInputStream in = new FileInputStream("d:/a.txt");
+			browser.addRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			HttpResponse resp = browser.post("http://127.0.0.1:8080/admin-demo/random_fail", in);
+			System.out.println("post status code:" + resp.getResponseCode() + "," + resp.getContentString());
+		}
+	}
 	
 }
