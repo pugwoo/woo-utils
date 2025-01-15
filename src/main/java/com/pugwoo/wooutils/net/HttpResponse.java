@@ -60,8 +60,8 @@ public class HttpResponse {
 	
 	/**
 	 * 获得已下载的字节数，非异步下载返回-1
-	 * @return
 	 */
+	@JsonIgnore
 	public long getDownloadedBytes() {
 		if(future == null) {
 			return -1;
@@ -71,7 +71,6 @@ public class HttpResponse {
 	
 	/**
 	 * 获取下载是否已经完成，针对异步下载而言
-	 * @return
 	 */
 	@JsonIgnore
 	public boolean isDownloadFinished() {
@@ -79,6 +78,13 @@ public class HttpResponse {
 			return true;
 		}
 		return future.isFinished;
+	}
+
+	/**
+	 * 下载是否异常结束，针对异步下载而言
+	 */
+	public boolean isException() {
+		return future != null && future.isException;
 	}
 
 	/**
