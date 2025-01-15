@@ -45,6 +45,8 @@ public class Browser {
 		public long downloadedBytes;
 		/**是否已经下载完成*/
 		public boolean isFinished;
+        /**是否发生了异常，当值为true时，表示已经发生了异常并结束了请求*/
+		public boolean isException;
 	}
 		
 	/**cookie, domain(域根目录) -> key/value*/
@@ -825,6 +827,7 @@ public class Browser {
 						}
                         future.isFinished = true;
                     } catch (IOException e) {
+						future.isException = true;
                         LOGGER.error("outputStream write error", e);
                     } finally {
                         IOUtils.close(outputStream);
