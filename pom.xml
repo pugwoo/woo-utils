@@ -9,6 +9,7 @@
 
 	<modules>
         <module>woo-utils</module>
+		<module>for-test</module>
 	</modules>
 
 </project>
