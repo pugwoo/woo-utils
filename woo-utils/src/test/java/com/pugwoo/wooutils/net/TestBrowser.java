@@ -19,24 +19,6 @@ public class TestBrowser {
 		assert resp.getContentString().contains("百度一下");
 	}
 
-	@Test
-	public void testBasicPost() throws Exception {
-		Browser browser = new Browser();
-		browser.setHttpProxy("127.0.0.1", 8888);
-		//browser.post("http://www.baidu.com",
-		//		MapUtils.of("key1", "val1", "key2", "val2"));
-
-		OutputStream out = new FileOutputStream("d:/a.txt");
-
-		Map<String, Object> map = MapUtils.of("key1", "val1", "key2", 33);
-
-
-		//browser.addRequestHeader("Content-Type", "text/plain");
-
-//		browser.post("http://127.0.0.1:8080/post",
-//				"content".getBytes(), out);
-	}
-	
 	// 测试上传文件
 	@Test
 	public void testPost() throws Exception {
@@ -135,7 +117,6 @@ public class TestBrowser {
 		}
 
 		File tempFile = File.createTempFile("woo-utils-test", ".txt");
-		tempFile.deleteOnExit();
 		FileOutputStream out = new FileOutputStream(tempFile);
 		out.write("name=nick5".getBytes());
 		out.close();
@@ -148,6 +129,8 @@ public class TestBrowser {
 			assert resp.getResponseCode() == 200;
 			assert resp.getContentString().equals("ok, your name is:nick5");
 		}
+
+		tempFile.deleteOnExit();
 	}
 	
 }
