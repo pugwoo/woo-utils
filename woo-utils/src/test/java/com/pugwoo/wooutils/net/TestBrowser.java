@@ -5,6 +5,7 @@ import com.pugwoo.wooutils.lang.DateUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,64 +34,20 @@ public class TestBrowser {
 	}
 
 	@Test
-	public void testGet() throws Exception {
-//		HttpResponse resp = new Browser().get("http://www.baidu.com");
-//		System.out.println(resp.getHeaders());
-//		System.out.println(resp.getContentLength());
-//		System.out.println(resp.getContentString());
+	public void testAsyncDownload() throws Exception {
+		File tempFile = File.createTempFile("woo-utils-test", ".txt");
+		FileOutputStream out = new FileOutputStream(tempFile);
 
-		OutputStream out = new FileOutputStream("d:/a.txt");
-		HttpResponse resp = new Browser().getAsync("http://www.baidu.com",
-				out);
+		HttpResponse resp = new Browser().getAsync("http://127.0.0.1:8080/download?content=hello123456", out);
 		while(!resp.isDownloadFinished()) {
-			System.out.println(resp.getDownloadedBytes());
 			Thread.sleep(100);
 		}
+
+		byte[] fileBytes = Files.readAllBytes(tempFile.toPath());
+		assert "hello123456".equals(new String(fileBytes));
+
+		tempFile.deleteOnExit();
 	}
-
-	/**
-	 * 下载一个将近1G的文件
-	 * @throws Exception
-	 */
-	@Test
-	public void  testDownload() throws Exception {
-		OutputStream out = new FileOutputStream("d:/a.iso");
-		HttpResponse resp = new Browser().getAsync(
-				"https://mirrors.163.com/centos/8-stream/isos/x86_64/CentOS-Stream-8-20230523.0-x86_64-boot.iso",
-				out);
-		while(!resp.isDownloadFinished()) {
-			System.out.println(DateUtils.format(new Date()) + " 已下载:" + resp.getDownloadedBytes());
-			Thread.sleep(1000);
-		}
-
-		System.out.println("下载完成");
-	}
-
-	public static void main(String[] args) throws Exception {
-
-		/////////////////////////// 把远程的下载转输的outputStream出到下载的InputStream，使用pipe的方式
-		
-		final String downUrl = "http://下载链接";
-		
-    	PipedInputStream in = new PipedInputStream();
-    	final PipedOutputStream out2 = new PipedOutputStream(in); // 将输入流和输出流对起来
-    	new Thread(new Runnable() {
-    	    public void run () {
-    	    	try {
-					new Browser().get(downUrl, out2);
-					out2.close();
-				} catch (IOException e) {
-//					LOGGER.error("down report fail, url:{}", downUrl, e);
-				}
-    	    }
-    	}).start();
-    	
-    	Map<String, String> headers = new HashMap<String, String>();
-    	headers.put("Content-type", "application/pdf");
-//    	return new StreamDownloadBean("sample-" + sampleNumber + ".pdf", in, headers);
-
-	}
-
 
 	/**
 	 * 测试重试场景下的inputstream和outputstream是否完整，请先准备一个接口，它会随机成功或失败
