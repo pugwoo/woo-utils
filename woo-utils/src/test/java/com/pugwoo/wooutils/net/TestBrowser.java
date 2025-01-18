@@ -34,6 +34,18 @@ public class TestBrowser {
 	}
 
 	@Test
+	public void testPostJson() throws Exception {
+		Browser browser = new Browser();
+		Map<String, Object> params = new HashMap<>();
+		params.put("name", "nick");
+		params.put("age", 18);
+		HttpResponse resp = browser.postJson("http://127.0.0.1:8080/json_param", params);
+		System.out.println(resp.getContentString());
+		assert resp.getResponseCode() == 200;
+		assert "name=nick, age=18".equals(resp.getContentString());
+	}
+
+	@Test
 	public void testAsyncDownload() throws Exception {
 		File tempFile = File.createTempFile("woo-utils-test", ".txt");
 		FileOutputStream out = new FileOutputStream(tempFile);
