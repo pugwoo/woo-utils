@@ -2,6 +2,7 @@ package com.pugwoo.wooutils.net;
 
 import com.pugwoo.wooutils.io.IOUtils;
 import com.pugwoo.wooutils.json.JSON;
+import com.pugwoo.wooutils.string.StringTools;
 import com.pugwoo.wooutils.thread.ThreadPoolUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,8 @@ public class Browser {
 	
 	/**全局的请求时的头部*/
 	private final Map<String, String> requestProperty = new HashMap<>();
+    /**请求的头部的小写名称到request头部名称的映射*/
+	private final Map<String, String> requestHeaderLowercaseKey = new HashMap<>();
 
 	private String USER_AGENT = "java";
 
@@ -190,11 +193,31 @@ public class Browser {
 	 * 注意：请不要用这个方法设置cookie，请使用addCookie方法
 	 */
 	public void addRequestHeader(String key, String value) {
+		if (value == null) {
+			value = "";
+		}
+		if (key == null) {
+			return;
+		}
+		String keyLowercase = key.toLowerCase();
+		String s = requestHeaderLowercaseKey.get(keyLowercase);
+		if (s != null) {
+			requestProperty.remove(s);
+		}
 		requestProperty.put(key, value);
+		requestHeaderLowercaseKey.put(keyLowercase, key);
 	}
 
 	public void delRequestHeader(String key) {
-		requestProperty.remove(key);
+		if (key == null) {
+			return;
+		}
+		String keyLowercase = key.toLowerCase();
+		String s = requestHeaderLowercaseKey.get(keyLowercase);
+		if (s != null) {
+			requestProperty.remove(s);
+			requestHeaderLowercaseKey.remove(keyLowercase);
+		}
 	}
 
 	/**设置请求时的头部，该设置是Browser实例全局的。<br>
@@ -283,15 +306,11 @@ public class Browser {
 	public HttpResponse post(String httpUrl, Map<String, Object> params, OutputStream outputStream) throws IOException {
 		if(isWithBrowserPostFile(params)) {
 			String boundary = "----WebKitFormBoundaryYp0ZBDEHwALiqVW5";
-			Map<String, String> header = new HashMap<>();
-			header.put("Content-Type", "multipart/form-data; boundary=" + boundary);
 			return _post(httpUrl, buildPostString(params, boundary),
-					outputStream, false, header);
+					outputStream, false, "multipart/form-data; boundary=" + boundary);
 		} else {
-			Map<String, String> header = new HashMap<>();
-			header.put("Content-Type", "application/x-www-form-urlencoded");
 			return _post(httpUrl, new ByteArrayInputStream(buildPostString(params)),
-					outputStream, false, header);
+					outputStream, false, "application/x-www-form-urlencoded");
 		}
 	}
 
@@ -303,10 +322,8 @@ public class Browser {
      * @return 请求返回数据，请注意通过http状态码判断请求是否成功
      */
     public HttpResponse postJson(String httpUrl, Object paramObject) throws IOException {
-		Map<String, String> header = new HashMap<>();
-		header.put("Content-Type", "application/json");
 		return _post(httpUrl, new ByteArrayInputStream(buildPostJson(paramObject)),
-				null, false, header);
+				null, false, "application/json");
     }
 
     /**
@@ -318,10 +335,8 @@ public class Browser {
      * @return 请求返回数据，请注意通过http状态码判断请求是否成功
      */
 	public HttpResponse postJson(String httpUrl, Object paramObject, OutputStream outputStream) throws IOException {
-        Map<String, String> header = new HashMap<>();
-        header.put("Content-Type", "application/json");
         return _post(httpUrl, new ByteArrayInputStream(buildPostJson(paramObject)),
-                outputStream, false, header);
+                outputStream, false, "application/json");
     }
 
     /**
@@ -332,10 +347,8 @@ public class Browser {
      * @return 请求返回数据对象，异步的，支持获取当前请求状态，请注意通过http状态码判断请求是否成功
      */
     public HttpResponse postJsonAsync(String httpUrl, Object toJson, OutputStream outputStream) throws IOException {
-        Map<String, String> header = new HashMap<>();
-        header.put("Content-Type", "application/json");
         return _post(httpUrl, new ByteArrayInputStream(buildPostJson(toJson)),
-                outputStream, true, header);
+                outputStream, true, "application/json");
     }
 	
 	/**
@@ -348,15 +361,11 @@ public class Browser {
 	public HttpResponse postAsync(String httpUrl, Map<String, Object> params, OutputStream outputStream) throws IOException {
 		if(isWithBrowserPostFile(params)) {
 			String boundary = "----WebKitFormBoundaryYp0ZBDEHwALiqVW5";
-			Map<String, String> header = new HashMap<>();
-			header.put("Content-Type", "multipart/form-data; boundary=" + boundary);
 			return _post(httpUrl, buildPostString(params, boundary),
-					outputStream, true, header);
+					outputStream, true, "multipart/form-data; boundary=" + boundary);
 		} else {
-			Map<String, String> header = new HashMap<>();
-			header.put("Content-Type", "application/x-www-form-urlencoded");
 			return _post(httpUrl, new ByteArrayInputStream(buildPostString(params)),
-					outputStream, false, header);
+					outputStream, false, "application/x-www-form-urlencoded");
 		}
 	}
 	
@@ -367,11 +376,8 @@ public class Browser {
 	 * @return 请求返回数据，请注意通过http状态码判断请求是否成功
 	 */
 	public HttpResponse post(String httpUrl, byte[] postData) throws IOException {
-		Map<String, String> header = new HashMap<>();
-		if(!requestProperty.containsKey("Content-Type")) {
-			header.put("Content-Type", "text/plain");
-		}
-		return _post(httpUrl, new ByteArrayInputStream(postData), null, false, header);
+		return _post(httpUrl, new ByteArrayInputStream(postData), null, false,
+				requestHeaderLowercaseKey.get("content-type") == null ? "text/plain" : null);
 	}
 	
 	/**
@@ -382,11 +388,8 @@ public class Browser {
 	 * @return 请求返回数据，请注意通过http状态码判断请求是否成功
 	 */
 	public HttpResponse post(String httpUrl, byte[] postData, OutputStream outputStream) throws IOException {
-		Map<String, String> header = new HashMap<>();
-		if(!requestProperty.containsKey("Content-Type")) {
-			header.put("Content-Type", "text/plain");
-		}
-		return _post(httpUrl, new ByteArrayInputStream(postData), outputStream, false, header);
+		return _post(httpUrl, new ByteArrayInputStream(postData), outputStream, false,
+				requestHeaderLowercaseKey.get("content-type") == null ? "text/plain" : null);
 	}
 	
 	/**
@@ -396,11 +399,8 @@ public class Browser {
 	 * @return 请求返回数据，请注意通过http状态码判断请求是否成功
 	 */
 	public HttpResponse post(String httpUrl, InputStream inputStream) throws IOException {
-		Map<String, String> header = new HashMap<>();
-		if(!requestProperty.containsKey("Content-Type")) {
-			header.put("Content-Type", "text/plain");
-		}
-		return _post(httpUrl, inputStream, null, false, header);
+		return _post(httpUrl, inputStream, null, false,
+				requestHeaderLowercaseKey.get("content-type") == null ? "text/plain" : null);
 	}
 	
 	/**
@@ -412,11 +412,8 @@ public class Browser {
 	 */
 	public HttpResponse post(String httpUrl, InputStream inputStream, OutputStream outputStream)
 			throws IOException {
-		Map<String, String> header = new HashMap<>();
-		if(!requestProperty.containsKey("Content-Type")) {
-			header.put("Content-Type", "text/plain");
-		}
-		return _post(httpUrl, inputStream, outputStream, false, header);
+		return _post(httpUrl, inputStream, outputStream, false,
+				requestHeaderLowercaseKey.get("content-type") == null ? "text/plain" : null);
 	}
 	
 	/**
@@ -426,11 +423,8 @@ public class Browser {
 	 * @param outputStream 如果提供，则post内容将输出到该输出流，输出完之后自动close掉，请注意通过http状态码判断请求是否成功
 	 */
 	public HttpResponse postAsync(String httpUrl, byte[] postData, OutputStream outputStream) throws IOException {
-		Map<String, String> header = new HashMap<>();
-		if(!requestProperty.containsKey("Content-Type")) {
-			header.put("Content-Type", "text/plain");
-		}
-		return _post(httpUrl, new ByteArrayInputStream(postData), outputStream, true, header);
+		return _post(httpUrl, new ByteArrayInputStream(postData), outputStream, true,
+				requestHeaderLowercaseKey.get("content-type") == null ? "text/plain" : null);
 	}
 	
 	/**
@@ -443,15 +437,15 @@ public class Browser {
 	 */
 	public HttpResponse postAsync(String httpUrl, InputStream inputStream, OutputStream outputStream)
 	        throws IOException {
-		Map<String, String> header = new HashMap<>();
-		if(!requestProperty.containsKey("Content-Type")) {
-			header.put("Content-Type", "text/plain");
-		}
-		return _post(httpUrl, inputStream, outputStream, true, header);
+		return _post(httpUrl, inputStream, outputStream, true,
+				requestHeaderLowercaseKey.get("content-type") == null ? "text/plain" : null);
 	}
-	
+
+	/**
+	 * @param contentType 如果不为null，则优先用这个
+	 */
 	private HttpResponse _post(String httpUrl, InputStream inputStream, OutputStream outputStream,
-			boolean isAsync, Map<String, String> requestHeader) throws IOException {
+			boolean isAsync, String contentType) throws IOException {
 		IOException ie = null;
 		for(int i = -1; i < postRetryTimes; i++) { // 0表示不重试，即只请求1次
 
@@ -480,12 +474,7 @@ public class Browser {
 
 			HttpURLConnection urlConnection = null;
 			try {
-				urlConnection = getUrlConnection(httpUrl, "POST");
-				if(requestHeader != null) {
-					for(Entry<String, String> entry : requestHeader.entrySet()) {
-						urlConnection.setRequestProperty(entry.getKey(), entry.getValue());
-					}
-				}
+				urlConnection = getUrlConnection(httpUrl, "POST", contentType);
 
 				// POST 数据
 				if(inputStream != null) {
@@ -632,7 +621,7 @@ public class Browser {
 
 			HttpURLConnection urlConnection = null;
 			try {
-				urlConnection = getUrlConnection(httpUrl, "GET");
+				urlConnection = getUrlConnection(httpUrl, "GET", "");
 
 				if(enableRedirect) {
 					// 301 302 跳转处理
@@ -687,10 +676,9 @@ public class Browser {
 	 * 拿到http连接对象
 	 * @param httpUrl
 	 * @param method
-	 * @return
-	 * @throws IOException
+	 * @param contentType 如果指定了contentType，那么使用该contentType，优先级高于requestProperty中的contentType
 	 */
-	private HttpURLConnection getUrlConnection(String httpUrl, String method) throws IOException {
+	private HttpURLConnection getUrlConnection(String httpUrl, String method, String contentType) throws IOException {
 		URL url = new URL(httpUrl);
 		HttpURLConnection urlConnection = null;
 		if(proxy == null) {
@@ -736,9 +724,21 @@ public class Browser {
 			urlConnection.setRequestProperty("Cookie", cookieSb.toString());
 		}
 
-		// 设置用户自定义RequestProperty
+		// 设置用户自定义RequestProperty，其中contentType优先
+		if (StringTools.isEmpty(contentType)) {
+			String s = requestHeaderLowercaseKey.get("content-type");
+			if (s != null) {
+				contentType = requestProperty.get(s);
+			}
+		}
+		if (StringTools.isNotEmpty(contentType)) {
+			urlConnection.setRequestProperty("Content-Type", contentType);
+		}
+
 		for(Entry<String, String> entry : requestProperty.entrySet()) {
-			urlConnection.setRequestProperty(entry.getKey(), entry.getValue());
+			if (!"content-type".equalsIgnoreCase(entry.getKey())) {
+				urlConnection.setRequestProperty(entry.getKey(), entry.getValue());
+			}
 		}
 		
 		return urlConnection;
