@@ -123,18 +123,30 @@ public class TestBrowser {
 		browser.setRetryTimes(100);
 
 		for (int i = 0; i < 100; i++) {
-			HttpResponse resp = browser.get("http://127.0.0.1:8080/admin-demo/random_fail", MapUtils.of("name", "nick3"));
+			HttpResponse resp = browser.get("http://127.0.0.1:8080/random_fail", MapUtils.of("name", "nick3"));
 			System.out.println("get status code:" + resp.getResponseCode() + "," + resp.getContentString());
+			assert resp.getResponseCode() == 200;
+			assert resp.getContentString().equals("ok, your name is:nick3");
 
-			resp = browser.post("http://127.0.0.1:8080/admin-demo/random_fail", MapUtils.of("name", "nick7"));
+			resp = browser.post("http://127.0.0.1:8080/random_fail", MapUtils.of("name", "nick7"));
 			System.out.println("post status code:" + resp.getResponseCode() + "," + resp.getContentString());
+			assert resp.getResponseCode() == 200;
+			assert resp.getContentString().equals("ok, your name is:nick7");
 		}
 
+		File tempFile = File.createTempFile("woo-utils-test", ".txt");
+		tempFile.deleteOnExit();
+		FileOutputStream out = new FileOutputStream(tempFile);
+		out.write("name=nick5".getBytes());
+		out.close();
+
 		for (int i = 0; i < 100; i++) {
-			FileInputStream in = new FileInputStream("d:/a.txt");
+			FileInputStream in = new FileInputStream(tempFile);
 			browser.addRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-			HttpResponse resp = browser.post("http://127.0.0.1:8080/admin-demo/random_fail", in);
+			HttpResponse resp = browser.post("http://127.0.0.1:8080/random_fail", in);
 			System.out.println("post status code:" + resp.getResponseCode() + "," + resp.getContentString());
+			assert resp.getResponseCode() == 200;
+			assert resp.getContentString().equals("ok, your name is:nick5");
 		}
 	}
 	
