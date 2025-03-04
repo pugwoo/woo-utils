@@ -1,3 +1,6 @@
+2025年3月4日
+v1.3.9 - [enhance] 优化maven依赖: javax.servlet和jakarta.servlet scope改成provided
+
 2025年1月18日
 v1.3.8 - [enhance] 优化Browser中对request header的处理，不区分大小写了
 
