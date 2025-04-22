@@ -39,6 +39,8 @@ public class ZipUtils {
         try (ZipOutputStream o = charsetNullable == null ?
                 new ZipOutputStream(out) : new ZipOutputStream(out, charsetNullable)) {
             zip(o, file, file.getName());
+            o.finish();
+            o.flush();
         }
     }
 
@@ -216,6 +218,8 @@ public class ZipUtils {
                     out.write(buff, 0, len);
                 }
             }
+            out.closeEntry();
+            out.flush();
         }
     }
 

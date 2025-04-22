@@ -1,3 +1,6 @@
+2025年4月22日
+v1.3.10 - [enhance] 优化Zip压缩内存占用
+
 2025年3月4日
 v1.3.9 - [enhance] 优化maven依赖: javax.servlet和jakarta.servlet scope改成provided
 
