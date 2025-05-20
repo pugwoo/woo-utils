@@ -17,11 +17,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <br>
  * 关于暂停：等价于 start - stop - resume
  * 重新开始：等价于 start - stop - start
- * 
+ *
  * @author pugwoo
  */
 public class EasyRunTask {
-	
+
 	/**用于同步sync*/
 	private final EasyRunTask that = this;
 
@@ -31,7 +31,7 @@ public class EasyRunTask {
 	private TaskStatusEnum status = TaskStatusEnum.NEW;
 	/**每次同时多线程指定的任务数，需要一批一批来，每批作为停止的单位*/
 	private final int concurrentNum;
-	
+
 	/**抛出的异常记录[线程安全]*/
 	private final List<Throwable> exceptions = new Vector<>();
 	/**任务总数[线程安全]*/
@@ -42,22 +42,22 @@ public class EasyRunTask {
 	private final AtomicInteger success = new AtomicInteger(0);
 	/**执行失败的任务总数[线程安全]*/
 	private final AtomicInteger fail = new AtomicInteger(0);
-	
+
 	/**任务开始时间*/
 	private Date startTime;
 	/**任务结束时间*/
 	private Date endTime;
-		
+
 	public EasyRunTask(ITask task) {
 		this.task = task;
 		this.concurrentNum = 1;
 	}
-	
+
 	public EasyRunTask(ITask task, int concurrentNum) {
 		this.task = task;
 		this.concurrentNum = concurrentNum;
 	}
-	
+
 	/**
 	 * 启动任务
 	 * @return 操作结果
@@ -65,7 +65,7 @@ public class EasyRunTask {
 	public synchronized TaskResult start() {
 		return run(true);
 	}
-	
+
 	/**
 	 * 停止之后恢复任务
 	 * @return 操作结果
@@ -73,7 +73,7 @@ public class EasyRunTask {
 	public synchronized TaskResult resume() {
 		return run(false);
 	}
-	
+
 	/**
 	 * 停止任务
 	 * @return 操作结果
@@ -85,7 +85,7 @@ public class EasyRunTask {
 		}
 		return new TaskResult(false, "stop must at running status");
 	}
-	
+
 	/**查询剩余的任务数，如果有异常，也返回0，返回0表示没有更多任务了*/
 	private int getRestCount() {
 		try {
@@ -103,9 +103,10 @@ public class EasyRunTask {
 		if(task == null) {
 			return new TaskResult(false, "task is not assigned");
 		}
-		
+
 		if(reset) {
 			startTime = new Date();
+			endTime = null;
 			task.reset();
 			total.set(0);
 			processed.set(0);
@@ -114,7 +115,7 @@ public class EasyRunTask {
 			exceptions.clear();
 		}
 		status = TaskStatusEnum.RUNNING;
-		
+
 		new Thread(MDCUtils.withMdc(() -> {
 			ThreadPoolExecutor executeThem = concurrentNum == 1 ? null :
 					ThreadPoolUtils.createThreadPool(concurrentNum, 0,
@@ -238,5 +239,5 @@ public class EasyRunTask {
 	public Date getEndTime() {
 		return endTime;
 	}
-	
+
 }
