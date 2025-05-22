@@ -132,7 +132,7 @@ public class EasyRunTask {
 					}
 
 					int restCount = getRestCount();
-					if(getRestCount() <= 0) {
+					if(restCount <= 0) {
 						synchronized (that) { // 结束任务
 							status = TaskStatusEnum.FINISHED;
 							endTime = new Date();
