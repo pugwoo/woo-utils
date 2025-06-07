@@ -694,7 +694,7 @@ public class Browser {
 		urlConnection.setConnectTimeout(connectTimeoutSeconds * 1000);
 		urlConnection.setReadTimeout(readTimeoutSeconds * 1000);
 		urlConnection.setRequestMethod(method);
-		urlConnection.setRequestProperty("User-agent", USER_AGENT);
+		urlConnection.setRequestProperty("User-Agent", USER_AGENT);
 		if (!disableGzip) {
 			urlConnection.setRequestProperty("Accept-Encoding", "gzip"); // support gzip
 		}
