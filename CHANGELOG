@@ -1,4 +1,6 @@
+2025年6月8日
 v1.3.11 - [fix] 修复EasyRunTask任务重新开始时，结束时间没有重置的问题
+        - [add] Browser支持设置代理、socks5代理
 
 2025年4月22日
 v1.3.10 - [enhance] 优化Zip压缩内存占用
