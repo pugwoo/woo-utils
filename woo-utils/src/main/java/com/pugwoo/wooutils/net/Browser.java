@@ -267,6 +267,19 @@ public class Browser {
 		return this;
 	}
 
+	/**
+	 * 设置socks代理
+	 */
+	public Browser setSocksProxy(String ip, int port) {
+		proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(ip, port));
+		return this;
+	}
+
+	public Browser setProxy(Proxy proxy) {
+		this.proxy = proxy;
+		return this;
+	}
+
 	// ======================== POST BEGIN ===========================================
 	
 	/**
