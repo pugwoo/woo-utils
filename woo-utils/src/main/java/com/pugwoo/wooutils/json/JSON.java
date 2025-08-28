@@ -416,8 +416,6 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -{@literal >} {
 			return function.apply(executeObjectMapper);
 		} catch (IOException e) {
 			throw new RuntimeException(Optional.ofNullable(exceptionMsg).orElse("json operate failed"), e);
-		} finally {
-			OBJECT_MAPPER_THREAD_LOCAL.remove();
 		}
 	}
 	
