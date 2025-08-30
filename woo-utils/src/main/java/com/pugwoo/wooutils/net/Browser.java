@@ -41,6 +41,15 @@ public class Browser {
 	private static final ThreadPoolExecutor asyncDownloadThreadPool =
 			ThreadPoolUtils.createThreadPool(10, 100, 20, "asyncDownloadThreadPool"); // 异步下载共用线程池
 
+	// 添加静态块来注册关闭钩子，确保应用关闭时线程池被正确清理
+	static {
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			if (asyncDownloadThreadPool != null && !asyncDownloadThreadPool.isShutdown()) {
+				ThreadPoolUtils.shutdownAndWaitAllTermination(asyncDownloadThreadPool);
+			}
+		}, "Browser-Cleanup"));
+	}
+
 	public static class HttpResponseFuture {
 		/**已经下载的字节数*/
 		public long downloadedBytes;

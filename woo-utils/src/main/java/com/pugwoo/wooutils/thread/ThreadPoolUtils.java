@@ -39,6 +39,20 @@ public class ThreadPoolUtils {
      * @param threadNamePrefix 线程前缀名称
      */
     public static ThreadPoolExecutor createThreadPool(int coreSize, int queueSize, int maxSize, String threadNamePrefix) {
+        // 参数验证
+        if (coreSize < 0) {
+            throw new IllegalArgumentException("coreSize cannot be negative: " + coreSize);
+        }
+        if (maxSize <= 0) {
+            throw new IllegalArgumentException("maxSize must be positive: " + maxSize);
+        }
+        if (coreSize > maxSize) {
+            throw new IllegalArgumentException("coreSize cannot be greater than maxSize: " + coreSize + " > " + maxSize);
+        }
+        if (threadNamePrefix == null) {
+            threadNamePrefix = "thread-pool";
+        }
+        
         return new ThreadPoolExecutor(
                 coreSize, maxSize,
                 60, // 空闲线程存活时间
