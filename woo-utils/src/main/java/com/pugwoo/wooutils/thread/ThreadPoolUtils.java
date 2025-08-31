@@ -65,7 +65,7 @@ public class ThreadPoolUtils {
     /**
      * 创建一个线程池，一些默认配置：
      * 1）空闲线程存活时间为60秒
-     * 2）拒绝策略：用默认，抛出RejectedExecutionException异常
+     * 2）拒绝策略：根据isBlockingWhenQueueFull参数决定，true时阻塞等待，false时抛出RejectedExecutionException异常
      * <br>
      * 说明：该工具类创建的线程池可以自动继承父线程的MDC上下文。
      * <br>

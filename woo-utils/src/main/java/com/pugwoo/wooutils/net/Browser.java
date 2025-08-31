@@ -25,7 +25,7 @@ import java.util.zip.GZIPInputStream;
  * 1. 支持指定为输出流 【done】
  * 2. 支持cookie,不支持过期特性 【done】
  * 3. 支持指定proxy【done】
- * 4. 支持超时和重试，默认超时1分钟，重试次数10次【done】
+ * 4. 支持超时和重试，默认连接超时10秒，读取超时60秒，GET重试1次，POST不重试【done】
  * 5. 支持程序写cookie，模拟javascript写cookie【done】
  * 
  * @author pugwoo@gmail.com

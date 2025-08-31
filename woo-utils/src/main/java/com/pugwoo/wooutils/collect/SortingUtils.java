@@ -60,6 +60,7 @@ public class SortingUtils {
 				if (compareResult == 0) {
 					continue;
 				}
+				// 升序时返回原比较结果，降序时返回相反的结果
 				return (sf.isAsc() ? 1 : -1) * compareResult;
 			}
 			return 0;
