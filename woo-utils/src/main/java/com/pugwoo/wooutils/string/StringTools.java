@@ -228,7 +228,20 @@ public class StringTools {
 	 * @return
 	 */
 	public static String randomString(String source, int num) {
-		StringBuilder sb = new StringBuilder();
+		if (source == null) {
+			throw new IllegalArgumentException("source cannot be null");
+		}
+		if (source.isEmpty()) {
+			throw new IllegalArgumentException("source cannot be empty");
+		}
+		if (num < 0) {
+			throw new IllegalArgumentException("num cannot be negative: " + num);
+		}
+		if (num == 0) {
+			return "";
+		}
+		
+		StringBuilder sb = new StringBuilder(num); // 预分配容量提高性能
 		Random random = new Random();
 		for(int i = 0; i < num; i++) {
 			sb.append(source.charAt(random.nextInt(source.length())));

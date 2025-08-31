@@ -77,6 +77,20 @@ public class ThreadPoolUtils {
      */
     public static ThreadPoolExecutor createThreadPool(int coreSize, int queueSize, int maxSize, String threadNamePrefix,
                                                       boolean isBlockingWhenQueueFull) {
+        // 参数验证
+        if (coreSize < 0) {
+            throw new IllegalArgumentException("coreSize cannot be negative: " + coreSize);
+        }
+        if (maxSize <= 0) {
+            throw new IllegalArgumentException("maxSize must be positive: " + maxSize);
+        }
+        if (coreSize > maxSize) {
+            throw new IllegalArgumentException("coreSize cannot be greater than maxSize: " + coreSize + " > " + maxSize);
+        }
+        if (threadNamePrefix == null) {
+            threadNamePrefix = "thread-pool";
+        }
+
         if (isBlockingWhenQueueFull) {
             RejectedExecutionHandler handler = new BlockingRejectedExecutionHandler();
             return new ThreadPoolExecutor(

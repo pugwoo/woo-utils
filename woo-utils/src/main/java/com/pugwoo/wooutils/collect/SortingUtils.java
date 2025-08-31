@@ -26,6 +26,7 @@ public class SortingUtils {
 								final List<SortingField<T, ? extends Comparable<?>>> sortingFieldList) {
 		if (sortingFieldList == null || sortingFieldList.isEmpty()) {
 			LOGGER.warn("sortingFieldList is null or empty, do nothing");
+			return; // 修复：当sortingFieldList为null时应该直接返回，避免空指针异常
 		}
 		if(list == null) {
 			return;
