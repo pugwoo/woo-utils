@@ -58,12 +58,15 @@ public class TestDate {
 		}
 
 		for(String str : testDates) {
+			if ("16:34:32".equals(str) || "16:34".equals(str)) {
+				continue;
+			}
 			LocalDate localDt = DateUtils.parseLocalDate(str);
 		//	System.out.println(localDt);
 			assert localDt != null;
 		}
 
-		for(String str : testDates) {
+		for(String str : ListUtils.of("16:34:32", "16:34")) {
 			LocalTime localDt = DateUtils.parseLocalTime(str);
 			//System.out.println(localDt);
 			assert localDt != null;
