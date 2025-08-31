@@ -182,7 +182,7 @@ public class EasyRunTask {
 				}
 			} finally {
 				if (executeThem != null) {
-					executeThem.shutdown(); // 线程池一定要释放掉
+					ThreadPoolUtils.shutdownAndWaitAllTermination(executeThem); // 线程池一定要释放掉，等待所有任务完成
 				}
 			}
 		}), "EasyRunTaskExecute").start();

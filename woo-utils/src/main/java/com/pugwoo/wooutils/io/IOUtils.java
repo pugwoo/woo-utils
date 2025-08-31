@@ -75,6 +75,8 @@ public class IOUtils {
 	/**
 	 * 读取input所有数据到String中，可用于读取文件内容到String。
 	 * @param in 读取完后in不会关闭
+	 * @param charset 字符编码
+	 * @return 读取的字符串内容
 	 */
 	public static String readAll(InputStream in, String charset) {
 		try {
@@ -189,8 +191,8 @@ public class IOUtils {
 
 	/**
 	 * 遍历获得所有的文件（不包括文件夹）
-	 * @param file    文件夹
-	 * @return
+	 * @param file 文件或文件夹
+	 * @return 文件列表，如果输入是文件则返回包含该文件的列表，如果是文件夹则返回其下所有文件（递归）
 	 */
 	public static List<File> listFiles(File file) {
 		if (file.isFile()) {

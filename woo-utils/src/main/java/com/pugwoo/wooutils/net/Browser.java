@@ -25,7 +25,7 @@ import java.util.zip.GZIPInputStream;
  * 1. 支持指定为输出流 【done】
  * 2. 支持cookie,不支持过期特性 【done】
  * 3. 支持指定proxy【done】
- * 4. 支持超时和重试，默认超时1分钟，重试次数10次【done】
+ * 4. 支持超时和重试，默认连接超时10秒，读取超时60秒，GET重试1次，POST不重试【done】
  * 5. 支持程序写cookie，模拟javascript写cookie【done】
  * 
  * @author pugwoo@gmail.com
@@ -40,6 +40,15 @@ public class Browser {
 
 	private static final ThreadPoolExecutor asyncDownloadThreadPool =
 			ThreadPoolUtils.createThreadPool(10, 100, 20, "asyncDownloadThreadPool"); // 异步下载共用线程池
+
+	// 添加静态块来注册关闭钩子，确保应用关闭时线程池被正确清理
+	static {
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			if (asyncDownloadThreadPool != null && !asyncDownloadThreadPool.isShutdown()) {
+				ThreadPoolUtils.shutdownAndWaitAllTermination(asyncDownloadThreadPool);
+			}
+		}, "Browser-Cleanup"));
+	}
 
 	public static class HttpResponseFuture {
 		/**已经下载的字节数*/

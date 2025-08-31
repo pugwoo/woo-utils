@@ -3,6 +3,7 @@ package com.pugwoo.wooutils.string;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 2016年2月4日 11:29:00
@@ -10,10 +11,20 @@ import java.util.function.Predicate;
  */
 public class StringTools {
 	
+	/**
+	 * 判断字符串是否为空（null或空字符串）
+	 * @param str 待检查的字符串
+	 * @return 如果字符串为null或空字符串返回true，否则返回false
+	 */
 	public static boolean isEmpty(String str) {
 		return str == null || str.isEmpty();
 	}
 	
+	/**
+	 * 判断字符串是否非空（既不是null也不是空字符串）
+	 * @param str 待检查的字符串
+	 * @return 如果字符串不为null且不是空字符串返回true，否则返回false
+	 */
 	public static boolean isNotEmpty(String str) {
 		return !isEmpty(str);
 	}
@@ -52,6 +63,11 @@ public class StringTools {
 		return false;
 	}
 
+	/**
+	 * 判断字符串是否为空白（null、空字符串或只包含空白字符）
+	 * @param str 待检查的字符串
+	 * @return 如果字符串为null、空字符串或只包含空白字符返回true，否则返回false
+	 */
 	public static boolean isBlank(String str) {
 		if (str == null) {
 			return true;
@@ -65,6 +81,11 @@ public class StringTools {
 		return true;
 	}
 
+	/**
+	 * 判断字符串是否非空白（不为null、不是空字符串且包含非空白字符）
+	 * @param str 待检查的字符串
+	 * @return 如果字符串不为null、不是空字符串且包含非空白字符返回true，否则返回false
+	 */
 	public static boolean isNotBlank(String str) {
 		return !isBlank(str);
 	}
@@ -228,8 +249,21 @@ public class StringTools {
 	 * @return
 	 */
 	public static String randomString(String source, int num) {
-		StringBuilder sb = new StringBuilder();
-		Random random = new Random();
+		if (source == null) {
+			throw new IllegalArgumentException("source cannot be null");
+		}
+		if (source.isEmpty()) {
+			throw new IllegalArgumentException("source cannot be empty");
+		}
+		if (num < 0) {
+			throw new IllegalArgumentException("num cannot be negative: " + num);
+		}
+		if (num == 0) {
+			return "";
+		}
+		
+		StringBuilder sb = new StringBuilder(num); // 预分配容量提高性能
+		ThreadLocalRandom random = ThreadLocalRandom.current();
 		for(int i = 0; i < num; i++) {
 			sb.append(source.charAt(random.nextInt(source.length())));
 		}
@@ -327,6 +361,13 @@ public class StringTools {
 		return sb.toString();
 	}
 
+	/**
+	 * 将字符串按正则表达式分割并过滤结果
+	 * @param str 待分割的字符串
+	 * @param splitRegex 分割用的正则表达式
+	 * @param predicate 过滤条件，用于筛选分割后的字符串
+	 * @return 过滤后的字符串列表，如果str为null返回空列表
+	 */
 	public static List<String> splitAndFilter(String str, String splitRegex,
 											  Predicate<String> predicate) {
 		if (str == null) {

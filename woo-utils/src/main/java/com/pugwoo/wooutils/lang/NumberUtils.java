@@ -158,6 +158,9 @@ public class NumberUtils {
 		if (a == null || b == null) {
 			return null;
 		}
+		if (b.compareTo(BigDecimal.ZERO) == 0) {
+			throw new ArithmeticException("Division by zero");
+		}
 		return a.divide(b, scale, RoundingMode.HALF_UP);
 	}
 
@@ -168,6 +171,9 @@ public class NumberUtils {
 	public static BigDecimal divide(BigDecimal a, Integer b, Integer scale) {
 		if (a == null || b == null) {
 			return null;
+		}
+		if (b == 0) {
+			throw new ArithmeticException("Division by zero");
 		}
 		return divide(a, BigDecimal.valueOf(b), scale);
 	}
@@ -180,6 +186,9 @@ public class NumberUtils {
 		if (a == null || b == null) {
 			return null;
 		}
+		if (b.compareTo(BigDecimal.ZERO) == 0) {
+			throw new ArithmeticException("Division by zero");
+		}
 		return divide(BigDecimal.valueOf(a), b, scale);
 	}
 
@@ -190,6 +199,9 @@ public class NumberUtils {
 	public static BigDecimal divide(Integer a, Integer b, Integer scale) {
 		if (a == null || b == null) {
 			return null;
+		}
+		if (b == 0) {
+			throw new ArithmeticException("Division by zero");
 		}
 		return divide(BigDecimal.valueOf(a), BigDecimal.valueOf(b), scale);
 	}

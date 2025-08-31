@@ -26,6 +26,7 @@ public class SortingUtils {
 								final List<SortingField<T, ? extends Comparable<?>>> sortingFieldList) {
 		if (sortingFieldList == null || sortingFieldList.isEmpty()) {
 			LOGGER.warn("sortingFieldList is null or empty, do nothing");
+			return; // 修复：当sortingFieldList为null时应该直接返回，避免空指针异常
 		}
 		if(list == null) {
 			return;
@@ -59,6 +60,7 @@ public class SortingUtils {
 				if (compareResult == 0) {
 					continue;
 				}
+				// 升序时返回原比较结果，降序时返回相反的结果
 				return (sf.isAsc() ? 1 : -1) * compareResult;
 			}
 			return 0;

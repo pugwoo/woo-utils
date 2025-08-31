@@ -167,7 +167,9 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -{@literal >} {
 	 * @param clazz 对象类型
 	 * @param genericClasses 对象的泛型
 	 * @return t
+	 * @deprecated use {@link #parse(String str, TypeReference<T>)} instead
 	 */
+	@Deprecated
 	public static <T> T parse(String str, Class<T> clazz, Class<?>... genericClasses) {
 		if (StringTools.isBlank(str)) {
 			return null;
@@ -307,7 +309,9 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -{@literal >} {
 	 * @param t 被克隆对象
 	 * @param genericClasses 被克隆对象的泛型
 	 * @return 对象
+	 * @deprecated use {@link #clone(Object, TypeReference)} instead
 	 */
+	@Deprecated
 	public static <T> T clone(T t, Class<?>... genericClasses) {
 		return clone(t, typeFactory -> typeFactory.constructParametricType(getClassFromT(t), genericClasses));
 	}
@@ -412,8 +416,6 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -{@literal >} {
 			return function.apply(executeObjectMapper);
 		} catch (IOException e) {
 			throw new RuntimeException(Optional.ofNullable(exceptionMsg).orElse("json operate failed"), e);
-		} finally {
-			OBJECT_MAPPER_THREAD_LOCAL.remove();
 		}
 	}
 	
