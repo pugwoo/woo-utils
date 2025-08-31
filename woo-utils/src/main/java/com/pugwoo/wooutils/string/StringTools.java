@@ -3,6 +3,7 @@ package com.pugwoo.wooutils.string;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 2016年2月4日 11:29:00
@@ -242,7 +243,7 @@ public class StringTools {
 		}
 		
 		StringBuilder sb = new StringBuilder(num); // 预分配容量提高性能
-		Random random = new Random();
+		ThreadLocalRandom random = ThreadLocalRandom.current();
 		for(int i = 0; i < num; i++) {
 			sb.append(source.charAt(random.nextInt(source.length())));
 		}

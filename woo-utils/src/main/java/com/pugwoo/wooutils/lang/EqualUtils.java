@@ -34,6 +34,14 @@ public class EqualUtils {
     private boolean ignoreListOrder = false;
     private boolean differentClassMinCompare = false; // 对于不同的类，启用最小化比对，只比对双方都有的属性
 
+    // 用于防止循环引用导致的无限递归
+    private ThreadLocal<Set<String>> visitedPairs = new ThreadLocal<Set<String>>() {
+        @Override
+        protected Set<String> initialValue() {
+            return new HashSet<>();
+        }
+    };
+
     /**
      * 忽略比对List元素的顺序
      * @param ignore 是否忽略List元素，true为忽略
@@ -80,8 +88,28 @@ public class EqualUtils {
      * 比对两个对象是否相等
      */
     public boolean isEqual(Object a, Object b) {
+        try {
+            visitedPairs.get().clear(); // 清空访问记录
+            return isEqualInternal(a, b);
+        } finally {
+            visitedPairs.get().clear(); // 确保清理
+        }
+    }
+
+    /**
+     * 内部比对方法，支持循环引用检测
+     */
+    private boolean isEqualInternal(Object a, Object b) {
         if(a == b) {return true;}
         if(a == null || b == null) {return false;}
+
+        // 检查循环引用
+        String pairKey = System.identityHashCode(a) + ":" + System.identityHashCode(b);
+        if (visitedPairs.get().contains(pairKey)) {
+            return true; // 已经在比较中，假设相等以避免无限递归
+        }
+        visitedPairs.get().add(pairKey);
+
         if((a instanceof Stream || a instanceof InputStream || a instanceof OutputStream) &&
                 (b instanceof Stream || b instanceof InputStream || b instanceof OutputStream)) {
             return true;
@@ -131,7 +159,7 @@ public class EqualUtils {
                 for(Method method : methods) {
                     Object aE = method.invoke(a);
                     Object bE = method.invoke(b);
-                    if(!isEqual(aE, bE)) {
+                    if(!isEqualInternal(aE, bE)) {
                         return false;
                     }
                 }
@@ -152,7 +180,7 @@ public class EqualUtils {
                             isMatchProperties = true;
                             Object aE = method1.invoke(a);
                             Object bE = method2.invoke(b);
-                            if(!isEqual(aE, bE)) {
+                            if(!isEqualInternal(aE, bE)) {
                                 return false;
                             }
                             break;
@@ -215,7 +243,7 @@ public class EqualUtils {
             return false;
         }
         for(int i = 0; i < arrA.length; i++) {
-            if(!isEqual(arrA[i], arrB[i])) {
+            if(!isEqualInternal(arrA[i], arrB[i])) {
                 return false;
             }
         }
@@ -231,7 +259,7 @@ public class EqualUtils {
             for(Object aE : a) {
                 boolean matched = false;
                 for(int i = 0; i < b.size(); i++) {
-                    if(isEqual(aE, b.get(i)) && !usedIndex.contains(i)) {
+                    if(isEqualInternal(aE, b.get(i)) && !usedIndex.contains(i)) {
                         usedIndex.add(i);
                         matched = true;
                         break;
@@ -243,7 +271,7 @@ public class EqualUtils {
             }
         } else {
             for(int i = 0; i < a.size(); i++) {
-                if(!isEqual(a.get(i), b.get(i))) {
+                if(!isEqualInternal(a.get(i), b.get(i))) {
                     return false;
                 }
             }
@@ -257,7 +285,7 @@ public class EqualUtils {
         }
         for(Map.Entry<?,?> entry : a.entrySet()) {
             Object o = b.get(entry.getKey());
-            if(o == null || !isEqual(entry.getValue(), o)) {
+            if(o == null || !isEqualInternal(entry.getValue(), o)) {
                 return false;
             }
         }
@@ -271,7 +299,7 @@ public class EqualUtils {
         for(Object aE : a) {
             boolean isMatch = false;
             for(Object bE : b) {
-                if(isEqual(aE, bE)) {
+                if(isEqualInternal(aE, bE)) {
                     isMatch = true;
                 }
             }
