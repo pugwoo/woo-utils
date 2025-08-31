@@ -167,7 +167,7 @@ String json = JSON.useThreadObjectMapper(customObjectMapper, () -{@literal >} {
 	 * @param clazz 对象类型
 	 * @param genericClasses 对象的泛型
 	 * @return t
-	 * @deprecated use {@link #parse(String str, TypeReference<T>)} instead
+	 * @deprecated use parse(String str, TypeReference) instead
 	 */
 	@Deprecated
 	public static <T> T parse(String str, Class<T> clazz, Class<?>... genericClasses) {
