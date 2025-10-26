@@ -518,7 +518,7 @@ public class Browser {
 				}
 				return resp;
 			} catch (IOException e) {
-				LOGGER.error("post url:{} exception msg:{}", httpUrl, e.getMessage());
+				LOGGER.error("post url:{} exception msg:{} {}", httpUrl, e.getClass(), e.getMessage());
 				ie = e;
 				if (retryIntervalMs > 0) {
 					try {
@@ -668,7 +668,7 @@ public class Browser {
 				}
 				return resp;
 			} catch (IOException e) {
-				LOGGER.error("get url:{} error msg:{}", httpUrl, e.getMessage());
+				LOGGER.error("get url:{} error msg:{} {}", httpUrl, e.getClass(), e.getMessage());
 				ie = e;
 				if (retryIntervalMs > 0) {
 					try {
