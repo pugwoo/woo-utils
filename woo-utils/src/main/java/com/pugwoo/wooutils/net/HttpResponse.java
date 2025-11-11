@@ -94,10 +94,14 @@ public class HttpResponse {
 	 * @return
 	 */
 	public String getContentString() {
+		if (contentBytes == null || contentBytes.length == 0) {
+			return "";
+		}
+
 		if(charset == null) {
 			// 尝试自动从http header里面获得编码
 			List<String> contentType = headers.get("Content-Type");
-			if(contentType != null && contentType.size() > 0) {
+			if(contentType != null && !contentType.isEmpty()) {
 				String ctype = contentType.get(0);
 				if(ctype != null) {
 					int index = ctype.indexOf("charset=");
@@ -130,6 +134,10 @@ public class HttpResponse {
 	 * @return
 	 */
 	public String getContentString(String charset) {
+		if (contentBytes == null || contentBytes.length == 0) {
+			return "";
+		}
+
 		try {
 			return new String(contentBytes, charset);
 		} catch (UnsupportedEncodingException e) {
