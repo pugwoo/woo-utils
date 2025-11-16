@@ -8,7 +8,7 @@ Java常用工具包，提供字符串、集合、IO、网络、JSON、YAML等常
 <dependency>
     <groupId>com.pugwoo</groupId>
     <artifactId>woo-utils</artifactId>
-    <version>1.3.12</version>
+    <version>1.3.13</version>
 </dependency>
 ```
 
