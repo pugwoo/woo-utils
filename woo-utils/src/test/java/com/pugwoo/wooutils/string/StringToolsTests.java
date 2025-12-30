@@ -102,4 +102,42 @@ public class StringToolsTests {
         assert StringTools.nthLastIndexOf(a, "a", 4) == 0;
         assert StringTools.nthLastIndexOf(a, "a", 5) == -1;
     }
+
+    @Test
+    public void testIsStartWith() {
+        // 正常匹配情况
+        assert StringTools.isStartWith("hello world", "hello");
+        assert StringTools.isStartWith("hello world", "he");
+        assert StringTools.isStartWith("hello world", "h");
+
+        // 多个前缀，匹配其中一个
+        assert StringTools.isStartWith("hello world", "hi", "hello", "hey");
+        assert StringTools.isStartWith("hello world", "hi", "he");
+
+        // 不匹配的情况
+        assert !StringTools.isStartWith("hello world", "world");
+        assert !StringTools.isStartWith("hello world", "hi", "hey");
+
+        // str为null的情况
+        assert !StringTools.isStartWith(null, "hello");
+        assert !StringTools.isStartWith(null, "hello", "hi");
+
+        // prefix为null的情况
+        assert !StringTools.isStartWith("hello world", (String[]) null);
+
+        // prefix数组为空的情况
+        assert !StringTools.isStartWith("hello world");
+
+        // prefix数组中包含null的情况
+        assert !StringTools.isStartWith("hello world", null, "hi");
+        assert StringTools.isStartWith("hello world", null, "hello");
+
+        // 空字符串作为前缀
+        assert StringTools.isStartWith("hello world", "");
+        assert StringTools.isStartWith("", "");
+
+        // str为空字符串的情况
+        assert StringTools.isStartWith("", "");
+        assert !StringTools.isStartWith("", "hello");
+    }
 }

@@ -224,6 +224,24 @@ public class StringTools {
 	}
 
 	/**
+	 * 判断字符串str是否以给定的任意一个前缀开头
+	 * @param str 待检查的字符串
+	 * @param prefix 前缀列表
+	 * @return 如果str以prefix中的任意一个字符串开头则返回true，否则返回false
+	 */
+	public static boolean isStartWith(String str, String... prefix) {
+		if(str == null || prefix == null) {
+			return false;
+		}
+		for(String p : prefix) {
+			if(p != null && str.startsWith(p)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * 把obj转换成string，如果obj为null，返回null
 	 * @param obj
 	 * @return
