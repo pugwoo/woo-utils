@@ -201,6 +201,30 @@ public class ListUtils {
 	}
 
 	/**
+	 * 转换list为map，并对每个key对应的value列表进行reduce操作
+	 * 该方法首先将list按key分组（类似toMapList），然后对每个key对应的value列表应用reduce函数
+	 * @param list 原始集合
+	 * @param keyMapper key映射函数
+	 * @param valueMapper value映射函数
+	 * @param reducer 对每个key对应的value列表进行reduce操作的函数，输入是List&lt;V&gt;，输出是R
+	 * @return Map&lt;K, R&gt; 其中R是reduce后的结果类型
+	 */
+	public static <T, K, V, R> Map<K, R> toMapListAndReduce(Collection<T> list,
+			Function<? super T, ? extends K> keyMapper,
+			Function<? super T, ? extends V> valueMapper,
+			Function<List<V>, R> reducer) {
+		if(list == null) {
+			return new HashMap<>();
+		}
+		Map<K, List<V>> mapList = toMapList(list, keyMapper, valueMapper);
+		Map<K, R> result = new HashMap<>();
+		for(Map.Entry<K, List<V>> entry : mapList.entrySet()) {
+			result.put(entry.getKey(), reducer.apply(entry.getValue()));
+		}
+		return result;
+	}
+
+	/**
 	 * 转换list为map，且对map的values进行去重
 	 */
 	public static <T, K, V> Map<K, Set<V>> toMapSet(Collection<T> list,
