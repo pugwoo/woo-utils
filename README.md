@@ -53,7 +53,6 @@ Java常用工具包，提供字符串、集合、IO、网络、JSON、YAML等常
 - `EqualUtils`: 相等性判断工具
 
 ### 其他模块
-- `algorithm`: 算法工具（动态进制转换等）
 - `compress`: 压缩工具（ZIP压缩解压）  
 - `tree`: 树形结构工具
 - `log`: 日志工具（MDC工具）
