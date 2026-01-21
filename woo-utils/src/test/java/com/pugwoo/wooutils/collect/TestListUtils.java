@@ -360,4 +360,117 @@ public class TestListUtils {
         assert distinct.size() == 2;
     }
 
+    @Test
+    public void testToMapListAndReduce() {
+        List<OneDTO> oneDTOS = new ArrayList<>();
+        OneDTO oneDTO = new OneDTO();
+        oneDTO.setName("a");
+        oneDTO.setOne(1);
+        oneDTOS.add(oneDTO);
+
+        oneDTO = new OneDTO();
+        oneDTO.setName("a");
+        oneDTO.setOne(2);
+        oneDTOS.add(oneDTO);
+
+        oneDTO = new OneDTO();
+        oneDTO.setName("a");
+        oneDTO.setOne(3);
+        oneDTOS.add(oneDTO);
+
+        oneDTO = new OneDTO();
+        oneDTO.setName("b");
+        oneDTO.setOne(4);
+        oneDTOS.add(oneDTO);
+
+        oneDTO = new OneDTO();
+        oneDTO.setName("b");
+        oneDTO.setOne(5);
+        oneDTOS.add(oneDTO);
+
+        // Test sum reduction
+        Map<String, Integer> sumMap = ListUtils.toMapListAndReduce(
+                oneDTOS,
+                OneDTO::getName,
+                OneDTO::getOne,
+                list -> list.stream().mapToInt(Integer::intValue).sum()
+        );
+
+        assert sumMap.size() == 2;
+        assert sumMap.get("a").equals(6);  // 1 + 2 + 3
+        assert sumMap.get("b").equals(9);  // 4 + 5
+
+        // Test max reduction
+        Map<String, Integer> maxMap = ListUtils.toMapListAndReduce(
+                oneDTOS,
+                OneDTO::getName,
+                OneDTO::getOne,
+                list -> list.stream().max(Integer::compareTo).orElse(null)
+        );
+
+        assert maxMap.size() == 2;
+        assert maxMap.get("a").equals(3);
+        assert maxMap.get("b").equals(5);
+
+        // Test string concatenation
+        Map<String, String> concatMap = ListUtils.toMapListAndReduce(
+                oneDTOS,
+                OneDTO::getName,
+                o -> o.getOne().toString(),
+                list -> String.join(",", list)
+        );
+
+        assert concatMap.size() == 2;
+        assert concatMap.get("a").equals("1,2,3");
+        assert concatMap.get("b").equals("4,5");
+
+        // Test count reduction
+        Map<String, Integer> countMap = ListUtils.toMapListAndReduce(
+                oneDTOS,
+                OneDTO::getName,
+                OneDTO::getOne,
+                List::size
+        );
+
+        assert countMap.size() == 2;
+        assert countMap.get("a").equals(3);
+        assert countMap.get("b").equals(2);
+
+        // Test with null list
+        Map<String, Integer> nullMap = ListUtils.toMapListAndReduce(
+                null,
+                OneDTO::getName,
+                OneDTO::getOne,
+                list -> list.stream().mapToInt(Integer::intValue).sum()
+        );
+        assert nullMap.isEmpty();
+
+        // Test with empty list
+        Map<String, Integer> emptyMap = ListUtils.toMapListAndReduce(
+                new ArrayList<>(),
+                OneDTO::getName,
+                OneDTO::getOne,
+                list -> list.stream().mapToInt(Integer::intValue).sum()
+        );
+        assert emptyMap.isEmpty();
+
+        // Test with null elements in list
+        List<OneDTO> listWithNulls = new ArrayList<>();
+        listWithNulls.add(null);
+        oneDTO = new OneDTO();
+        oneDTO.setName("c");
+        oneDTO.setOne(10);
+        listWithNulls.add(oneDTO);
+        listWithNulls.add(null);
+
+        Map<String, Integer> nullElementsMap = ListUtils.toMapListAndReduce(
+                listWithNulls,
+                OneDTO::getName,
+                OneDTO::getOne,
+                list -> list.stream().mapToInt(Integer::intValue).sum()
+        );
+        assert nullElementsMap.size() == 1;
+        assert nullElementsMap.get("c").equals(10);
+    }
+
 }
