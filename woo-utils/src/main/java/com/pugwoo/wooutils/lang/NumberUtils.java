@@ -249,6 +249,21 @@ public class NumberUtils {
 		return a.compareTo(b) >= 0 ? a : b;
 	}
 
+	/**
+	 * 返回两个数中的较大者，如果一个为null则返回非null的那个
+	 * @param a 第一个数
+	 * @param b 第二个数
+	 * @return 较大者
+	 */
+	public static <T extends Comparable<? super T>> T max(T a, T b) {
+		if (a == null) {
+			return b;
+		} else if (b == null) {
+			return a;
+		}
+		return a.compareTo(b) >= 0 ? a : b;
+	}
+
 	public static BigDecimal min(BigDecimal a, BigDecimal b) {
 		if (a == null) {
 			return b;
@@ -257,6 +272,21 @@ public class NumberUtils {
 		}
 		return a.compareTo(b) > 0 ? b : a;
 	}
+
+    /**
+     * 返回两个数中的较小者，如果一个为null则返回非null的那个
+     * @param a 第一个数
+     * @param b 第二个数
+     * @return 较小者
+     */
+    public static <T extends Comparable<? super T>> T min(T a, T b) {
+        if (a == null) {
+            return b;
+        } else if (b == null) {
+            return a;
+        }
+        return a.compareTo(b) > 0 ? b : a;
+    }
 
 	/**
 	 * 求最小值
