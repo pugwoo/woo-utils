@@ -292,7 +292,7 @@ public class ListUtils {
 	/**
 	 * list按指定的数量分组
 	 * @param list 这里明确用List类型，不支持Collection
-	 * @param groupNum 分组的数量，必须大于等于1，当小于1时返回空数组
+	 * @param groupNum 分组的数量，必须大于等于1，当小于1时返回空List
 	 */
 	public static <T> List<List<T>> groupByNum(List<T> list, final int groupNum) {
 		if (list == null || groupNum < 1) {
@@ -311,7 +311,7 @@ public class ListUtils {
 	/**
 	 * list按指定的数量分组
 	 * @param list 这里明确用List类型，不支持Collection
-	 * @param groupNum 分组的数量，必须大于等于1，当小于1时返回空数组
+	 * @param groupNum 分组的数量，必须大于等于1，当小于1时返回空List
 	 */
 	public static <T> List<List<T>> partition(List<T> list, final int groupNum) {
 		return groupByNum(list, groupNum);
@@ -572,8 +572,9 @@ public class ListUtils {
 	}
 
 	/**
-	 * list交集，返回List a和List b中都有的值，去重，不保证顺序。
+	 * 求多个list的交集，返回所有lists中都有的值，去重，不保证顺序。
 	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
+	 * @param lists 支持传入多个List
 	 */
 	@SafeVarargs
 	public static <E> List<E> intersection(List<E>... lists) {
@@ -597,9 +598,10 @@ public class ListUtils {
 	}
 
 	/**
-	 * list交集，返回List a和List b中都有的值，去重，不保证顺序。
+	 * 求多个list的交集，返回所有lists中都有的值，去重，不保证顺序。
 	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
 	 * @param mapper 实际上是以lambda表达式返回的值进行去重的
+	 * @param lists 支持传入多个List
 	 */
 	@SafeVarargs
 	public static <E, R extends Comparable<?>> List<E> intersection(
@@ -629,8 +631,9 @@ public class ListUtils {
 	}
 
 	/**
-	 * list并集，返回lists中有的值，去重，不保证顺序。
+	 * 求多个list的并集，返回所有lists中的值，去重，不保证顺序。
 	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
+	 * @param lists 支持传入多个List
 	 */
 	@SafeVarargs
 	public static <E> List<E> union(List<E>... lists) {
@@ -648,9 +651,10 @@ public class ListUtils {
 	}
 
 	/**
-	 * list并集，返回lists中有的值，去重，不保证顺序。
+	 * 求多个list的并集，返回所有lists中的值，去重，不保证顺序。
 	 * 算法时间复杂度:O(n)，空间复杂度O(n)，n是所有lists中的元素总数
 	 * @param mapper 实际上是以lambda表达式返回的值进行去重的
+	 * @param lists 支持传入多个List
 	 */
 	@SafeVarargs
 	public static <E, R extends Comparable<?>> List<E> union(

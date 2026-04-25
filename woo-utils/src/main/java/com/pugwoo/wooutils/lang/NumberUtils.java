@@ -207,10 +207,13 @@ public class NumberUtils {
 	}
 
 	/**
-	 * 保留decimalPlaces位小数，四舍五入 例如：
-	 * 输入 (1.236, 2) 输出1.24
-	 * 输入 (1.2, 2) 输出1.20
-	 * @param number 注意精度问题 建议使用 {@link #roundUp(BigDecimal, int)}
+	 * 保留decimalPlaces位小数，四舍五入，返回字符串形式。<br>
+	 * 例如：<br>
+	 * 输入 (1.236, 2) 输出 "1.24" <br>
+	 * 输入 (1.2, 2) 输出 "1.20" <br>
+	 * <br>
+	 * 注意：double类型存在精度问题，如果需要精确计算，请直接使用 {@link #roundUp(BigDecimal, int)} 方法。
+	 * @param number 数字
 	 * @param decimalPlaces 保留小数位数
 	 */
 	public static String roundUp(double number, int decimalPlaces) {
@@ -218,10 +221,13 @@ public class NumberUtils {
 	}
 	
 	/**
-	 * 保留decimalPlaces位小数，例如：
-	 * 输入 (1.236, 2) 输出1.24
-	 * 输入 (1.2, 2) 输出1.20
-	 * @param number 注意精度问题 建议使用 {@link #roundUp(BigDecimal, int)}
+	 * 保留decimalPlaces位小数，四舍五入，返回double形式。<br>
+	 * 例如：<br>
+	 * 输入 (1.236, 2) 输出 1.24 <br>
+	 * 输入 (1.2, 2) 输出 1.20 <br>
+	 * <br>
+	 * 注意：double类型存在精度问题，如果需要精确计算，请直接使用 {@link #roundUp(BigDecimal, int)} 方法。
+	 * @param number 数字
 	 * @param decimalPlaces 保留小数位数
 	 */
 	public static double roundUpToDouble(double number, int decimalPlaces) {
@@ -249,6 +255,21 @@ public class NumberUtils {
 		return a.compareTo(b) >= 0 ? a : b;
 	}
 
+	/**
+	 * 返回两个数中的较大者，如果一个为null则返回非null的那个
+	 * @param a 第一个数
+	 * @param b 第二个数
+	 * @return 较大者
+	 */
+	public static <T extends Comparable<? super T>> T max(T a, T b) {
+		if (a == null) {
+			return b;
+		} else if (b == null) {
+			return a;
+		}
+		return a.compareTo(b) >= 0 ? a : b;
+	}
+
 	public static BigDecimal min(BigDecimal a, BigDecimal b) {
 		if (a == null) {
 			return b;
@@ -257,6 +278,21 @@ public class NumberUtils {
 		}
 		return a.compareTo(b) > 0 ? b : a;
 	}
+
+    /**
+     * 返回两个数中的较小者，如果一个为null则返回非null的那个
+     * @param a 第一个数
+     * @param b 第二个数
+     * @return 较小者
+     */
+    public static <T extends Comparable<? super T>> T min(T a, T b) {
+        if (a == null) {
+            return b;
+        } else if (b == null) {
+            return a;
+        }
+        return a.compareTo(b) > 0 ? b : a;
+    }
 
 	/**
 	 * 求最小值
