@@ -81,6 +81,7 @@ public class DateUtils {
 	 * <br>
 	 * 说明：<br>
 	 * 会尝试将数字当做时间戳转换，但只转换值大于等于946656000的时间戳，即2000年以后的 <br>
+	 * 特殊日期值"0000-00-00"和"0000-00-00 00:00:00"会返回null <br>
 	 *
 	 * @return 解析失败返回null，同时log error
 	 */
@@ -190,6 +191,7 @@ public class DateUtils {
 	 *
 	 * 说明：<br>
 	 * 会尝试将数字当做时间戳转换，但只转换值大于等于946656000的时间戳，即2000年以后的 <br>
+	 * 特殊日期值"0000-00-00"和"0000-00-00 00:00:00"会返回null，不抛异常 <br>
 	 *
 	 */
 	public static Date parseThrowException(String date) throws ParseException {
@@ -226,7 +228,8 @@ public class DateUtils {
 	}
 
 	/**
-	 * 解析日期，失败抛出异常
+	 * 解析日期，失败抛出异常。<br>
+	 * 特殊日期值"0000-00-00"和"0000-00-00 00:00:00"会返回null，不抛异常。
 	 */
 	public static Date parseThrowException(String date, String pattern) throws ParseException {
 		if(date == null || date.trim().isEmpty()) {
@@ -540,6 +543,7 @@ public class DateUtils {
 
 	/**
 	 * 计算两个日期的年份差，主要用于计算年龄。不足一年的不计，一年按365天计，不考虑闰年。
+	 * 注意：由于不考虑闰年，计算年龄时可能与实际年龄存在误差（例如跨越闰年出生的人）。
 	 * @return 返回值都大于等于0，不关心date1和date2的顺序
 	 */
 	public static int diffYears(Date date1, Date date2) {
@@ -890,7 +894,7 @@ public class DateUtils {
 	}
 
 	/**解析失败不抛异常，返回null<br>
-	 * 特别说明，即便时间带有时区，也会被忽略，这符合LocalTime语义，如果需要时区，请使用OOffsetTime类型*/
+	 * 特别说明，即便时间带有时区，也会被忽略，这符合LocalTime语义，如果需要时区，请使用OffsetTime类型*/
 	public static LocalTime parseLocalTime(String dateString, String pattern) {
 		try {
 			return parseLocalTimeThrowException(dateString, pattern);

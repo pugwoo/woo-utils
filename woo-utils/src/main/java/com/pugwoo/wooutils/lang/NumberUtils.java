@@ -207,10 +207,13 @@ public class NumberUtils {
 	}
 
 	/**
-	 * 保留decimalPlaces位小数，四舍五入 例如：
-	 * 输入 (1.236, 2) 输出1.24
-	 * 输入 (1.2, 2) 输出1.20
-	 * @param number 注意精度问题 建议使用 {@link #roundUp(BigDecimal, int)}
+	 * 保留decimalPlaces位小数，四舍五入，返回字符串形式。<br>
+	 * 例如：<br>
+	 * 输入 (1.236, 2) 输出 "1.24" <br>
+	 * 输入 (1.2, 2) 输出 "1.20" <br>
+	 * <br>
+	 * 注意：double类型存在精度问题，如果需要精确计算，请直接使用 {@link #roundUp(BigDecimal, int)} 方法。
+	 * @param number 数字
 	 * @param decimalPlaces 保留小数位数
 	 */
 	public static String roundUp(double number, int decimalPlaces) {
@@ -218,10 +221,13 @@ public class NumberUtils {
 	}
 	
 	/**
-	 * 保留decimalPlaces位小数，例如：
-	 * 输入 (1.236, 2) 输出1.24
-	 * 输入 (1.2, 2) 输出1.20
-	 * @param number 注意精度问题 建议使用 {@link #roundUp(BigDecimal, int)}
+	 * 保留decimalPlaces位小数，四舍五入，返回double形式。<br>
+	 * 例如：<br>
+	 * 输入 (1.236, 2) 输出 1.24 <br>
+	 * 输入 (1.2, 2) 输出 1.20 <br>
+	 * <br>
+	 * 注意：double类型存在精度问题，如果需要精确计算，请直接使用 {@link #roundUp(BigDecimal, int)} 方法。
+	 * @param number 数字
 	 * @param decimalPlaces 保留小数位数
 	 */
 	public static double roundUpToDouble(double number, int decimalPlaces) {

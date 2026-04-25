@@ -52,19 +52,37 @@ public class ZipUtils {
     }
     
     /**
-     * 压缩文件
-     * @param zipItems zipItemList 全部zipItem.in会自动关闭
-     * @param out 会自动close
+     * 压缩文件。<br>
+     * <br>
+     * 资源关闭说明：<br>
+     * - 全部zipItem.in会在操作完成后自动关闭（无论成功或异常）。<br>
+     * - out会在操作完成后自动关闭（无论成功或异常）。<br>
+     * <br>
+     * 异常处理说明：<br>
+     * - 如果压缩过程中发生异常，已打开的输入流和输出流都会被关闭，然后异常会向上抛出。<br>
+     * 
+     * @param zipItems 待压缩的文件项列表
+     * @param out 输出流，压缩结果将写入此流
+     * @throws IOException 压缩过程中发生I/O异常时抛出
      */
     public static void zip(List<ZipItem> zipItems, OutputStream out) throws IOException {
         zip(zipItems, out, null);
     }
     
     /**
-     * 压缩文件
-     * @param zipItems zipItemList 全部zipItem.in会自动关闭
-     * @param out 会自动close
-     * @param charsetNullable 字符集 如果为null，则使用ZipOutputStream默认的UTF-8
+     * 压缩文件。<br>
+     * <br>
+     * 资源关闭说明：<br>
+     * - 全部zipItem.in会在操作完成后自动关闭（无论成功或异常）。<br>
+     * - out会在操作完成后自动关闭（无论成功或异常）。<br>
+     * <br>
+     * 异常处理说明：<br>
+     * - 如果压缩过程中发生异常，已打开的输入流和输出流都会被关闭，然后异常会向上抛出。<br>
+     * 
+     * @param zipItems 待压缩的文件项列表
+     * @param out 输出流，压缩结果将写入此流
+     * @param charsetNullable 字符集，如果为null，则使用ZipOutputStream默认的UTF-8
+     * @throws IOException 压缩过程中发生I/O异常时抛出
      */
     public static void zip(List<ZipItem> zipItems, OutputStream out, Charset charsetNullable) throws IOException {
         ZipOutputStream zipOut = null;

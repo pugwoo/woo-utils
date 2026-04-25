@@ -158,7 +158,9 @@ public class RegexUtils {
 	 * @param first        是否仅替换第一个符合的匹配项
 	 * @param str          待替换的字符串
 	 * @param regex        正则表达式
-	 * @param replacements 需要替换的字符，如果不需要替换，传入null
+	 * @param replacements 需要替换的字符。<br>
+	 *                     - 如果某个捕获组不需要替换，传入null即可，该捕获组将保留原值。<br>
+	 *                     - 如果replacements数组为null、空数组，或所有元素都为null，则返回原字符串不做任何修改。<br>
 	 * @return 替换后的字符串
 	 */
 	private static String replaceGroup(boolean first, String str, String regex, String... replacements) {
@@ -186,7 +188,9 @@ public class RegexUtils {
 	 * @param first        是否仅替换第一个符合的匹配项
 	 * @param str          待替换的字符串
 	 * @param regex        正则表达式
-	 * @param replacementFunctions 需要替换的逻辑
+	 * @param replacementFunctions 需要替换的逻辑函数。<br>
+	 *                             - 如果某个捕获组不需要替换，传入null即可，该捕获组将保留原值。<br>
+	 *                             - 如果replacementFunctions数组为null、空数组，或所有元素都为null，则返回原字符串不做任何修改。<br>
 	 * @return 替换后的字符串
 	 */
 	private static String replaceGroup(boolean first, String str, String regex,

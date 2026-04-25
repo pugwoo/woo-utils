@@ -33,9 +33,11 @@ public class ThreadPoolUtils {
      * <br>
      * 说明：该工具类创建的线程池可以自动继承父线程的MDC上下文。
      * <br>
-     * @param coreSize 核心线程数，可以理解为线程池在开始排队时，达到的最大线程数
+     * @param coreSize 核心线程数，可以理解为线程池在开始排队时，达到的最大线程数。<br>
+     *                 取值范围：0到maxSize之间的整数（包括0）。<br>
+     *                 当coreSize为0时，所有线程都是非核心线程，空闲60秒后会被回收。
      * @param queueSize 任务排队队列最大长度
-     * @param maxSize 最大线程数，当等待队列满了之后，线程数会继续加大到该值
+     * @param maxSize 最大线程数，当等待队列满了之后，线程数会继续加大到该值。必须大于0。
      * @param threadNamePrefix 线程前缀名称
      */
     public static ThreadPoolExecutor createThreadPool(int coreSize, int queueSize, int maxSize, String threadNamePrefix) {
@@ -69,9 +71,11 @@ public class ThreadPoolUtils {
      * <br>
      * 说明：该工具类创建的线程池可以自动继承父线程的MDC上下文。
      * <br>
-     * @param coreSize 核心线程数，可以理解为线程池在开始排队时，达到的最大线程数
+     * @param coreSize 核心线程数，可以理解为线程池在开始排队时，达到的最大线程数。<br>
+     *                 取值范围：0到maxSize之间的整数（包括0）。<br>
+     *                 当coreSize为0时，所有线程都是非核心线程，空闲60秒后会被回收。
      * @param queueSize 任务排队队列最大长度
-     * @param maxSize 最大线程数，当等待队列满了之后，线程数会继续加大到该值
+     * @param maxSize 最大线程数，当等待队列满了之后，线程数会继续加大到该值。必须大于0。
      * @param threadNamePrefix 线程前缀名称
      * @param isBlockingWhenQueueFull 当队列满了之后，是否阻塞等待，true时等待，false则抛出RejectedExecutionException异常
      */
