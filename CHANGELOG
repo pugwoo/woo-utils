@@ -1,3 +1,7 @@
+2026年10月12日
+v1.4.2 - [enhance] Browser优化有些服务器返回的http头部压缩头部大小写不规范问题
+       - [upgrade] 更新pom相关依赖
+
 2026年4月25日
 v1.4.1 - [add] NumberUtils增加min和max通用方法，适用于任何可比较的类型
 
