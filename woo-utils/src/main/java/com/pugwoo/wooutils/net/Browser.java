@@ -817,9 +817,9 @@ public class Browser {
 
 		boolean isGzip = false;
 		if (!disableGzip) {
-			List<String> contentEncoding = headerFields.get("Content-Encoding");
-			isGzip = contentEncoding != null && !contentEncoding.isEmpty()
-					&& "gzip".equals(contentEncoding.get(0));
+			// headerFields的key区分大小写，服务端返回content-encoding这类写法时会取不到，getContentEncoding()不区分大小写
+			String contentEncoding = urlConnection.getContentEncoding();
+			isGzip = contentEncoding != null && "gzip".equalsIgnoreCase(contentEncoding.trim());
 		}
 
 		InputStream connectionIn;

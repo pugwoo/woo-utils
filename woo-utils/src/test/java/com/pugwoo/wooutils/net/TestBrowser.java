@@ -2,13 +2,17 @@ package com.pugwoo.wooutils.net;
 
 import com.pugwoo.wooutils.collect.MapUtils;
 import com.pugwoo.wooutils.lang.DateUtils;
+import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 
 public class TestBrowser {
 
@@ -97,6 +101,34 @@ public class TestBrowser {
 		}
 
 		tempFile.deleteOnExit();
+	}
+
+	/**
+	 * 头部名大小写不敏感，服务端返回的不是Content-Encoding这种写法时也要能解压gzip
+	 */
+	@Test
+	public void testGzipWithNonStandardHeaderCase() throws Exception {
+		String content = "data: 你好，gzip\n\n";
+		ByteArrayOutputStream gzipBytes = new ByteArrayOutputStream();
+		try (GZIPOutputStream gzipOut = new GZIPOutputStream(gzipBytes)) {
+			gzipOut.write(content.getBytes(StandardCharsets.UTF_8));
+		}
+
+		HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+		server.createContext("/gzip", exchange -> {
+			exchange.getResponseHeaders().add("content-encoding", "gzip");
+			exchange.sendResponseHeaders(200, gzipBytes.size());
+			try (OutputStream out = exchange.getResponseBody()) {
+				out.write(gzipBytes.toByteArray());
+			}
+		});
+		server.start();
+		try {
+			HttpResponse resp = new Browser().get("http://127.0.0.1:" + server.getAddress().getPort() + "/gzip");
+			assert content.equals(resp.getContentString());
+		} finally {
+			server.stop(0);
+		}
 	}
 	
 }
